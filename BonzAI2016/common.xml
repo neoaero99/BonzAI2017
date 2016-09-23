@@ -1,0 +1,74 @@
+<project name = "common">
+	<property name = "package" value = "bonzai2016" />
+	
+	<property name = "lib" value = "lib" />
+	<property name = "src" value = "src" />
+	<property name = "bin" value = "bin" />
+	<property name = "art" value = "art" />
+	
+	<path id = "lib.classpath">
+		<fileset dir="${lib}" includes="**/*.jar" />
+	</path>
+
+	<manifestclasspath property="manifestclasspath" jarfile="${package}/lazers.jar">
+			<classpath refid="lib.classpath"/>
+	</manifestclasspath>
+
+	<!-- Macro: compile, compile specified java source files -->
+	<macrodef name = "compile">
+		<attribute name = "source" />
+		<attribute name = "files" />
+		<element   name = "external" optional = "true" />
+		<sequential>
+			<javac includeantruntime = "false"
+				sourcepath  = "@{source}"
+				srcdir      = "@{source}${src}"
+				destdir     = "@{source}${bin}"
+				includes    = "@{files}"
+				source      = "1.8"
+				target      = "1.8"			
+				deprecation = "on"
+				debug       = "true"
+				debuglevel  = "lines,vars,source"
+				listfiles   = "no"
+			>
+				<!-- show all warnings -->
+				<compilerarg value = "-Xlint"/>
+				<!-- serialization warnings are irrelevant to our application: -->
+				<compilerarg value = "-Xlint:-serial"/>
+				<!-- Squash Batik error reporting from misspelled jar manifests -->
+				<compilerarg value = "-Xlint:-path"/>
+				<!-- compile against external jars/libs -->
+				<external />
+			</javac>
+		</sequential>
+	</macrodef>
+
+	<!-- Macro: build, jar together specified java class files -->
+	<macrodef name = "build">
+		<attribute name = "jar" />
+		<attribute name = "source" />
+		<attribute name = "main" />
+		<element   name = "external" optional = "true" />
+		<sequential>
+			<jar destfile = "${package}/@{jar}">
+				<external />
+				<fileset dir = "@{source}/${bin}/" />
+    				<fileset dir = "@{source}/${src}/" /> 
+				<manifest>
+					<attribute name = "Main-Class" value = "@{main}" />
+					<attribute name = "Class-Path" value = "${manifestclasspath}" />
+				</manifest>
+			</jar>
+		</sequential>
+	</macrodef>
+
+	<!-- Macro: run, run the specified class -->
+	<macrodef name = "run">
+		<attribute name = "class"/>
+		<sequential>
+			<java classname = "@{class}" fork = "true">
+			</java>
+		</sequential>
+	</macrodef>
+</project>
