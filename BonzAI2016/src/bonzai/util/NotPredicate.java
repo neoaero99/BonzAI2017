@@ -1,5 +1,6 @@
 package bonzai.util;
 
+// e-mail to jason (and utility)
 public class NotPredicate<E> implements Predicate<E> {
 	Predicate<? super E> pred;
 	

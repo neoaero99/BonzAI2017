@@ -1,221 +1,407 @@
 package lazers.api;
 
-import lazers.api.TurnInterface;
-import lazers.LazersScenario;
-import lazers.api.Repeater;
-
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Iterator;
+import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 
 import bonzai.Action;
-import bonzai.Entity;
 import bonzai.Identifiable;
 import bonzai.Positionable;
 import bonzai.Team;
-import bonzai.Traversable;
-import bonzai.Position;
-import lazers.api.Emitter;
+import bonzai.ShoutAction;
 
 /**
  * A snapshot in time at the current turn. In addition to accessing current 
  * state, stale references to entities can be used to get fresh references to
  * those entities at this turn.
  **/
-public class Turn implements TurnInterface{
+public class Turn {
+	final LazersMap map;
+	final ArrayList<Team> teams;
+	final ArrayList<Boolean> success;
+	final int turnNumber;
+
+	final ArrayList<ShoutAction> shoutActions;
 	
-	private static final int MAX_TURNS = LazersScenario.NUM_TURNS;
-	
-	private final LazersMap map;
-	private final Collection<Team> teams;			// Never initialized 
-	private final int turnNumber;
-	
-	private int team_id;						// [0..]
-	
-	
-	//First turn is constructed with this constructor
-	public Turn(int turnNumber, LazersMap map, int id) {
+	// How long the Repeaters can go before being rotated again
+	private final int cooldownAmount = 3;
+
+	private String errorMessage = "";
+
+	// The current team that is acting.
+	// For each client, this will ALWAYS be their teamId
+	// This decides the context that isValid() will be run for.
+	// Example, If I'm on team 1, I can move team 1's things.  If I'm on team 2, I cant
+
+	//making this a class so all the pathfinding stuff is in one place
+	Pathfinding pathfinding;
+
+	// Example, If I'm on team 1, I can move team 1's things.  If I'm on team 2, I cannot
+
+	int currentTeam;
+	int MAX_TURNS = LazersScenario.NUM_TURNS;
+
+	/**
+	 * Turn constructor.
+	 * 
+	 * @param teamNumber - the team number that this current Turn object
+	 *					   was made for
+	 * @param turnNumber - the current turn number
+	 * @param map - the map object to clone to start the turn off
+	 */
+	public Turn(int teamNumber, int turnNumber, LazersMap map) {
+		this.currentTeam = teamNumber;
 		this.turnNumber = turnNumber;
-		this.map = map;
-		this.team_id = id;
-		
-		teams = new ArrayList<Team>();
-		for (Emitter e : map.getEmitters()) {
+
+		//Clone the old map (so we can retain history)
+		this.map = new LazersMap(map);
+		this.shoutActions = new ArrayList<>();
+
+		teams = new ArrayList<>();
+		success = new ArrayList<>();
+		for (Emitter e : this.map.getEmitters()) {
 			teams.add(e.getTeam());
+			success.add(true);
 		}
-	}
-	
-	//All turns other than first are made with this constructor
-	public Turn(Turn turn) {
-		map = new LazersMap(turn.map);
-		turnNumber = turn.turnNumber + 1;
-		teams = turn.teams;
-		team_id = turn.team_id;
+
+		util = new TurnUtil(this);
+
 	}
 
-	public Collection<Repeater> getRepeaters() {
-		return map.getRepeaters();
-	}
-	
-	public Collection<Positionable> getPaths(Positionable a, Positionable b) {
-		return Pathfinding.getPath(map, a, b);
-	}
-	
-	public Collection<Target> getTargets() {
-		return map.getTargets();
-	}
-	
-	public Collection<Wall> getWalls() {
-		return map.getWalls();
-	}
-	
-	public Collection<Emitter> getEmitters() {
-		return map.getEmitters();
-	}
-	
-	public LazersMap getMap() {
-		return map;
-	}
-	
-	public int turnsRemaining() { 
-		return MAX_TURNS - turnNumber;
-	}
-	
-	public int getScore(Team team) {
-		return team.getScore();
-	}
-	
-	public Team getMyTeam() {
-		Iterator<Team> iter = teams.iterator();
-		
-		for (int i = 0; i != team_id; ++i)
-			iter.next();
-
-		return iter.next();
-	}
-	
-	public Emitter getMyEmitter() {
-		Team me = getMyTeam();
-		
-		for (Emitter e : map.getEmitters())
-			if (e.getTeam().equals(me))
-				return e;
-
-		return null;
-	}
-	
-	public boolean inLineOfSight(Positionable a, Positionable b) {
-		if (!(a instanceof Identifiable || b instanceof Identifiable)) return false;
-		
-		return map.canHit((Identifiable)a, (Identifiable)b);
-	}
-	
-	public Collection<Team> getTeams() {
-		return teams;
+	/**
+	 * Alternate turn constructor, used to specify a number of turns
+	 * that the match should last for
+	 * 
+	 * @param teamNumber - the team number that this current Turn object
+	 *					   was made for
+	 * @param turnNumber - the current turn number
+	 * @param map - the map object to clone to start the turn off
+	 * @param MAX_TURNS - the total number of turns in the match
+	 */
+	public Turn(int teamNumber, int turnNumber, LazersMap map, int MAX_TURNS) {
+		this(teamNumber, turnNumber, map);
+		this.MAX_TURNS = MAX_TURNS;
 	}
 
-	public boolean isValid(Action action) {
-		if (action instanceof RotateAction) {
-			RotateAction r = (RotateAction) action;
-			
-			//If rotation not within bounds
-			if (!(r.getRotation() <= 360) || r.getRotation() >= 0 ) {
-				return false;
-			}
-			
-			//If object to rotate is not an Emitter or Repeater
-			Entity t = map.getObject(r.getTarget());
-			return t instanceof Emitter || t instanceof Repeater; 
+	/**
+	 * Copy constructor for Turn
+	 * 
+	 * @param turn - the Turn object to copy
+	 * @param teamNumber
+	 * @param map
+	 */
+	public Turn(Turn turn, int teamNumber, LazersMap map, Collection<Team> failedActions) {
+		this(teamNumber, turn.turnNumber + 1, map);
+		this.MAX_TURNS = turn.MAX_TURNS;
 
-		} else if (action instanceof bonzai.ShoutAction) {
-			return true;
-		} else {
-			//If this executes, the competitor managed to make a new type of
-			//action available within a copy of the code they are not able
-			//to touch. This is amazing, please give them a medal.
-			// Question: What Team are we giving the medal to?
-			System.out.println("Give this team a medal.");
-			return false;
+		for (Team t : failedActions) {
+			success.set(t.getID(), false);
 		}
 	}
 
 	/**
-	 * @param action - the Action to apply to the current turn
-	 * @return a new Turn object that represents the current Turn
-	 * after the specified action has been applied to it
+	 * Returns the map object for the current turn
+	 * 
+	 * @return - the map object
 	 */
-	public Turn apply(List<Action> actions) {
-		Turn next = new Turn(this);
-		
-		//Holds a list of the unit ID's each AI wants to move.
-		//This is an ArrayList for checks against null
-		ArrayList<Integer> unitsChosen = new ArrayList<Integer>(actions.size());
-		//Holds a list of chosen rotations for each unit.
-		float[] rotationsChosen = new float[actions.size()];
-		
-		int index = 0;
-		for (Action action : actions) {
-			
-			/******************************************
-			/* THIS IS WHERE BONZAI TURN LOGIC GOES!
-			 * create all variables that need to be
-			 * created to initialize a new turn object
-			 ******************************************/
-			if (isValid(action)) {
-				if (action instanceof RotateAction) { //Store for later checks/use.
-					unitsChosen.add(((RotateAction) action).getTarget());
-					rotationsChosen[index] = ((RotateAction) action).getRotation();
-				} else {
-					//TODO: Apply the ShoutAction to the turn.
-				}
-			}
-			
-			index += 1;
-		}
-		
-		//Careful. Loop indexes are i = 0..N-2, j = i+1..N-1
-		for (int i = 0; i < unitsChosen.size()-1; i++) {
-			Integer element = unitsChosen.get(i);
-			if (element != null) {
-				//Check to see if the element exists further down the list.
-				for (int j = i+1; j < unitsChosen.size(); j++) {
-					if (element == unitsChosen.get(j)) {
-						
-						if (map.getObject(element) instanceof Repeater){
-							next.map.replace(element, new Repeater((Entity<Repeater>)map.getObject(element), 4));
-						}
-						
-						//Remove the conflicting items.
-						unitsChosen.set(j, null);
-						unitsChosen.set(i, null);
-					}
-					
-					//If the i-th item is unique, rotate it.
-					if (j == unitsChosen.size() - 1 && unitsChosen.get(i) != null) {
-						//Rotate the i-th item. Will look something like:
-						//map.get(i).clone(rotationsChosen[i]);
-						//Where ".clone" means the copy constructor or something.
-						if (map.getObject(element) instanceof Repeater) {
-							next.map.replace(element, new Repeater((Entity<Repeater>)map.getObject(element), 4, rotationsChosen[i]));
-						} else if (map.getObject(element) instanceof Emitter) {
-							next.map.replace(element, new Emitter((Entity<Emitter>)map.getObject(element), rotationsChosen[i]));
-						}
-					}
-				}
-			}
-		}
-		
-		//decrement all objects on cooldown
-		for (Repeater r : next.map.getRepeaters()) {
-			next.map.replace(r.getID(),
-					new Repeater(r, Math.max(r.getCooldown() - 1, 0)));
-		}
-		
-		return next;
+	public LazersMap getMap() {
+		return map;
+	}
+
+	/**
+	 * Returns a Collection of Positionables that represent a 
+	 * valid path between points A and B. The path is not
+	 * guaranteed to be a shortest, longest, best, or worst path.
+	 * There are also no guarantees that each Repeater on this 
+	 * path is controllable at the current time by your AI.
+	 * 
+	 * @param a - the start point for the path-generator
+	 * @param b - the end point for the path-generator 
+	 * @return - a Collection of Positionable objects (usually Repeaters)
+	 * that can be chained together to form a Lazer path. 
+	 */
+	public Collection<Positionable> getPath(Rotatable a, Traversable b) {
+		return Pathfinding.getPath(a, b,this.getMyTeam(), map );
 	}
 	
-	void setCurTeam(int id) {
-		team_id = id;
+	/**
+	 * Returns a Collection of all team objects on the map
+	 * 
+	 * @return - a Collection of Teams
+	 */
+	/*public Collection<Team> getAllTeams() {
+		return teams;
+	}*/
+	
+	
+	/*
+	/**
+	 * Returns whether this is the first turn or not
+	 * 
+	 * @return
+	 */
+	public boolean isFirstTurn() {
+		return turnNumber == 0;
 	}
+
+	/**
+	 * Returns the score for the specified Team
+	 * 
+	 * @param t - the Team object to get the score for
+	 * @return - the Team's score
+	 */
+	public int getScore(Team t) { 
+		return t.getScore();
+	}
+
+	/**
+	 * Returns the number of remaining turns in the match
+	 * 
+	 * @return - the number of remaining turns
+	 */
+	public int getTurnsRemaining() {
+		return MAX_TURNS - turnNumber;
+	}
+	
+	/**
+	 * Get a list of the ShoutActions performed on this turn.
+	 * This has LITERALLY ZERO USE TO YOUR CODE, but if you want to
+	 * make an AI that evaluates the humor level of other teams'
+	 * shouts, be our guest. :D
+	 * 
+	 * @return a Collection of the ShoutActions performed on this turn
+	 */
+	public Collection<ShoutAction> getShoutActions() {
+		return shoutActions;
+	}
+	
+	/**
+	 * Returns your AI's Team object
+	 * 
+	 * @return - your AI's Team object
+	 */
+	public Team getMyTeam() {
+		for (Team t : getAllTeams()) {
+			if (t.getID() == currentTeam) {
+				return t;
+			}
+		}
+		return null;
+	}
+
+
+
+	/**
+	 * Test if a given Action is a valid one if it were applied on this Turn object.
+	 * This method returns true if the Action is a valid Action, false otherwise.
+	 * There are no guarantees that the Action will be performed, even if it is
+	 * valid, as another team may be performing an Action that interferes
+	 * with the given Action. (For example, if two teams try to rotate the same
+	 * Repeater on the same turn.) 
+	 * 
+	 * If this method returns false, calling getIsValidError() will return the
+	 * reason for failure.
+	 * 
+	 * @param action - the Action object to check for validity
+	 * 
+	 * @return - true if the Action is valid for the current gamestate,
+	 * 			 false otherwise
+	 */
+	public boolean isValid(Action action) {
+		//TODO 2017: This is important for us and competitors. 
+	}
+
+	/**
+	 * If isValid() returns false, this method returns
+	 * a String containing a more detailed error message
+	 * 
+	 * @return - a String explaining why a move is invalid
+	 */
+	public String getIsValidError() {
+		return errorMessage;
+	}
+
+	/**
+	 * Applies an action to the current turn. This should 
+	 * not be called by an AI as it is almost useless.
+	 * 
+	 * @param actions - the list of actions to apply
+	 * @return - the new Turn object created after applying 
+	 * the actions
+	 */
+	public Turn apply(List<Action> actions) {
+		
+		
+		//TODO 2017: This is where we applied each action from the playing ai's. This is an example of our process. 
+		// Most of the game logic goes here. 
+		
+		
+		int oldID = this.currentTeam;
+
+		//Clone the map. All actions are applied to this new clone.
+		LazersMap map = new LazersMap(this.map, false);
+
+		//This is used to store the RotateActions.
+		//Maps ID's of targeted Entities (Repeaters or Emitters)
+		//to the team ID that wants to perform them
+		HashMap<Integer, Team> rotationsToPerform = new HashMap<>();
+
+		//Store the desired rotation at [teamNum] of this array.
+		//Thus, if team 3 wanted to rotate something, their chosen rotation
+		//will be at rotationsDesired[3]. If they didn't choose to rotate
+		//something, then the array will contain null at that index.
+		Float [] rotationsDesired = new Float [teams.size()];
+
+		// Store the teams whose action failed
+		LinkedList<Team> failedTeams = new LinkedList<>();
+		
+
+		//Parse the list of all actions for validity and move collisions
+		//Reduce the list to only the moves that actually need to be performed
+		currentTeam = 0;
+		for (Action action : actions) {
+			if (isValid(action)) {
+				if (action instanceof RotateAction) {
+					RotateAction r = (RotateAction)action;
+
+					rotationsDesired[currentTeam] = r.getRotation();
+
+					//Revert the rotation if two AIs attempt to move the same repeater
+					if (rotationsToPerform.containsKey(r.getRotatedObjectId())) {
+						failedTeams.add(rotationsToPerform.get(r.getRotatedObjectId()));
+						failedTeams.add(teams.get(currentTeam));
+						
+						rotationsToPerform.put(r.getRotatedObjectId(), null);
+						
+					} else {
+						//Otherwise put the move in the list (in case of later conflicts)
+						//Indicate that the currentTeam performed the move.
+						rotationsToPerform.put(r.getRotatedObjectId(), teams.get(currentTeam));
+					}
+					
+					shoutActions.add(null);
+				} else {
+					shoutActions.add((ShoutAction)action);
+				}
+			} else {
+				//TODO Write code for an invalid action
+				shoutActions.add(null);
+			}
+
+			currentTeam++;
+		}
+
+		//Apply all valid RotateActions to the game state.
+		for (int id : rotationsToPerform.keySet()) {
+
+			Rotatable r = (Rotatable)map.getEntity(id);
+
+			if (r instanceof Emitter) {
+
+				LinkedList<Emitter> emitters = (LinkedList<Emitter>)map.getEmitters();
+
+				//Create a new Emitter object to replace the old one. The new Emitter is set to have the new rotation.
+				// Okay to not use LazersMap.replace as emitters have the lowest id's
+				emitters.set(r.getID(), new Emitter((Emitter)r, rotationsDesired[rotationsToPerform.get(id).getID()], map));
+
+			} else {
+				//Create a new Repeater object to replace the old one (as there is no setRotation method)
+				Team teamRotating = rotationsToPerform.get(id);
+
+				if (teamRotating == null) {	//Two teams tried to move the same Repeater
+					map.replace(id, new Repeater((Repeater)r, r.getRotation(), null, cooldownAmount + 1, map));
+				} else {
+					//Some team is performing a RotateAction on Repeater r.
+
+
+					map.replace(id, new Repeater((Repeater)r, rotationsDesired[teamRotating.getID()], teamRotating, cooldownAmount + 1, map));
+				}
+			}
+		}
+		
+		map.calculateParentsTargetsAndOwners();
+
+		//Generate the new Turn object. We apply any earned points onto this new Turn.
+		Turn newTurn = new Turn(this, oldID, map, failedTeams);
+		
+		
+		for (Team team : this.getAllTeams()) {
+			currentTeam = team.getID();
+			int multiplier = 1;
+
+			//Only score if something was moved
+			boolean validPoints = false;
+
+			//To prevent infinite loops if a circular path is found
+			LinkedList<Positionable> visited = new LinkedList<>();
+
+			Positionable current = newTurn.getUtil().updateEntity(util.getMyEmitter());
+			Team myTeam = ((Emitter) current).getTeam();
+
+			//Traverse the path of the Emitter/Repeater chain until we hit a Wall or Target.
+			while (current != null && !visited.contains(current) && current instanceof Rotatable) {				
+				if (current instanceof Repeater) {
+					Repeater r = (Repeater) current;
+
+					//If the current team has control, or if no one has control
+					if (myTeam.equals(r.getOwner())) {
+						visited.add(current);
+
+						multiplier *= 2;
+					} else { 
+						//The person does not have control of this Repeater. They should not get points, as their lazer isn't emitting.
+						validPoints = false;
+						break;
+					}
+
+					//Prevent ais from getting points by moving through an opponent's emitter
+				} else if (current instanceof Emitter && !current.getPosition().equals(util.getMyEmitter().getPosition())) {
+					validPoints = false;
+					break;
+				}
+
+				validPoints = validPoints || rotationsToPerform.containsKey(((Identifiable)current).getID());
+				current = ((Rotatable)current).getTarget();
+			}
+
+			//The lazer's path traveled to a Target this turn. See if it is a valid hit.
+			//"Valid" is defined as "this team performed a valid rotation action this turn on some Rotatable
+			//that is within the path from Emitter to Target" (including rotation actions on the Emitter itself).
+			//We also only want to calculate points if the team has not hit the target before.
+			if ((current instanceof Target) && validPoints) {
+				//Refresh the target in case another team hit it this turn
+				//Due to dangling references from getTarget, the hit array won't be accurate
+				//I'm not sure how to better explain this, just trust me
+				Target hitTarget = (Target)newTurn.getUtil().updateEntity((Target)current);
+
+				//Don't calculate points if a team has hit the target before
+				if (hitTarget.isDiscoveredByTeam(team)) {
+					break;
+				}
+
+				//Get the number of points the target was worth last turn
+				int points = ((Target) map.updateEntity(hitTarget)).getPointValue();
+
+				//Increment the players points total
+				newTurn.addPoints(team.getID(), points * multiplier);
+				
+				//Update the next turn's target with the correct hit records
+				newTurn.map.replace(hitTarget, new Target(hitTarget, team.getID()));
+			}
+		}
+
+		this.currentTeam = oldID;
+
+		return newTurn;
+	}
+
+	/*
+	void addPoints(int teamID, int points) {
+		Team old = teams.get(teamID);
+		teams.set(teamID, new Team(old, old.getScore() + points));
+		((Emitter) map.getEntity(teamID)).setTeam(teams.get(teamID));			// Update the team's emitter to have the correct reference
+	}
+	*/
 }

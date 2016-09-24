@@ -311,18 +311,6 @@ public class Utility {
 		return retain(list, new NotPredicate<E>(predicate));
 	}
 	
-	/**
-	 * Finds the given object in the given collection
-	 * Useful for updating local entity objects to any changes
-	 */
-	public static <E> E find(Collection<E> list, E obj) {
-		for (E e : list)
-			if (obj.equals(e))
-				return e;
-		
-		return null;
-	}
-	
 	
 	// Suggest moving these methods to snowbound.api.util.Utility (would inherit from bonzai.uitl.Utility)
 	/**

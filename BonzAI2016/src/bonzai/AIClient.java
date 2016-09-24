@@ -14,7 +14,7 @@ import bonzai.util.ProcessCPUTimer;
 import bonzai.util.TimeoutException;
 import lazers.Game;
 import lazers.Jar;
-import lazers.LazersScenario;
+import lazers.api.LazersScenario;
 
 public class AIClient implements Runnable {
 	private final AI ai;
@@ -27,9 +27,9 @@ public class AIClient implements Runnable {
 	/**
 	 *
 	 **/
-	public AIClient(LazersScenario scenario, Jar me, List<Jar> jars, int my_team) throws Exception {
+	public AIClient(LazersScenario scenario, Jar me, List<Jar> jars) throws Exception {
 		this.ai = me.instantiate();
-		this.game = scenario.instantiate(jars, my_team);
+		this.game = scenario.instantiate(jars);
 	}
 	
 	@Override
@@ -67,6 +67,7 @@ public class AIClient implements Runnable {
 							timer.exception.printStackTrace();
 						
 					} catch(TimeoutException e) {
+						action = new ShoutAction("Timed OUT yo");
 						System.err.println("Timed Out!");
 					}
 					
@@ -98,18 +99,18 @@ public class AIClient implements Runnable {
 		
 			// the first argument should always be the output id for the 
 			// client, representing the match and client name
-			String my_name = arguments.poll();
-			int id = Integer.parseInt(arguments.poll());
+			String id = arguments.poll();
+			int teamID = Integer.parseInt(arguments.poll());
 			
 			// hurry and reassign System.{err,in,out} to use files, where 
 			// appropriate, using the output id for file names
-			System.setErr(new PrintStream(new File(my_name + ".err")));
+			System.setErr(new PrintStream(new File(id + teamID + ".err")));
 			System.setIn (null);
-			System.setOut(new PrintStream(new File(my_name + ".out")));
+			System.setOut(new PrintStream(new File(id + +teamID + ".out")));
 	
 			// the next two arguments should always be the scenario, and then
 			// the path to the AI I should be running
-			LazersScenario scenario = new LazersScenario(new File(arguments.poll()));
+			LazersScenario scenario = new LazersScenario(new File(arguments.poll()),teamID);
 			Jar me = new Jar(new File(arguments.poll()));
 	
 			// there should be exactly six remaining arguments, corresponding
@@ -120,7 +121,7 @@ public class AIClient implements Runnable {
 			}
 		
 			// Initiate the client
-			client = new AIClient(scenario, me, jars, id);		
+			client = new AIClient(scenario, me, jars);		
 		}
 		catch(Exception e) {
 			// if anything happened in our initialization, that would be bad,

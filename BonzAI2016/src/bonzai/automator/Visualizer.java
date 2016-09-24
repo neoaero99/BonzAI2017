@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import javax.swing.JPanel;
 
 public class Visualizer extends JPanel {
+	private static final long serialVersionUID = -4363244673396195624L;
 	ArrayList<ArrayList<bonzai.Jar>> ais;
 
 	public Visualizer(ArrayList<ArrayList<bonzai.Jar>> ais) {

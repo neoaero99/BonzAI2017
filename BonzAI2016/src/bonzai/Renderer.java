@@ -4,10 +4,14 @@ import java.awt.*;
 import java.awt.geom.*;
 import java.awt.image.BufferedImage;
 
+import javax.swing.JPanel;
+
 // Various helper methods
 public abstract class Renderer {
 	private static Point2D.Double lastUL = new Point2D.Double();
 	private static Point2D.Double lastDR = new Point2D.Double();
+	
+	protected static JPanel panel;
 	
 	/**
 	 * Draw a string, then return its bounds
@@ -16,35 +20,49 @@ public abstract class Renderer {
 	 * @param color
 	 * @return
 	 */
-	protected static Rectangle2D.Double drawText(Graphics2D g, String str, double x, double y, Color color) {
-		int size = 18;
+	protected static Rectangle2D.Double drawText(Graphics2D g, String str, double x, double y, Color fill, float size) {
+		return drawText(g, str, x, y, Color.WHITE, fill, size);
+	}
+	
+	protected static Rectangle2D.Double drawText(Graphics2D g, String str, double x, double y, Color text, Color fill, float size) {
+		if (size < 0.5 && g.getTransform().getScaleX() < 100) {
+			return null;
+		}
+		
+		int baseSize = 18;
 		double sized = size;
 		
-		Font font = new Font("arial", Font.BOLD,size);
+		Font font = new Font("Arial", Font.BOLD, baseSize);
 		g.setFont(font);				// Why does g.setFont need to be called if we aren't drawing the text with g???
 		
-		int width = g.getFontMetrics().stringWidth(str);
+		int width = (int)(g.getFontMetrics().stringWidth(str) * 1.1f);
 		int height = g.getFontMetrics().getAscent() + g.getFontMetrics().getDescent();
 		
-		// Draw the text using a BufferedImage
-		BufferedImage img = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
+		width  = (width  <= 0) ? 1 : width;
+		height = (height <= 0) ? 1 : height;
+		
+		
+		//Draw the text using a BufferedImage
+		BufferedImage img = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
 		Graphics2D imgg = img.createGraphics();
-		imgg.setColor(color);
+		imgg.setColor(fill);
 		imgg.fillRect(0, 0, width, height);
 		imgg.setFont(font);
-		imgg.setColor(Color.WHITE);
+		imgg.setColor(text);
 		imgg.drawString(str, 0, g.getFontMetrics().getAscent());
 		
-		// What do AffineTransforms do???
+		//Scale first to get the font size to "size"
 		AffineTransform at = new AffineTransform();
-		at.translate(x + (width / 2 / sized), y - (height / size));
-		at.scale(-1.0 / size, 1.0 / size);
+		double scaleFactor = (1.0 / baseSize)*size;
+		at.translate(x - (width*scaleFactor/2.0), y - (height *scaleFactor/2.0));
+		at.scale(scaleFactor, scaleFactor);
 		
-		// Draw the image to the passed graphics instance
+		//Draw the image to the passed graphics instance\
+		
 		g.drawImage(img, at, null);
-		g.setColor(color);				// Why is this after the drawing occurred???
+		g.setColor(fill);				// Why is this after the drawing occurred???
 		
-		// Return the bounding rectangle for the displayed Text
+		//Return the bounding rectangle for the displayed Text
 		return new Rectangle2D.Double(x - (width / sized), y, width / sized, height/ sized);
 	}
 
@@ -149,5 +167,9 @@ public abstract class Renderer {
 
 	public static void setLastDR(Point2D.Double lastDR) {
 		Renderer.lastDR = lastDR;
+	}
+
+	public static void setPanel(JPanel p) {
+		panel = p;
 	}
 }

@@ -15,6 +15,7 @@ import bonzai.GameWrapper;
 public class BonzAIFrame extends JFrame {
 	private final CardLayout switcher;
 	
+	@SuppressWarnings("unused")
 	private static SelectorPanel selectorPanel;
 	
 	private BonzAIFrame(String title) {
@@ -90,7 +91,7 @@ public class BonzAIFrame extends JFrame {
 	
 	public static BonzAIFrame createGameOnly(String title, GameWrapper game) throws Exception {
 		UIManager.setLookAndFeel("javax.swing.plaf.metal.MetalLookAndFeel");
-
+		//System.out.println("not hilarious print statement");
 		BonzAIFrame frame = new BonzAIFrame(title);
 		
 		frame.add(GameplayPanel.create(frame, game), "Gameplay");

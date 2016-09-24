@@ -15,6 +15,11 @@
 		<delete dir  = "${package}/scenarios/" />
 		<delete dir  = "${package}/art/" />
 		<delete dir  = "${package}/docs/" />
+		<delete dir  = "${package}/automation/" />
+		<delete>
+			<fileset dir = "${package}" includes="*.err"/>
+		 	<fileset dir = "${package}" includes="*.out"/>
+		</delete>
 	</target>
 
 	<!-- Stage Target(s) -->
@@ -43,9 +48,19 @@
 	</target>
 	
 	<!-- Build Automator -->
-	<target name = "automator" depends = "compile">
+	<target name = "automator" depends = "deploy">
 		<build jar = "lazers.jar" source = "./" main = "bonzai.automator.Automator">
 		</build>
+	</target>
+
+	<!-- Run Spawner -->
+	<target name = "spawner">
+		<java classname = "bonzai.automator.Spawner" fork = "true">
+			<classpath>
+				<pathelement location="bin"/>
+				<pathelement path="lib/lib/*"/>
+			</classpath>			
+		</java>
 	</target>
 	
 	<!-- Build Ladder -->
@@ -54,7 +69,7 @@
 		</build>
 	</target>
 	
-	<target name = "deploy" depends = "build, ai.simple">
+	<target name = "deploy" depends = "build, ai.mitch, ai.simple, ai.flo, ai.gabe, ai.taunt, ai.dave, ai.derp, ai.bethor">
 		<copy todir = "bonzai2016/scenarios/"><fileset dir="scenarios/" /></copy>
 		<copy todir = "bonzai2016/art/"><fileset dir = "${art}/" /></copy>
 	</target>
@@ -65,7 +80,7 @@
 		<compile source = "ais/SimpleAI/" files = "**">
 			<external><classpath refid = "lazers.classpath"/></external>
 		</compile>
-		<build jar = "ais/SimpleAI.jar" source = "./ais/SimpleAI/" main = "" />
+		<build-ai jar = "ais/SimpleAI.jar" source = "./ais/SimpleAI/" main = "" />
 	</target>
 	
 	<!-- Run Target(s) -->

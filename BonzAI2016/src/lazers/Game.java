@@ -1,32 +1,35 @@
 package lazers;
 
-import java.awt.Color;
 import java.util.*;
 
 import bonzai.Action;
-import bonzai.Position;
 import lazers.api.LazersMap;
 import lazers.api.Turn;
 
 
 /**
  * A representation of a state of the game board
- **/
+ */
 public class Game {
 	private final List<Turn> history;
 	private int remaining;
-	private LazersMap map;
+	
+	/**
+	 * list of colors that have jars selected
+	 */
+	//private List<lazers.api.Color> activeColors;
+	//private LazersMap map;
 
 	/**
 	 *
 	 **/
-	public Game(int turns, LazersMap map, List<lazers.api.Color> colors, int id) {
+	public Game(int teamID, int turns, LazersMap map, List<lazers.api.Color> colors) {
 		this.remaining = turns;
-		this.map = map;
+		//this.map = map;
 		this.history = new ArrayList<Turn>(turns);
-		this.history.add(new Turn(0, map, id));	//Create the first turn of the game
+		this.history.add(new Turn(teamID, 0, map, turns));	//Create the first turn of the game
 	}
-
+	
 	/**
 	 *
 	 **/
@@ -67,12 +70,6 @@ public class Game {
 	 **/
 	public boolean isValid(Action action) {
 		return turn().isValid(action);
-	}
-
-	public void apply(Action action) {
-		ArrayList<Action> list = new ArrayList<Action>(1);
-		list.add(action);
-		apply(list);
 	}
 
 	// Apply a list of actions

@@ -53,7 +53,7 @@ public class SelectorPanel extends JPanel implements ActionListener, FileListene
 	private JButton play;
 
 	private JLabel footer;
-	
+
 	public SelectorPanel(BonzAIFrame bonzai, GameWrapper game) {
 		super(new GridBagLayout());
 		this.bonzai = bonzai;
@@ -62,7 +62,7 @@ public class SelectorPanel extends JPanel implements ActionListener, FileListene
 		this.scenarios = new DefaultComboBoxModel<>();
 		this.scenarioWatcher = new FileMonitor("scenarios/");
 		this.scenarioWatcher.fileListeners().add(this);
-		
+
 		this.scenarios.addElement(null);
 		for (File file : this.scenarioWatcher.files()) {
 			try {
@@ -71,22 +71,23 @@ public class SelectorPanel extends JPanel implements ActionListener, FileListene
 				for(; x < this.scenarios.getSize() && this.scenarios.getElementAt(x).compareTo(scenario) < 0; x++);
 				this.scenarios.insertElementAt(scenario, x);
 			} catch (Exception e) {
+				e.printStackTrace();
 				System.out.printf("Scenario file %s failed to load%n", file);
 			}
 		}
-		
+
 		jars = new LinkedList<DefaultComboBoxModel<Jar>>();
 		for(int x = 0; x < game.teams(); x += 1) {
 			this.jars.add(new DefaultComboBoxModel<Jar>());
 		}
-		
+
 		this.jarWatcher = new FileMonitor("ais/");
 		this.jarWatcher.fileListeners().add(this);
 
 		for(MutableComboBoxModel<Jar> model : this.jars) {
 			model.addElement(null);
 		}
-		
+
 		for (File file : this.jarWatcher.files()) {
 			try {
 				Jar jar = game.jar(file);
@@ -103,7 +104,7 @@ public class SelectorPanel extends JPanel implements ActionListener, FileListene
 
 		this.scenarioSelector = createScenarioSelector(scenarios);
 		this.scenarioSelector.addActionListener(this);
-		
+
 		this.jarSelectors = new ArrayList<JComboBox<Jar>>();
 		for (int x = 0; x < game.teams(); x += 1) {
 			this.jarSelectors.add(createJarSelector(jars.get(x), game.color(x)));
@@ -128,21 +129,21 @@ public class SelectorPanel extends JPanel implements ActionListener, FileListene
 				Object selected =  scenarioSelector.getSelectedItem();
 				scenario = selected.equals(scenarioSelector.getItemAt(0)) ? null : (Scenario)selected;
 			}
-			
+
 			List<Jar> jars = new ArrayList<Jar>();
 			for(JComboBox<Jar> selector : jarSelectors) {
 				jars.add((Jar)(selector.getSelectedItem()));
 			}
-			
+
 			game.run(scenario, jars);
 			bonzai.flip();
-			
+
 			resume.setEnabled(true);
 		}
 		if (scenarioSelector.equals(e.getSource())) {
 			Scenario selected = scenarioSelector.getItemAt(scenarioSelector.getSelectedIndex());
 			final int TEAMS = selected != null ? selected.getNumTeams() : 0;
-		
+
 			int x = 0;
 			for(; x < TEAMS; x += 1)               { jarSelectors.get(x).setEnabled(true ); }
 			for(; x < jarSelectors.size(); x += 1) { jarSelectors.get(x).setEnabled(false); }
@@ -155,7 +156,7 @@ public class SelectorPanel extends JPanel implements ActionListener, FileListene
 			System.out.printf("Found new scenario file %s. Loading...%n", e.getFile());
 			try {
 				Scenario scenario = game.scenario(e.getFile());
-				
+
 				int x = 1; 
 				for(; x < this.scenarios.getSize() && this.scenarios.getElementAt(x).compareTo(scenario) < 0; x++);
 				this.scenarios.insertElementAt(scenario, x);
@@ -183,7 +184,7 @@ public class SelectorPanel extends JPanel implements ActionListener, FileListene
 	public void fileDeleted(FileEvent e) {
 		if (scenarioWatcher.equals(e.getSource())) {
 			System.out.printf("The scenario file %s was deleted. Updating records...%n", e.getFile());
-			
+
 			File file = e.getFile();
 			for(int x = 1; x < scenarios.getSize(); x += 1) {
 				if(scenarios.getElementAt(x).getFile().equals(file)) { 
@@ -194,10 +195,10 @@ public class SelectorPanel extends JPanel implements ActionListener, FileListene
 				}
 			}
 		}
-		
+
 		if (jarWatcher.equals(e.getSource())) {
 			System.out.printf("The ai file %s was deleted. Updating records...%n", e.getFile());
-			
+
 			File file = e.getFile();
 			for(JComboBox<Jar> combo : this.jarSelectors) {
 				DefaultComboBoxModel<Jar> model = (DefaultComboBoxModel<Jar>)combo.getModel();
@@ -217,10 +218,10 @@ public class SelectorPanel extends JPanel implements ActionListener, FileListene
 	public void fileModified(FileEvent e) {
 		if (scenarioWatcher.equals(e.getSource())) {
 			System.out.printf("The scenario file %s was modified. Reloading...%n", e.getFile());
-		
+
 			try {
 				Scenario scenario = game.scenario(e.getFile());
-			
+
 				File file = e.getFile();
 				for(int x = 1; x < scenarios.getSize(); x += 1) {
 					if(scenarios.getElementAt(x).getFile().equals(file)) { 
@@ -234,13 +235,13 @@ public class SelectorPanel extends JPanel implements ActionListener, FileListene
 				fileDeleted(e);
 			}
 		}
-		
+
 		if (jarWatcher.equals(e.getSource())) {
 			System.out.printf("The jar file %s was modified. Reloading...%n", e.getFile());
-		
+
 			try {
 				Jar jar = game.jar(e.getFile());
-				
+
 				File file = e.getFile();
 				for(JComboBox<Jar> combo : this.jarSelectors) {
 					DefaultComboBoxModel<Jar> model = (DefaultComboBoxModel<Jar>)combo.getModel();
@@ -296,7 +297,7 @@ public class SelectorPanel extends JPanel implements ActionListener, FileListene
 		c.gridheight = 1;
 		c.weightx = 0;
 		panel.add(panel.replay, c);
-		*/
+		 */
 
 		c.gridx = 4;
 		c.gridy = game.teams();
@@ -309,7 +310,7 @@ public class SelectorPanel extends JPanel implements ActionListener, FileListene
 		c.gridwidth = 3;
 		c.gridheight = 1;
 		panel.add(panel.play, c);
-		
+
 		c.gridx = 0;
 		c.gridy = game.teams() + 1;
 		c.gridwidth = 8;
@@ -346,10 +347,10 @@ public class SelectorPanel extends JPanel implements ActionListener, FileListene
 			@Override
 			public void paintCurrentValueBackground(Graphics g, Rectangle bounds, boolean hasFocus) {
 				Paint gradient = new LinearGradientPaint(
-					0, 0, 0, bounds.height, 
-					new float[] { 0.0f, 0.25f, 0.30f, 0.60f, 1.0f }, 
-					new Color[] { Color.LIGHT_GRAY, Color.LIGHT_GRAY, Color.LIGHT_GRAY, Color.LIGHT_GRAY, Color.LIGHT_GRAY }
-				);
+						0, 0, 0, bounds.height, 
+						new float[] { 0.0f, 0.25f, 0.30f, 0.60f, 1.0f }, 
+						new Color[] { Color.LIGHT_GRAY, Color.LIGHT_GRAY, Color.LIGHT_GRAY, Color.LIGHT_GRAY, Color.LIGHT_GRAY }
+						);
 				((Graphics2D) g).setPaint(gradient);
 				((Graphics2D) g).fillRect(bounds.x, bounds.y, bounds.width + 20, bounds.height);
 			}

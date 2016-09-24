@@ -1,5 +1,5 @@
 package bonzai;
 
-public interface Identifiable {
+public interface Identifiable{
 	public int getID();
 }

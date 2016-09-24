@@ -8,6 +8,7 @@ package bonzai.util;
  * here for convienence.
  **/
 public class TimeoutException extends Exception {
+	private static final long serialVersionUID = -8709687299308864546L;
 
 	/**
 	 * Constructs a TimeoutException with no specified detail message.

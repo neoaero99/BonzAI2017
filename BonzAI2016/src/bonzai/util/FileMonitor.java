@@ -29,8 +29,7 @@ public class FileMonitor extends Thread {
 	public void run() {
 		try {
 			WatchService watcher = FileSystems.getDefault().newWatchService();
-			WatchKey master = path.register(watcher, ENTRY_CREATE,
-					ENTRY_DELETE, ENTRY_MODIFY);
+			//WatchKey master = path.register(watcher, ENTRY_CREATE, ENTRY_DELETE, ENTRY_MODIFY);
 
 			while (true) {
 				try {

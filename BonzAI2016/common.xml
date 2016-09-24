@@ -54,7 +54,25 @@
 			<jar destfile = "${package}/@{jar}">
 				<external />
 				<fileset dir = "@{source}/${bin}/" />
-    				<fileset dir = "@{source}/${src}/" /> 
+    			<fileset dir = "@{source}/${src}/" />
+				<manifest>
+					<attribute name = "Main-Class" value = "@{main}" />
+					<attribute name = "Class-Path" value = "${manifestclasspath}" />
+				</manifest>
+			</jar>
+		</sequential>
+	</macrodef>
+
+	<!-- Macro: build, jar together specified java class files -->
+	<macrodef name = "build-ai">
+		<attribute name = "jar" />
+		<attribute name = "source" />
+		<attribute name = "main" />
+		<element   name = "external" optional = "true" />
+		<sequential>
+			<jar destfile = "${package}/@{jar}">
+				<external />
+				<fileset dir = "@{source}/${bin}/" />
 				<manifest>
 					<attribute name = "Main-Class" value = "@{main}" />
 					<attribute name = "Class-Path" value = "${manifestclasspath}" />

@@ -12,18 +12,15 @@ import java.util.Queue;
 import bonzai.AIHost;
 import bonzai.Action;
 import bonzai.Team;
-import bonzai.gui.*;
-
-import java.text.*;
-import java.util.*;
-import java.io.*;
 
 import lazers.api.Turn;
 import lazers.api.Color;
-
+import lazers.api.LazersScenario;
 
 /**
- *
+ * A Simulation holds a history state of how a game played out. It keeps a 
+ * Game object that holds references to the state of the Map at each turn.
+ * In addition, the Simulation keeps a list of actions that were applied. 
  **/
 public class Simulation extends Thread {
 	private final Queue<AIHost> clients;
@@ -31,7 +28,11 @@ public class Simulation extends Thread {
 	private final Game game;
 	private final List<Action> actions;
 	private Color winningTeam;
+	int numTurns;
 	
+	/**
+	 * Constructor 
+	 */
 	public Simulation(bonzai.Scenario scenario, List<bonzai.Jar> jars) throws Exception {
 		String timestamp = new SimpleDateFormat("HH-mm-ss").format(new Date());
 		
@@ -39,87 +40,123 @@ public class Simulation extends Thread {
 		this.jars = new HashMap<Color, bonzai.Jar>();
 		int team = 0;
 		
+		//For each AI jar that is in the game, make an AIHost thread for it.
 		for(bonzai.Jar jar : jars) {
 			if(jar != null) {
-				this.clients.add(AIHost.spawn(timestamp, scenario, jar, jars, team++));
+				this.clients.add(AIHost.spawn(timestamp, scenario, jar, jars, team));
 			}
-			
-			this.jars.put(Color.values()[team], jar);
+			this.jars.put(Color.values()[team++], jar);
 		}
 		
-		this.game = ((lazers.LazersScenario)scenario).instantiate(jars, -1);
+		//Initialize the game with the required jars and scenario.
+		//Effectively, this makes the game at it's initial point, before anyone has taken an action.
+		this.game = ((lazers.api.LazersScenario)scenario).instantiate(jars);
+		
 		this.actions = new ArrayList<Action>();
 	}
 	
+	/**
+	 * Get the winning team
+	 */
 	public Color getWinner() {
 		return winningTeam;
 	}
-	
+
+	/**
+	 * Return the team color associated with a specific AI's jar.
+	 */
 	public bonzai.Jar jar(lazers.api.Color color) {
 		return jars.get(color);
 	}
 	
+	/**
+	 * Has the effect of returning the number of turns taken thus far.
+	 * In the playback renderer, this is used to determine how far ahead 
+	 * we can fast-forward 
+	 */
 	public int availableFrames() {
 		return actions.size();
 	}
 	
+	/**
+	 * Return the total number of turns. Each "frame" is considered
+	 * to be the state of the game at that turn. 
+	 */
 	public int totalFrames() {
-		return LazersScenario.NUM_TURNS;
+		return game.turns();
 	}
 	
+	/**
+	 * Return the turn object at a specified turn, if that turn is between
+	 * 0-game.turns(). If it isn't, return the last turn in the history. 
+	 */
 	public Turn turn(int current) {
 		return current >= game.turns() ? game.turn() : game.turn(current);
 	}
 	
+	/**
+	 * Return the action taken at a specified turn. If the turn is not between
+	 * 0-game.turns(), return the last turn in the history.
+	 */
 	public Action action(int current) {
 		return actions.get(current >= actions.size() ? actions.size() - 1 : current);
 	}
 	
+	/**
+	 * Run the game!
+	 */
 	@Override
 	public void run() {
 		while(game.remaining() > 0) {
-			// Handle concurrent turns (ie. Lazers)
+			//Handle concurrent turns - i.e., everyone takes their action at the same time.
 			if (LazersScenario.CONCURRENT_TURNS) {
 				List<bonzai.Action> acts = new LinkedList<>();
 				
-				for (AIHost client : clients)
+				for (AIHost client : clients) {
 					acts.add(client.query());
-				
-				// Reduce actions
-				{
-					
-					
 				}
+
+				game.apply(acts);
+				
+				//Tell all the clients to apply the actions
+				//that happened this turn.
+				for(AIHost client : clients) {
+					client.apply(acts);
+				}
+				
+				for (Action a : acts) {
+					actions.add(a);
+				}
+				
+			} else { //turn-based game. Each AI takes its turn independent of other AI's
+				
+				List<bonzai.Action> acts = new LinkedList<>();
+				Action act = clients.peek().query();
+				
+				acts.add(act);
 				
 				game.apply(acts);
 				
-				for(AIHost client : clients)
+				//Tell all the clients to apply the actions
+				//that happened this turn.
+				for(AIHost client : clients) {
 					client.apply(acts);
+				}
 				
-				for (Action a : acts)
-					actions.add(a);
-				
-			// Handle normal turn-based gameplay
-			} else {
-				Action action = clients.peek().query();
-				
-				game.apply(action);
-				actions.add(action);
-				
-				for(AIHost client : clients)
-					client.apply(action);
+				actions.add(act);
 				
 				clients.offer(clients.poll());
 			}
 		}
 		
+		//The game is over, clean up all the clients.
 		for(AIHost client : clients) {
 			client.terminate();
 		}
 		
-		//Set the winner
+		//Set the winner of the game!
 		Team winner = null;
-		for (Team team : game.turn(game.turns()-1).getTeams()) {
+		for (Team team : game.turn(game.turns()-1).getAllTeams()) {
 			if (winner == null || winner.getScore() < team.getScore()) {
 				winner = team;
 			}

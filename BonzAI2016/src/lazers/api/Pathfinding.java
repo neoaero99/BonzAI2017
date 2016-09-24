@@ -1,19 +1,3 @@
-package lazers.api;
-
-import java.util.ArrayDeque;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Queue;
-
-import bonzai.Identifiable;
-import bonzai.Position;
-import bonzai.Positionable;
-import bonzai.Traversable;
-
 /**
  * A breadth-first search pathfinder.
  * <p>
@@ -23,6 +7,10 @@ import bonzai.Traversable;
 public class Pathfinding {
 	
 	
+	//TODO 2017: This is an example of pathfinding code used in a bonzai. 
+	// Implementation and extent of pathfinding have to be determined for any indivdual game. 
+	
+
 	/**
 	 * Returns a list of positions representing the path from the start
 	 * position to the goal position. If no such path exists, then this method
@@ -33,23 +21,22 @@ public class Pathfinding {
 	 * @param goal the end position
 	 * @return a list of positions representing the path
 	 */
-	protected static Collection<Positionable> getPath(LazersMap m, Positionable start, Positionable goal) {
-		
-		Queue<Positionable> frontier = new ArrayDeque<>();
+	public static List<Position> getPath(Turn turn, Position start, Position goal) {
+		Queue<Position> frontier = new ArrayDeque<Position>();
 		frontier.add(goal);
 		
-		Map<Positionable, Positionable> visited = new HashMap<>();
+		Map<Position, Position> visited = new HashMap<Position, Position>();
 		visited.put(goal, null);
 
 		while(!frontier.isEmpty() && !goal.equals(start)) {
-			Positionable current = frontier.remove();
+			Position current = frontier.remove();
 			
-			for(Positionable neighbor : m.getNeighbors((Identifiable)current)) {
+			for(Position neighbor : current.neighbors()) {
 				if(neighbor.equals(start)) {
-					List<Positionable> path = new ArrayList<>();
+					List<Position> path = new ArrayList<>();
 					path.add(start);
 				
-					Positionable part = current;
+					Position part = current;
 					while(part != null) {
 						path.add(part);
 						part = visited.get(part);
@@ -58,13 +45,13 @@ public class Pathfinding {
 					return path;
 				}
 				
-				if(!visited.containsKey(neighbor) ) {
+				if(!visited.containsKey(neighbor) && turn.tileAt(neighbor) != null && turn.unitAt(neighbor) == null) {
 					frontier.add(neighbor);
 					visited.put(neighbor, current);
 				}
 			}
 		}
 
-		return new ArrayList<>(Arrays.asList(start));
+		return new ArrayList<Position>(Arrays.asList(start));
 	}
 }

@@ -6,5 +6,3 @@ package bonzai;
  * game state.
  **/
 public interface Action {}
-
-// Function interface ???

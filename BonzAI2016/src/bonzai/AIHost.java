@@ -16,17 +16,18 @@ public class AIHost {
 	private final Scanner err;
 	private final Scanner in;
 	private final PrintStream out;
+	final int teamID;
 	
 	/**
 	 *
 	 **/
-	public AIHost(Process process) {
+	public AIHost(Process process, int teamID) {
 		this.process = process;
 		this.isAlive = true;
+		this.teamID = teamID;
 		
 		this.err = new Scanner(process.getErrorStream());
 		this.in  = new Scanner(process.getInputStream());
-		
 		this.out = new PrintStream(process.getOutputStream());
 		
 		expects("ACK");
@@ -76,18 +77,23 @@ public class AIHost {
 		}
 	}
 	
+	public int getTeam() {
+		return teamID;
+	}
+	
 	// Why does this require the try-catch block (if response.matches(pattern) return response)
 	private String expects(String pattern) {
 		try { 
 			String response = in.nextLine(); 
-			if (!response.matches(pattern)) { throw new IOException("Inappropriate response given"); }
+			if (!response.matches(pattern)) { throw new IOException("Inappropriate response given.  Expected pattern " + pattern + " but got " + response); }
 			return response;
-		} catch(Exception e) { 
+			
+		} catch(Exception e) {
 			e.printStackTrace(); 
 			
 			isAlive = false;
 			process.destroy();
-			System.err.println("The process has been nuked!");
+			System.err.print("Expected pattern: " + pattern + ". The process has been nuked!");
 		}
 		
 		return null;
@@ -96,41 +102,38 @@ public class AIHost {
 	public static Action toAction(String message) {
 		Scanner arguments = new Scanner(message);
 		
-		String type = arguments.next();
-		
-		if("ROTATE".equals(type)) {
-			int id = arguments.nextInt();
-			float rotation = arguments.nextFloat();
-			
-			return new RotateAction(id, rotation);
+		switch(arguments.next()) {
+			case "ROTATE":
+				int id = arguments.nextInt();
+				float rotation = arguments.nextFloat();
+				return new RotateAction(id, rotation);
+			case "SHOUT":
+				return new ShoutAction(arguments.nextLine());
+			default:
+				return null;
 		}
-		if("SHOUT".equals(type)) {
-			String shout = arguments.nextLine();
-			return new ShoutAction(shout);
-		}
-		return null;
 	}
 	
 	public static String toString(Action action) {
+		
 		if(action instanceof RotateAction) {
-			int target = ((RotateAction)action).getTarget();
+			int target = ((RotateAction)action).getRotatedObjectId();
 			float rotation = ((RotateAction)action).getRotation();
 			
 			return String.format("ROTATE %d %f", target, rotation);
 		}
-		
 		if(action instanceof ShoutAction) {
-			String message = ((ShoutAction)action).getMessage();
-			return String.format("SHOUT %s", message);
+			ShoutAction shout = (ShoutAction)action;
+			return String.format("SHOUT %s", shout.getMessage());
 		}
-		
 		return "NONE";
 	}
 	
 	public static AIHost spawn(String timestamp, bonzai.Scenario scenario, bonzai.Jar me, List<bonzai.Jar> jars, int id) throws IOException {
 		List<String> command = new ArrayList<>();
 		command.addAll(Arrays.asList("java", "-cp", "lazers.jar", "bonzai.AIClient"));
-		command.add(String.format("%s %d", me.name(), id));
+		command.add(String.format("%s", me.name()));
+		command.add(String.format("%d", id));
 		command.add(scenario.getFile().getAbsolutePath());
 		command.add(me.file().getAbsolutePath());
 		
@@ -138,6 +141,6 @@ public class AIHost {
 			command.add(choice == null ? "null" : choice.file().getAbsolutePath()); 
 		}
 		
-		return new AIHost(new ProcessBuilder(command).start());
+		return new AIHost(new ProcessBuilder(command).start(), id);
 	}
 }

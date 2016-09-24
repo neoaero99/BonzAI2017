@@ -17,8 +17,6 @@ public class Jar implements bonzai.Jar {
 	public Jar(File file) throws Exception {
 		URLClassLoader loader = URLClassLoader.newInstance(new URL[] { file.toURI().toURL() });
 		
-		// verify class has AI superclass
-		// verify class had AI annotation
 		try{
 			aiClass = loader.loadClass("CompetitorAI");
 		} catch (Exception e){
@@ -33,7 +31,7 @@ public class Jar implements bonzai.Jar {
 			throw new NullPointerException("CompetitorAI is not using the Agent Annotation on their Class");
 		}
 		
-		this.name = aiClass.getAnnotation(Agent.class).name().replace(" ", "");
+		this.name = aiClass.getAnnotation(Agent.class).name();
 		this.file = file;
 	}
 	

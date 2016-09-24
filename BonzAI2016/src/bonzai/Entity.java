@@ -26,7 +26,7 @@ public abstract class Entity<E> {
 	 * @param o the object to compare to
 	 * @return true if the objects are ID equal
 	 **/
-	@Override
+	@SuppressWarnings("rawtypes")
 	public final boolean equals(Object o) {
 		if(!(o instanceof Entity)) { return false; }
 		return id == ((Entity)o).id;

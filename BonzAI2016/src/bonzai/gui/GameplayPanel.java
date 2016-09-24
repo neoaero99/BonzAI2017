@@ -231,7 +231,7 @@ public class GameplayPanel extends JPanel implements ActionListener, KeyListener
 	}
 
 	private static JSlider createSpeedSlider() {
-		JSlider slider = new JSlider(1, 34 , 10);
+		JSlider slider = new JSlider(-20, 100, 10);
 		slider.setUI(new SpeedSliderUI(slider));
 		slider.setOpaque(false);
 		slider.setFocusable(false);

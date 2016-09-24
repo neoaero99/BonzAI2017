@@ -3,10 +3,12 @@ package bonzai.automator;
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.net.Inet4Address;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -14,30 +16,31 @@ import java.util.Map;
 import java.util.Scanner;
 import java.util.Set;
 
-import lazers.LazersScenario;
+import bonzai.Jar;
 import lazers.Simulation;
 
 import lazers.api.Color;
+import lazers.api.LazersScenario;
 
 public class Automator {
-	static String root = "automation/";
+	//static String root = "automation/";
+
+	static int PORT = 13375;
+	//The directory where all the jars and scenarios will be
+	static String root = "automationJars";
+	static String mapFile = "map.dat";
 
 	public static void main(String[] args) throws IOException {
-		File file = new File("serverip.txt");
 
 		/****************
 		 * RUN AS CLIENT
 		 ***************/
-		if (file.exists()) {
+		if (args.length > 1) {
+			//if (args.length == 0 || !"-s".equals(args[0])) {
 			System.out.println("***RUNNING AS CLIENT***");
-			System.out.println("Remove serverip.txt to run as server");
-			Scanner ipScanner = new Scanner(file);
-			client(ipScanner.nextLine());
-			
-			if (ipScanner != null) {
-				ipScanner.close();
-			}
-			
+			//Argument 0 is ip, argument 1 is ID
+			client(args[0],args[1]);
+
 			return;
 		} else {
 			/****************
@@ -48,14 +51,19 @@ public class Automator {
 			System.out.println("serverip.txt should contain the server's IP");
 		}
 
+		//create serverip.txt
+		//		PrintWriter serverInfo = new PrintWriter("serverip.txt");
+		//		serverInfo.write(Inet4Address.getLocalHost().getHostAddress());
+		//		System.out.println("Creating server.txt with ip = " + Inet4Address.getLocalHost().getHostAddress());
+		//		serverInfo.close();
 		//Open the output file early on to make sure another process isnt using it
 		PrintWriter output = new PrintWriter("ladderinput.txt");
 
 		//Store scores in a hashmap, mapping from team to score
-		HashMap<bonzai.Jar,Integer> scores = new HashMap<bonzai.Jar,Integer>();
+		HashMap<bonzai.Jar,Integer> scores = new HashMap<>();
 
 		//Store everyone who is connected to us
-		HashMap<String, Long> connections = new HashMap<String,Long>();
+		HashMap<String, Long> connections = new HashMap<>();
 
 		System.out.println("Recursively searching for jars in " + root);
 
@@ -78,17 +86,30 @@ public class Automator {
 		Set<Match> matches = new HashSet<Match>();
 
 		System.out.print("Generating round robin matches... ");
+		// UNCOMMENT TO SIMULATE One v One v One
+		//		for (bonzai.Jar team1 : ais) {
+		//			for (bonzai.Jar team2 : ais) {
+		//				for (bonzai.Jar team3 : ais) {
+		//					if (team1 == team2 || team1 == team3 || team2 == team3) { continue; }
+		//
+		//					//This is really bad.
+		//					//Make sure we don't have a team in any other order already stored
+		//
+		//					Match m = new Match(team1,team2,team3);
+		//					matches.add(m);
+		//				}
+		//			}
+		//		}
 		for (bonzai.Jar team1 : ais) {
 			for (bonzai.Jar team2 : ais) {
-				for (bonzai.Jar team3 : ais) {
-					if (team1 == team2 || team1 == team3 || team2 == team3) { continue; }
+				if (team1 == team2) { continue; }
 
-					//This is really bad.
-					//Make sure we don't have a team in any other order already stored
+				//This is really bad.
+				//Make sure we don't have a team in any other order already stored
 
-					Match m = new Match(team1,team2,team3);
-					matches.add(m);
-				}
+				Match m = new Match(team1,team2,null);
+				System.out.println("Adding match " + m);
+				matches.add(m);
 			}
 		}
 		System.out.println("DONE!");
@@ -100,9 +121,14 @@ public class Automator {
 
 		//Create a map that lets us know which client is working on which simulation
 		//Each task will have a unique HASH given to it (key)
-		Map<String, Match> inProgress = new HashMap<String,Match>();
+		Map<String, Match> inProgress = new HashMap<>();
 
-		ServerSocket socket = new ServerSocket(13375);
+		ServerSocket socket = null;
+		try {
+		socket = new ServerSocket(PORT);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 
 		//This is written as synchronous so we don't have to worry about concurrency issues as much
 		while (!matches.isEmpty() || !inProgress.isEmpty()) {
@@ -110,6 +136,7 @@ public class Automator {
 			//Is this client ready, or did it finish a simulation?
 			Scanner scanner = new Scanner(client.getInputStream());
 			String[] status = scanner.nextLine().split(" ");
+			//System.out.println(Arrays.toString(status));
 
 			if (status[0].equals("READY")) {
 
@@ -127,7 +154,7 @@ public class Automator {
 					numberofsimulations = -1;
 					connections.remove(status[1]);
 				}
-				
+
 				//Tell the computer how many simulations are to follow
 				PrintWriter pw = new PrintWriter(client.getOutputStream());
 				pw.println(numberofsimulations);
@@ -160,14 +187,16 @@ public class Automator {
 					inProgress.put(key, m);
 					//System.out.println(key + " is assigned to " + m);
 
+
 					//Send the paths and key
 					pw.println(key);
-					pw.println(m.team1.file().getPath());
-					pw.println(m.team2.file().getPath());
-					pw.println(m.team3.file().getPath());
+					pw.println(jarPath(m.team1));	//Gets the path of the jar
+					pw.println(jarPath(m.team2));	//Gets the path of the jar
+					pw.println(jarPath(m.team3));	//Gets the path of the jar (Null if not exists)
 					pw.flush();
 
 				}
+
 				System.out.println(numberofsimulations + " matches assigned to " + status[1] + " " + client.getInetAddress());
 				//We're all done!  Lets move onto the next one!
 			} else if (status[0].equals("RESULT")) {
@@ -187,7 +216,7 @@ public class Automator {
 
 						if (result.equals("1")) {winningTeam = m.team1;}
 						else if (result.equals("2")){ winningTeam = m.team2; }
-						else { winningTeam = m.team3; }
+						else { winningTeam = m.team3; System.out.println("THIS SHOULD FAIL: Result: " + result);}
 
 						scores.put(winningTeam, scores.get(winningTeam) + 1);
 
@@ -195,11 +224,11 @@ public class Automator {
 					}
 
 				}
-				
+
 				System.out.println(numberofmatches + " results from client!");
-				
+
 				long timeElapsed = System.currentTimeMillis() - time;
-				long timePerSimulation = timeElapsed / finishedSimulations;
+				long timePerSimulation = (finishedSimulations == 0) ? -1 : timeElapsed / finishedSimulations;
 				int remaining = matches.size() + inProgress.size();
 				long timeRemaining = timePerSimulation * remaining;
 
@@ -233,7 +262,7 @@ public class Automator {
 
 		//Calculate time taken
 		long timeElapsed = System.currentTimeMillis() - time;
-		long avgTime = timeElapsed / finishedSimulations;
+		long avgTime = (finishedSimulations == 0) ? -1 : timeElapsed / finishedSimulations;
 		System.out.println("Total time taken: " + timeToString(timeElapsed));
 		System.out.println(finishedSimulations + " games simulated.  Avg simulation time: " + timeToString(avgTime));
 
@@ -264,6 +293,11 @@ public class Automator {
 
 	}
 
+	private static String jarPath(Jar team) {
+		if (team == null) { return "NULL"; }
+		return team.file().getPath();
+	}
+
 	public static String pad(String s, int length) {
 		if (s.length() > length) {
 			return s.substring(0, length);
@@ -282,7 +316,7 @@ public class Automator {
 		for (File f : directory.listFiles()) {
 			//If this is a directory, recursively add
 			if (f.isDirectory()) {
-				recursivelyAdd(f,map);
+				recursivelyAdd(f, map);
 			} else {
 				if (f.getName().contains(".jar")) {
 					try {
@@ -321,16 +355,17 @@ public class Automator {
 		return key;
 	}
 
-	public static void client(String ip) throws UnknownHostException, IOException {
-		String myKey = System.currentTimeMillis() + "";	//Semi-unique id per client
+	public static void client(String ip, String id) throws UnknownHostException, IOException {
+		String myKey = id + "";//System.currentTimeMillis() + "";	//Semi-unique id per client
 
 
 		while (true) {
 			try {
 
-				System.out.println("Establishing connection...");
+				System.out.println("Establishing connection with " + ip + " on port " + PORT + "...");
+
 				//Connect to the server
-				Socket socket = new Socket(ip,13375);
+				Socket socket = new Socket(ip, PORT);
 				PrintWriter out = new PrintWriter(socket.getOutputStream());
 				Scanner in = new Scanner(socket.getInputStream());
 
@@ -341,9 +376,9 @@ public class Automator {
 
 				//Let the server tell us who we are
 				int numberofmatches = Integer.parseInt(in.nextLine());
-				
+
 				if (numberofmatches < 0) { System.exit(0); }
-				
+
 				String resultString = "";
 				for (int i = 0; i < numberofmatches; i++) {
 					String key = in.nextLine();
@@ -358,15 +393,15 @@ public class Automator {
 					//Simulate this match!
 					//Choose scenario
 					LazersScenario scenario;
-					String scenarioPath = root + "snowflake.dat";
+					String scenarioPath = root + "/" + mapFile;
 					try {
-						scenario = new LazersScenario(new File(scenarioPath));
+						scenario = new LazersScenario(new File(scenarioPath),-1);
 					} catch (Exception e) {
 						System.out.println("Failed to load scenario " + scenarioPath + " --Killing program");
 						return;
 					}
 
-					System.out.print(pad(match.team1.name(),15) + " vs " + pad(match.team2.name(),15) + " vs " + pad(match.team3.name(),15) + "... ");
+					System.out.print(match + "... ");
 					System.out.flush();
 
 					//Spin up the simulation!
@@ -410,12 +445,12 @@ public class Automator {
 
 					resultString += key + "\n" + winningTeam + "\n";
 				}
-				
+
 				//Connect to the server to say what we've done!
 				socket = new Socket(ip,13375);
 				out = new PrintWriter(socket.getOutputStream());
 				in = new Scanner(socket.getInputStream());
-				
+
 				out.println("RESULT " + numberofmatches);
 				out.print(resultString);
 				out.flush();
@@ -424,12 +459,13 @@ public class Automator {
 
 
 			catch (Exception e) {
-				e.printStackTrace();
-				System.out.println("Encountered an error.  Waiting 1 second, then trying again");
-
+				//e.printStackTrace();
+				System.out.println(e.getMessage());
+				System.out.println("Encountered an error.  Waiting 5 seconds, then trying again");
+				e.printStackTrace(System.out);
 
 				try {
-					Thread.sleep(1000);
+					Thread.sleep(5000);
 				} catch (InterruptedException e1) {
 					e1.printStackTrace();
 				}
@@ -454,9 +490,9 @@ public class Automator {
 
 
 class Match {
-	bonzai.Jar team1;
-	bonzai.Jar team2;
-	bonzai.Jar team3;
+	bonzai.Jar team1 = null;
+	bonzai.Jar team2 = null;
+	bonzai.Jar team3 = null;
 
 	public Match(bonzai.Jar t1, bonzai.Jar t2, bonzai.Jar t3) {
 		team1 = t1;
@@ -476,24 +512,38 @@ class Match {
 			File file2 = new File(path2);
 			File file3 = new File(path3);
 
-			System.out.println("Loading " + path1 + "<" + file1.getAbsolutePath() + ">");
-			team1 = new lazers.Jar(file1);
-			System.out.println("Loading " + path2 + "<" + file2.getAbsolutePath() + ">");
-			team2 = new lazers.Jar(file2);
-			System.out.println("Loading " + path3 + "<" + file3.getAbsolutePath() + ">");
-			team3 = new lazers.Jar(file3);
+			if (!path1.toLowerCase().equals("null")) {
+				System.out.println("Loading " + path1 + "  <" + file1.getAbsolutePath() + ">");
+				team1 = new lazers.Jar(file1);
+			}
+
+			if (!path2.toLowerCase().equals("null")) {
+				System.out.println("Loading " + path2 + "  <" + file2.getAbsolutePath() + ">");
+				team2 = new lazers.Jar(file2);
+			}
+
+			if (!path3.toLowerCase().equals("null")) {
+				System.out.println("Loading " + path3 + "  <" + file3.getAbsolutePath() + ">");
+				team3 = new lazers.Jar(file3);
+			}
 		} catch (Exception e) {
 			System.out.println("Encountered an error while loading jar!");
 		}
 	}
 
 	public String toString() {
-		return Automator.pad(team1.name(),15) + " " + Automator.pad(team2.name(),15) + " " + Automator.pad(team3.name(),15);
+		String team1Name = (team1 == null) ? "NULL" : team1.name();
+		String team2Name = (team2 == null) ? "NULL" : team2.name();
+		String team3Name = (team3 == null) ? "NULL" : team3.name();
+		return Automator.pad(team1Name,15) + " " + Automator.pad(team2Name,15) + " " + Automator.pad(team3Name,15);
 	}
 
 	@Override
 	public int hashCode() {
-		return team1.hashCode() ^ team2.hashCode() ^ team3.hashCode();
+		int hash = team1.hashCode();
+		if (team2 != null) { hash ^= team2.hashCode(); }
+		if (team3 != null) { hash ^= team3.hashCode(); }
+		return hash;
 	}
 
 	@Override
@@ -515,7 +565,7 @@ class Match {
 		int similar = 0;
 		for (bonzai.Jar j : match1Jars) {
 			for (bonzai.Jar k : match2Jars) {
-				if (j.equals(k)) { similar ++; }
+				if (j==k || (j!=null && j.equals(k))) { similar ++; }
 			}
 		}
 

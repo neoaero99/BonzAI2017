@@ -11,6 +11,7 @@ package bonzai;
 public class Team extends Entity<Team> {
 	private final lazers.api.Color color;
 	private final int score, uid;
+	private String name;
 
 	public Team(lazers.api.Color color, int uid) {
 		this.color = color;
@@ -18,21 +19,36 @@ public class Team extends Entity<Team> {
 		this.score = 0;
 	}
 	
+	/**This does nothing for players
+	 * 
+	 * @param name
+	 */
+	public void setName(String name) {
+		this.name = name;
+	}
+	
 	/**
 	 * Copy constructor
 	 * 
-	 * @param turn the current turn
-	 * @param copy the Team object we would like to copy
-	 * @param score the current score that the team has
+	 * @param turn - the current turn
+	 * @param copy - the Team object we would like to copy
+	 * @param score - the new score that the Team object should be assigned
 	 */
 	public Team(Team copy, int score) {
 		super(copy);
 		this.color = copy.getColor();
 		this.uid = copy.getID();
 		this.score = score;
+		this.name = copy.name;
+	}
+	
+	public String getName() {
+		return name;
 	}
 	
 	/**
+	 * Returns the Color of this team.
+	 * 
 	 * @return this team's color
 	 **/
 	public lazers.api.Color getColor() {
@@ -40,8 +56,12 @@ public class Team extends Entity<Team> {
 	}
 	
 	/**
+	 * Returns the ID of this Team. This ID remains consistent
+	 * across different copies of the same Team object, and 
+	 * can be passed to a turnObject.getUtil().updateEntity() call
+	 * to retrieve the copy of the Team object on that turn.
 	 * 
-	 * @return Team unique identifier
+	 * @return this team's unique identifier
 	 */
 	public int getID() {
 		return uid;
@@ -56,8 +76,14 @@ public class Team extends Entity<Team> {
 		return score;
 	}
 	
+	/**
+	 * Returns a String representation of the Team object,
+	 * containing this team's color and score.
+	 * 
+	 * @return a String containing the team's color and score
+	 */
 	@Override
 	public String toString() {
-		return String.format("[Team | color = %s, score = %d]", color.toString(), score);
+		return String.format("[Team %s has score = %d]", color.toString(), score);
 	}
 }
