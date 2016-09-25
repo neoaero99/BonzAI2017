@@ -36,8 +36,13 @@ public class GraphNode<E, W extends Comparable<W>> {
 		edge4 = new GraphEdge<Integer, Double>(3.0);
 		
 		formConnection(node1, node2, edge1);
+		formConnection(node1, node1, edge2);
 		System.out.printf("%s\n", node1.adjEdges);
 		System.out.printf("%s\n", node2.adjEdges);
+		
+		node1.removeEdge(edge2);
+		
+		System.out.printf("%s\n", node1.adjEdges);
 	}
 	
 	public static <E, W extends Comparable<W>> void formConnection(GraphNode<E, W>
@@ -67,14 +72,18 @@ public class GraphNode<E, W extends Comparable<W>> {
 	}
 	
 	/**
-	 * Remove the given edge from the adjacency list of this node, if it is
-	 * adjacent to this node.
+	 * Removes all instances of the given edge from this node's adjacency list.
 	 * 
 	 * @param toRemove	The edge to remove
-	 * @return			Whether the edge was successfully removed
+	 * @return			The number of removed edges
 	 */
-	public boolean removeEdge(GraphEdge<E, W> toRemove) {
-		return adjEdges.removeRef(toRemove);
+	public int removeEdge(GraphEdge<E, W> toRemove) {
+		int removed = 0;
+		
+		while (adjEdges.removeRef(toRemove)) {
+			++removed;
+		}
+		return removed;
 	}
 	
 	/**
