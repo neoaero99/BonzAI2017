@@ -5,11 +5,7 @@ import java.io.File;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Scanner;
-
 import javax.imageio.ImageIO;
-
-import bonzai.Position;
-import lazers.api.Rotatable;
 
 class Entry {
 	int x,y;
@@ -229,6 +225,7 @@ public class MapMaker {
 		System.out.println("DONE!");
 		System.out.println("Be sure to move this into the scenarios folder");
 		System.out.println("Current: " + f.getAbsolutePath());
+		scanner.close();
 	}
 	
 	public static float distance(int x1, int y1, int x2, int y2) {

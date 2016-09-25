@@ -1,7 +1,10 @@
 package avatar;
 
 import java.awt.image.BufferedImage;
+import java.io.File;
+import java.io.IOException;
 
+import javax.imageio.ImageIO;
 import javax.swing.JComponent;
 import util.VectorND;
 
@@ -42,19 +45,36 @@ public class Soldier extends JComponent {
 	// The position of the soldier on the map (on screen)
 	public VectorND position;
 	
+	// Here is the constructor for the soldier
 	/**
-	 * Method:	create_soldier(VectorND base_position)
-	 * Returns:	Void
-	 * Takes:	VectorND base_position
+	 * Method:	Soldier Constructor
+	 * Takes:	String filepath
+	 * 				The path to the sprite for soldiers
+	 * 
+	 * 			VectorND base_position
 	 * 				An <X,Y> position so that soldiers spawn in the right
 	 * 				place.
-	 * 
+	 * 			
 	 * Description:
 	 * Creates a soldier at a given position.  Can be called by the castles.
 	 * 
 	 * @author David Mohrhardt
 	 */
-	public void create_soldier(VectorND base_position) {
-		position = base_position;
+	public Soldier(String filepath, VectorND start_position) {
+
+		try {
+			sprite = ImageIO.read(new File(filepath));
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		position = start_position;
 	}
+	
+	public Soldier(VectorND start_position) {
+		position = start_position;
+	}
+	
+	
 }

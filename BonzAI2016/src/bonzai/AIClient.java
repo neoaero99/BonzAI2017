@@ -12,9 +12,9 @@ import java.util.Scanner;
 
 import bonzai.util.ProcessCPUTimer;
 import bonzai.util.TimeoutException;
-import lazers.Game;
-import lazers.Jar;
-import lazers.api.LazersScenario;
+import Castles.*;
+import Castles.api.*;
+import Castles.util.*;
 
 public class AIClient implements Runnable {
 	private final AI ai;
@@ -27,7 +27,7 @@ public class AIClient implements Runnable {
 	/**
 	 *
 	 **/
-	public AIClient(LazersScenario scenario, Jar me, List<Jar> jars) throws Exception {
+	public AIClient(CastlesScenario scenario, AIJar me, List<AIJar> jars) throws Exception {
 		this.ai = me.instantiate();
 		this.game = scenario.instantiate(jars);
 	}
@@ -110,14 +110,14 @@ public class AIClient implements Runnable {
 	
 			// the next two arguments should always be the scenario, and then
 			// the path to the AI I should be running
-			LazersScenario scenario = new LazersScenario(new File(arguments.poll()),teamID);
-			Jar me = new Jar(new File(arguments.poll()));
+			CastlesScenario scenario = new CastlesScenario(new File(arguments.poll()),teamID);
+			AIJar me = new AIJar(new File(arguments.poll()));
 	
 			// there should be exactly six remaining arguments, corresponding
 			// to the six jars which have been chosen or omitted for the match
-			List<Jar> jars = new ArrayList<>();
+			List<AIJar> jars = new ArrayList<>();
 			for(String arg : arguments) {
-				jars.add(arg.equals("null") ? null : new lazers.Jar(new File(arg)));
+				jars.add(arg.equals("null") ? null : new AIJar(new File(arg)));
 			}
 		
 			// Initiate the client
