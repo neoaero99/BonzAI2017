@@ -10,6 +10,9 @@ local.properties
 .loadpath
 .recommenders
 
+# Mac .dstore
+.DS_STORE
+
 # Eclipse Core
 .project
 
