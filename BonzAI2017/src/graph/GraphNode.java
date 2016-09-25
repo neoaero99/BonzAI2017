@@ -21,9 +21,38 @@ public class GraphNode<E, W extends Comparable<W>> {
 	}
 	
 	public static void main(String[] args) {
-		GraphNode<Integer, Double> node1, node2, node3, node5;
+		GraphNode<Integer, Double> node1, node2, node3, node4, node5;
 		GraphEdge<Integer, Double> edge1, edge2, edge3, edge4;
 		
+		node1 = new GraphNode<Integer, Double>(0);
+		node2 = new GraphNode<Integer, Double>(1);
+		node3 = new GraphNode<Integer, Double>(2);
+		node4 = new GraphNode<Integer, Double>(3);
+		node5 = new GraphNode<Integer, Double>(4);
+		
+		edge1 = new GraphEdge<Integer, Double>(5.0);
+		edge2 = new GraphEdge<Integer, Double>(10.0);
+		edge3 = new GraphEdge<Integer, Double>(8.0);
+		edge4 = new GraphEdge<Integer, Double>(3.0);
+		
+		formConnection(node1, node2, edge1);
+	}
+	
+	public static <E, W extends Comparable<W>> void formConnection(GraphNode<E, W>
+					fNode, GraphNode<E, W> bNode, GraphEdge<E, W> edge) throws
+						InvalidNodeException, InvalidEdgeException {
+		
+		if (fNode == null || bNode == null) {
+			throw new InvalidNodeException("nodes cannot be null!");
+			
+		} else if (edge == null) {
+			throw new InvalidEdgeException("edge cannot be null!");
+		}
+		
+		edge.setFirst(fNode);
+		edge.setSecond(bNode);
+		fNode.addEdge(edge);
+		bNode.addEdge(edge);
 	}
 	
 	/**
