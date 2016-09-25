@@ -1,7 +1,10 @@
 package avatar;
 
 import java.awt.image.BufferedImage;
+import java.io.File;
+import java.io.IOException;
 
+import javax.imageio.ImageIO;
 import javax.swing.JComponent;
 import util.VectorND;
 
@@ -41,6 +44,19 @@ public class Soldier extends JComponent {
 	public float radius = 0f;
 	// The position of the soldier on the map (on screen)
 	public VectorND position;
+	
+	// Here is the constructor for the soldier
+	public Soldier(String filepath, boolean isFirst) {
+		if (isFirst)
+			try {
+				sprite = ImageIO.read(new File(filepath));
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		
+		// Do anything else that the soldier will need
+	}
 	
 	/**
 	 * Method:	create_soldier(VectorND base_position)
