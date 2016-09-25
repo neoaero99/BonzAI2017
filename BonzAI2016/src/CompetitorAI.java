@@ -1,5 +1,5 @@
 import bonzai.*;
-import lazers.api.*;
+import Castles.api.*;
 
 @Agent(name = "SimpleAI")
 public class CompetitorAI extends AI {

@@ -16,6 +16,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
 import java.util.Stack;
+import Castles.util.*;
 
 public class Ladder {	
 	public static void main(String[] args) throws FileNotFoundException {				
@@ -39,7 +40,7 @@ public class Ladder {
 		while (scanner.hasNextLine()) {
 			String aiPath = scanner.nextLine();
 			try {
-				aiStack.push(new lazers.Jar(new File(aiPath)));
+				aiStack.push(new AIJar(new File(aiPath)));
 				System.out.println("     " + aiPath);
 			} catch (Exception e) {
 				System.out.println("Could not load " + aiPath);
@@ -246,7 +247,7 @@ public class Ladder {
 				for (int i = 4; i < split.length; i++) {
 					if (! split[i].equals("null")) {
 						System.out.println(split[i] + "  split[i]");
-						players.add(new lazers.Jar(new File(split[i])));
+						players.add(new AIJar(new File(split[i])));
 					}
 				}
 			} catch (Exception e) {
