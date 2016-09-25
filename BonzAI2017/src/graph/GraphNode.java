@@ -36,6 +36,8 @@ public class GraphNode<E, W extends Comparable<W>> {
 		edge4 = new GraphEdge<Integer, Double>(3.0);
 		
 		formConnection(node1, node2, edge1);
+		System.out.printf("%s\n", node1.adjEdges);
+		System.out.printf("%s\n", node2.adjEdges);
 	}
 	
 	public static <E, W extends Comparable<W>> void formConnection(GraphNode<E, W>

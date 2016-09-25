@@ -7,8 +7,8 @@ import linkedlist.*;
  * 
  * @author Joshua Hooker
  *
- * @param <E>	The type of element contained in the nodes connected to this
- * 				type of edge
+ * @param <E>	The type of element contained in the nodes
+ * @param <W>	The type of element contained in the edges
  */
 public class GraphEdge<E, W extends Comparable<W>> {
 	// The nodes, which this edge connects
@@ -103,7 +103,11 @@ public class GraphEdge<E, W extends Comparable<W>> {
 	}
 	
 	public String toString() {
-		// Display weight value and if the edge has a connection
-		return String.format("[ w: %d, c: %b ]", weight, (first != null && second != null));
+		/* Display weight value and if the edge has a connection for first and
+		 * second */
+		char firstConnect = (first == null) ? '(' : '<';
+		char secondConnect = (second == null) ? ')' : '>';
+		
+		return String.format("%c w: %s %c", firstConnect, weight, secondConnect);
 	}
 }
