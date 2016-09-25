@@ -11,4 +11,6 @@ public class GraphMap<E, W extends Comparable<W>> {
 		nodes = new DualLinkList<GraphNode<E, W>>();
 		edges = new DualLinkList<GraphEdge<E, W>>();
 	}
+	
+	
 }
