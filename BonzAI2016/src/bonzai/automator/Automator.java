@@ -17,10 +17,9 @@ import java.util.Scanner;
 import java.util.Set;
 
 import bonzai.Jar;
-import lazers.Simulation;
-
-import lazers.api.Color;
-import lazers.api.LazersScenario;
+import Castles.Simulation;
+import Castles.api.*;
+import Castles.util.*;
 
 public class Automator {
 	//static String root = "automation/";
@@ -321,7 +320,7 @@ public class Automator {
 				if (f.getName().contains(".jar")) {
 					try {
 						System.out.print("Loading " + f.getPath() + " : ");
-						bonzai.Jar jar = new lazers.Jar(f);
+						bonzai.Jar jar = new AIJar(f);
 						map.put(jar, 0);
 						System.out.println(jar.name());
 					} catch (Exception e) {
@@ -392,10 +391,10 @@ public class Automator {
 
 					//Simulate this match!
 					//Choose scenario
-					LazersScenario scenario;
+					CastlesScenario scenario;
 					String scenarioPath = root + "/" + mapFile;
 					try {
-						scenario = new LazersScenario(new File(scenarioPath),-1);
+						scenario = new CastlesScenario(new File(scenarioPath),-1);
 					} catch (Exception e) {
 						System.out.println("Failed to load scenario " + scenarioPath + " --Killing program");
 						return;
@@ -514,17 +513,17 @@ class Match {
 
 			if (!path1.toLowerCase().equals("null")) {
 				System.out.println("Loading " + path1 + "  <" + file1.getAbsolutePath() + ">");
-				team1 = new lazers.Jar(file1);
+				team1 = new AIJar(file1);
 			}
 
 			if (!path2.toLowerCase().equals("null")) {
 				System.out.println("Loading " + path2 + "  <" + file2.getAbsolutePath() + ">");
-				team2 = new lazers.Jar(file2);
+				team2 = new AIJar(file2);
 			}
 
 			if (!path3.toLowerCase().equals("null")) {
 				System.out.println("Loading " + path3 + "  <" + file3.getAbsolutePath() + ">");
-				team3 = new lazers.Jar(file3);
+				team3 = new AIJar(file3);
 			}
 		} catch (Exception e) {
 			System.out.println("Encountered an error while loading jar!");

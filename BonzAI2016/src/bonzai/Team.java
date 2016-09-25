@@ -9,11 +9,11 @@ package bonzai;
  * provide you with the most up-to-date version.
  **/
 public class Team extends Entity<Team> {
-	private final lazers.api.Color color;
+	private final Castles.api.Color color;
 	private final int score, uid;
 	private String name;
 
-	public Team(lazers.api.Color color, int uid) {
+	public Team(Castles.api.Color color, int uid) {
 		this.color = color;
 		this.uid = uid;
 		this.score = 0;
@@ -51,7 +51,7 @@ public class Team extends Entity<Team> {
 	 * 
 	 * @return this team's color
 	 **/
-	public lazers.api.Color getColor() {
+	public Castles.api.Color getColor() {
 		return color;
 	}
 	

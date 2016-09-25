@@ -7,8 +7,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Scanner;
 
-import lazers.api.RotateAction;
-
 public class AIHost {
 	private final Process process;
 	private boolean isAlive;
@@ -103,12 +101,12 @@ public class AIHost {
 		Scanner arguments = new Scanner(message);
 		
 		switch(arguments.next()) {
-			case "ROTATE":
+			/*case "ROTATE":
 				int id = arguments.nextInt();
 				float rotation = arguments.nextFloat();
 				return new RotateAction(id, rotation);
 			case "SHOUT":
-				return new ShoutAction(arguments.nextLine());
+				return new ShoutAction(arguments.nextLine());*/
 			default:
 				return null;
 		}
@@ -116,12 +114,12 @@ public class AIHost {
 	
 	public static String toString(Action action) {
 		
-		if(action instanceof RotateAction) {
+		/*if(action instanceof RotateAction) {
 			int target = ((RotateAction)action).getRotatedObjectId();
 			float rotation = ((RotateAction)action).getRotation();
 			
 			return String.format("ROTATE %d %f", target, rotation);
-		}
+		}*/
 		if(action instanceof ShoutAction) {
 			ShoutAction shout = (ShoutAction)action;
 			return String.format("SHOUT %s", shout.getMessage());

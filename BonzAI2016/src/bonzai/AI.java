@@ -1,6 +1,6 @@
 package bonzai;
 
-import lazers.api.Turn;
+import Castles.api.Turn;
 
 /**
  * The base class for AIs. An AI must provide a single function, action, which
