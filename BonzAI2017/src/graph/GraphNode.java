@@ -20,6 +20,12 @@ public class GraphNode<E, W extends Comparable<W>> {
 		element = e;
 	}
 	
+	public static void main(String[] args) {
+		GraphNode<Integer, Double> node1, node2, node3, node5;
+		GraphEdge<Integer, Double> edge1, edge2, edge3, edge4;
+		
+	}
+	
 	/**
 	 * Connected an edge to this node.
 	 * 
