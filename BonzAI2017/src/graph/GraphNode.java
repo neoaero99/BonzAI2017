@@ -1,5 +1,8 @@
 package graph;
 
+import java.util.HashMap;
+import java.util.Set;
+
 import linkedlist.*;
 
 /**
@@ -9,81 +12,47 @@ import linkedlist.*;
  *
  * @param <E>	The type of object stored in the node
  */
-public class GraphNode<E, W extends Comparable<W>> {
+@SuppressWarnings("rawtypes")
+public class GraphNode<E> {
 	
-	// List of the node's connected edges
-	private DualLinkList<GraphEdge<E, W>> adjEdges; 
+	// The node's adjacency hashmap or set of all adjacent edges
+	private HashMap<GraphEdge, Integer> adjEdges;
 	private E element;
 	
 	public GraphNode(E e) {
-		adjEdges = new DualLinkList<GraphEdge<E, W>>();
+		adjEdges = new HashMap<GraphEdge, Integer>();
 		element = e;
 	}
 	
-	public static void main(String[] args) {
-		GraphNode<Integer, Double> node1, node2, node3, node4, node5;
-		GraphEdge<Integer, Double> edge1, edge2, edge3, edge4;
-		
-		node1 = new GraphNode<Integer, Double>(0);
-		node2 = new GraphNode<Integer, Double>(1);
-		node3 = new GraphNode<Integer, Double>(2);
-		node4 = new GraphNode<Integer, Double>(3);
-		node5 = new GraphNode<Integer, Double>(4);
-		
-		edge1 = new GraphEdge<Integer, Double>(5.0);
-		edge2 = new GraphEdge<Integer, Double>(10.0);
-		edge3 = new GraphEdge<Integer, Double>(8.0);
-		edge4 = new GraphEdge<Integer, Double>(3.0);
-		
-		formConnection(node1, node2, edge1);
-		formConnection(node1, node1, edge2);
-		System.out.printf("%s\n", node1.adjEdges);
-		System.out.printf("%s\n", node2.adjEdges);
-		
-		node1.removeEdge(edge2);
-		
-		System.out.printf("%s\n", node1.adjEdges);
-	}
-	
-	public static <E, W extends Comparable<W>> void formConnection(GraphNode<E, W>
-					fNode, GraphNode<E, W> bNode, GraphEdge<E, W> edge) throws
-						InvalidNodeException, InvalidEdgeException {
-		
-		if (fNode == null || bNode == null) {
-			throw new InvalidNodeException("nodes cannot be null!");
-			
-		} else if (edge == null) {
-			throw new InvalidEdgeException("edge cannot be null!");
-		}
-		
-		edge.setFirst(fNode);
-		edge.setSecond(bNode);
-		fNode.addEdge(edge);
-		bNode.addEdge(edge);
-	}
-	
 	/**
-	 * Connected an edge to this node.
+	 * Adds the given edge to this node's adjacency hashmap.
 	 * 
 	 * @param edge	The edge to connect to this node
 	 */
-	public void addEdge(GraphEdge<E, W> edge) {
-		adjEdges.addToBack(edge);
+	public void addConnection(GraphEdge edge) {
+		adjEdges.put(edge, 0);
 	}
 	
 	/**
-	 * Removes all instances of the given edge from this node's adjacency list.
+	 * Removes the given edge from this node's adjacency hashmap, if it exists.
 	 * 
-	 * @param toRemove	The edge to remove
-	 * @return			The number of removed edges
+	 * @param edge	The edge from which to remove all connections
+	 * @return		The value associated with this edge in the adjacency
+	 * 				hashmap
 	 */
-	public int removeEdge(GraphEdge<E, W> toRemove) {
-		int removed = 0;
-		
-		while (adjEdges.removeRef(toRemove)) {
-			++removed;
-		}
-		return removed;
+	public Integer removeConnection(GraphEdge edge) {
+		return adjEdges.remove(edge);
+	}
+	
+	/**
+	 * Determines if the given node is adjacent to this node.
+	 * 
+	 * @param node	A non-null graph node
+	 * @return		If the given node is adjacent to this node
+	 */
+	public boolean isAdjacent(GraphNode<E> node) {
+		DualLinkList<GraphNode<E>> adjNodes = adjacentVertices();
+		return adjNodes.findNextRef(adjNodes.Head, node) != null;
 	}
 	
 	/**
@@ -91,10 +60,13 @@ public class GraphNode<E, W extends Comparable<W>> {
 	 * 
 	 * @return	A list of adjacent nodes
 	 */
-	public DualLinkList<GraphNode<E, W>> adjacentVertices() {
-		DualLinkList<GraphNode<E, W>> copyList = new DualLinkList<GraphNode<E, W>>();
+	@SuppressWarnings("unchecked")
+	public DualLinkList<GraphNode<E>> adjacentVertices() {
+		DualLinkList<GraphNode<E>> copyList =
+				new DualLinkList<GraphNode<E>>();
+		Set<GraphEdge> keys = adjEdges.keySet();
 		
-		for (GraphEdge<E, W> edge : adjEdges) {
+		for (GraphEdge edge : keys) {
 			copyList.addToBack(edge.getOpposite(this));
 		}
 		
@@ -107,7 +79,6 @@ public class GraphNode<E, W extends Comparable<W>> {
 	public E getElement() { return element; }
 	
 	@Override
-	@SuppressWarnings("rawtypes")
 	public boolean equals(Object obj) {
 		if (obj instanceof GraphNode) {
 			GraphNode node = (GraphNode)obj;

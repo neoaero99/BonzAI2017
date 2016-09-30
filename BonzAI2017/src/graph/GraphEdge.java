@@ -10,9 +10,10 @@ import linkedlist.*;
  * @param <E>	The type of element contained in the nodes
  * @param <W>	The type of element contained in the edges
  */
-public class GraphEdge<E, W extends Comparable<W>> {
+@SuppressWarnings("rawtypes")
+public class GraphEdge<W extends Comparable<W>> {
 	// The nodes, which this edge connects
-	private GraphNode<E, W> first, second;
+	private GraphNode first, second;
 	// The weight value associated with this edge
 	private W weight;
 	
@@ -23,7 +24,9 @@ public class GraphEdge<E, W extends Comparable<W>> {
 	}
 	
 	public GraphEdge(W iniWeight) {
-		setWeight(iniWeight);
+		first = null;
+		second = null;
+		weight = iniWeight;
 	}
 	
 	/**
@@ -35,16 +38,17 @@ public class GraphEdge<E, W extends Comparable<W>> {
 	 * 				equal to the given node
 	 * @throws		InvalidNodeException- if node is not connected to this edge
 	 */
-	public GraphNode<E, W> getOpposite(GraphNode<E, W> node) {
+	@SuppressWarnings("unchecked")
+	public <E> GraphNode<E> getOpposite(GraphNode<E> node) {
 		
 		if (!isConnected(node)) {
 			throw new InvalidNodeException("Must be connected to the edge!");
 			
 		} else if (first == node) {
-			return second;
+			return (GraphNode<E>)second;
 			
-		} else if (first != node) {
-			return first;
+		} else if (second == node) {
+			return (GraphNode<E>)first;
 			
 		}
 		
@@ -58,26 +62,28 @@ public class GraphEdge<E, W extends Comparable<W>> {
 	 * @param node	The node to check this edge for a connection
 	 * @return		If first or second are references to node's address space
 	 */
-	public boolean isConnected(GraphNode<E, W> node) {
+	public boolean isConnected(GraphNode node) {
 		return node != null && (node == first || node == second);
 	}
 	
 	// Getter and setters
 	
-	public void setFirst(GraphNode<E, W> node) {
+	public void setFirst(GraphNode node) {
 		first = node;
 	}
 	
-	public GraphNode<E, W> getFirst() {
-		return first;
+	@SuppressWarnings("unchecked")
+	public <E> GraphNode<E> getFirst() {
+		return (GraphNode<E>)first;
 	}
 	
-	public void setSecond(GraphNode<E, W> node) {
+	public void setSecond(GraphNode node) {
 		second = node;
 	}
 	
-	public GraphNode<E, W> getSecond() {
-		return second;
+	@SuppressWarnings("unchecked")
+	public <E> GraphNode<E> getSecond() {
+		return (GraphNode<E>)second;
 	}
 	
 	public void setWeight(W newWeight) {
@@ -87,7 +93,6 @@ public class GraphEdge<E, W extends Comparable<W>> {
 	public W getWeight() { return weight; }
 	
 	@Override
-	@SuppressWarnings("rawtypes")
 	public boolean equals(Object obj) {
 		if (obj instanceof GraphEdge) {
 			GraphEdge edge = (GraphEdge)obj;
@@ -102,12 +107,14 @@ public class GraphEdge<E, W extends Comparable<W>> {
 		return false;
 	}
 	
+	@Override
 	public String toString() {
 		/* Display weight value and if the edge has a connection for first and
 		 * second */
 		char firstConnect = (first == null) ? '(' : '<';
 		char secondConnect = (second == null) ? ')' : '>';
 		
-		return String.format("%c w: %s %c", firstConnect, weight, secondConnect);
+		return String.format("%c w: %s %c", firstConnect, weight,
+				secondConnect);
 	}
 }

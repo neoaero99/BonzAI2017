@@ -101,8 +101,13 @@ public class DualLinkList<E> implements Iterable<E> {
 								System.out.printf("%s\n", list);
 								
 							} else if (input.length == 2) {
+								if (input[1].equals("-f")) {
+									System.out.printf("%s\n", list.reverseListString());
+								}
+								
+							} else if (input.length == 2) {
 								if (input[1].equals("-r")) {
-									System.out.printf("%s\n", list.reverseString());
+									System.out.printf("%s\n", list.reverseListString());
 								}
 								
 							}
@@ -700,6 +705,29 @@ public class DualLinkList<E> implements Iterable<E> {
 	public String toString() {
 		String DLList = "{ ";
 		
+		DualLinkNode<E> limbo = Head.getNext();
+		
+		while (limbo != Tail) {
+			DLList += limbo.getElement();
+			
+			if (limbo.getNext() != Tail) {
+				DLList += ", ";
+			}
+			
+			limbo = limbo.getNext();
+		}
+		
+		return DLList + " }";
+	}
+	
+	/**
+	 * Build a string, which represents the list, including the sentinel nodes.
+	 * 
+	 * @return	A string representation of the of the list
+	 */
+	public String forwardListString() {
+		String DLList = "{ ";
+		
 		DualLinkNode<E> limbo = Head;
 		
 		while (limbo != null) {
@@ -716,11 +744,12 @@ public class DualLinkList<E> implements Iterable<E> {
 	}
 	
 	/**
-	 * Build a string, which represents the list in reverse.
+	 * Build a string, which represents the list in reverse, including sentinel
+	 * nodes.
 	 * 
 	 * @return	A string representation of the reverse of the list
 	 */
-	public String reverseString() {
+	public String reverseListString() {
 		String RevDLList = "{ ";
 		DualLinkNode<E> limbo = Tail;
 		
