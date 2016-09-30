@@ -10,19 +10,19 @@ import linkedlist.*;
  * @param <E>	The type of element contained in the nodes
  * @param <W>	The type of element contained in the edges
  */
-public class GraphEdge<E, W extends Comparable<W>> {
+public class WeightedEdge<E, W extends Comparable<W>> {
 	// The nodes, which this edge connects
 	private GraphNode<E, W> first, second;
 	// The weight value associated with this edge
 	private W weight;
 	
-	public GraphEdge() {
+	public WeightedEdge() {
 		first = null;
 		second = null;
 		weight = null;
 	}
 	
-	public GraphEdge(W iniWeight) {
+	public WeightedEdge(W iniWeight) {
 		first = null;
 		second = null;
 		weight = iniWeight;
@@ -91,8 +91,8 @@ public class GraphEdge<E, W extends Comparable<W>> {
 	@Override
 	@SuppressWarnings("rawtypes")
 	public boolean equals(Object obj) {
-		if (obj instanceof GraphEdge) {
-			GraphEdge edge = (GraphEdge)obj;
+		if (obj instanceof WeightedEdge) {
+			WeightedEdge edge = (WeightedEdge)obj;
 			// Compare edge weights
 			if ((weight == null && edge.weight == null) ||
 					weight.equals(edge.weight)) {
@@ -111,7 +111,7 @@ public class GraphEdge<E, W extends Comparable<W>> {
 		char firstConnect = (first == null) ? '(' : '<';
 		char secondConnect = (second == null) ? ')' : '>';
 		
-		return String.format("%c w: %s %c", firstConnect, weight,
+		return String.format("%c %s %c", firstConnect, weight,
 				secondConnect);
 	}
 }

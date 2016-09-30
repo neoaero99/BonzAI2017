@@ -11,15 +11,16 @@ import linkedlist.*;
  * @author Joshua Hooker
  *
  * @param <E>	The type of object stored in the node
+ * @param <W>	The type of element contained in the edges
  */
 public class GraphNode<E, W extends Comparable<W>> {
 	
 	// The node's adjacency hashmap or set of all adjacent edges
-	private HashMap<GraphEdge<E, W>, Integer> adjEdges;
+	private HashMap<WeightedEdge<E, W>, Integer> adjEdges;
 	private E element;
 	
 	public GraphNode(E e) {
-		adjEdges = new HashMap<GraphEdge<E, W>, Integer>();
+		adjEdges = new HashMap<WeightedEdge<E, W>, Integer>();
 		element = e;
 	}
 	
@@ -28,7 +29,7 @@ public class GraphNode<E, W extends Comparable<W>> {
 	 * 
 	 * @param edge	The edge to connect to this node
 	 */
-	public void addConnection(GraphEdge<E, W> edge) {
+	public void addConnection(WeightedEdge<E, W> edge) {
 		adjEdges.put(edge, 0);
 	}
 	
@@ -39,8 +40,23 @@ public class GraphNode<E, W extends Comparable<W>> {
 	 * @return		The value associated with this edge in the adjacency
 	 * 				hashmap
 	 */
-	public Integer removeConnection(GraphEdge<E, W> edge) {
+	public Integer removeConnection(WeightedEdge<E, W> edge) {
 		return adjEdges.remove(edge);
+	}
+	
+	/**
+	 * @return	A list of edges adjacent to this node
+	 */
+	public DualLinkList<WeightedEdge<E, W>> adjEdges() {
+		DualLinkList<WeightedEdge<E, W>> dupEdges = new
+				DualLinkList<WeightedEdge<E, W>>();
+		Set<WeightedEdge<E, W>> edgeSet = adjEdges.keySet();
+		
+		for (WeightedEdge<E, W> edge : edgeSet) {
+			dupEdges.addToBack(edge);
+		} 
+		
+		return dupEdges;
 	}
 	
 	/**
@@ -62,9 +78,9 @@ public class GraphNode<E, W extends Comparable<W>> {
 	public DualLinkList<GraphNode<E, W>> adjacentVertices() {
 		DualLinkList<GraphNode<E, W>> copyList =
 				new DualLinkList<GraphNode<E, W>>();
-		Set<GraphEdge<E, W>> keys = adjEdges.keySet();
+		Set<WeightedEdge<E, W>> keys = adjEdges.keySet();
 		
-		for (GraphEdge<E, W> edge : keys) {
+		for (WeightedEdge<E, W> edge : keys) {
 			copyList.addToBack(edge.getOpposite(this));
 		}
 		
