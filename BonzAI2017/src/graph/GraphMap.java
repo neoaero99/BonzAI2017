@@ -7,28 +7,28 @@ public class GraphMap<E, W extends Comparable<W>> {
 	/**
 	 * The graphs lists of nodes and edges.
 	 */
-	private DualLinkList<GraphNode<E>> nodes;
-	private DualLinkList<GraphEdge<W>> edges;
+	private DualLinkList<GraphNode<E, W>> nodes;
+	private DualLinkList<GraphEdge<E, W>> edges;
 	
 	public GraphMap() {
-		nodes = new DualLinkList<GraphNode<E>>();
-		edges = new DualLinkList<GraphEdge<W>>();
+		nodes = new DualLinkList<GraphNode<E, W>>();
+		edges = new DualLinkList<GraphEdge<E, W>>();
 	}
 	
 	public static void main(String[] args) {
-		GraphNode<Integer> node1, node2, node3, node4, node5;
-		GraphEdge<Double> edge1, edge2, edge3, edge4;
+		GraphNode<Integer, Double> node1, node2, node3, node4, node5;
+		GraphEdge<Integer, Double> edge1, edge2, edge3, edge4;
 		
-		node1 = new GraphNode<Integer>(0);
-		node2 = new GraphNode<Integer>(1);
-		node3 = new GraphNode<Integer>(2);
-		node4 = new GraphNode<Integer>(3);
-		node5 = new GraphNode<Integer>(4);
+		node1 = new GraphNode<Integer, Double>(0);
+		node2 = new GraphNode<Integer, Double>(1);
+		node3 = new GraphNode<Integer, Double>(2);
+		node4 = new GraphNode<Integer, Double>(3);
+		node5 = new GraphNode<Integer, Double>(4);
 		
-		edge1 = new GraphEdge<Double>(5.0);
-		edge2 = new GraphEdge<Double>(10.0);
-		edge3 = new GraphEdge<Double>(8.0);
-		edge4 = new GraphEdge<Double>(3.0);
+		edge1 = new GraphEdge<Integer, Double>(5.0);
+		edge2 = new GraphEdge<Integer, Double>(10.0);
+		edge3 = new GraphEdge<Integer, Double>(8.0);
+		edge4 = new GraphEdge<Integer, Double>(3.0);
 		
 		connect(node1, node2, edge1);
 		connect(node1, node1, edge2);
@@ -65,8 +65,8 @@ public class GraphMap<E, W extends Comparable<W>> {
 	 * @throws 		InvalidNodeException- if either fNode or sNode are null
 	 * @throws 		InvalidEdgeException- if edge is null
 	 */
-	public static <E, W extends Comparable<W>> void connect(GraphNode<E> fNode,
-			GraphNode<E> sNode, GraphEdge<W> edge) throws InvalidNodeException,
+	public static <E, W extends Comparable<W>> void connect(GraphNode<E, W> fNode,
+			GraphNode<E, W> sNode, GraphEdge<E, W> edge) throws InvalidNodeException,
 			InvalidEdgeException {
 		
 		if (fNode == null || sNode == null) {
@@ -90,8 +90,8 @@ public class GraphMap<E, W extends Comparable<W>> {
 	 * @throws 		InvalidNodeException- if node is null
 	 * @throws 		InvalidEdgeException- if edge is null
 	 */
-	public static <E, W extends Comparable<W>> void disconnect(GraphNode<E> node,
-			GraphEdge<W> edge) throws InvalidNodeException, InvalidEdgeException  {
+	public static <E, W extends Comparable<W>> void disconnect(GraphNode<E, W> node,
+			GraphEdge<E, W> edge) throws InvalidNodeException, InvalidEdgeException  {
 		
 		if (node == null) {
 			throw new InvalidNodeException("node cannot be null!");
@@ -114,7 +114,7 @@ public class GraphMap<E, W extends Comparable<W>> {
 		node.removeConnection(edge);
 	}
 	
-	public void addNode(GraphNode<E> newNode) throws InvalidNodeException {
+	public void addNode(GraphNode<E, W> newNode) throws InvalidNodeException {
 		if (nodes.findNextRef(nodes.Head, newNode) != null) {
 			throw new InvalidNodeException("newNode already exists in the graph!");
 		}
@@ -122,7 +122,7 @@ public class GraphMap<E, W extends Comparable<W>> {
 		nodes.addToBack(newNode);
 	}
 	
-	public void adddEdge(GraphEdge<W> newEdge) throws InvalidEdgeException {
+	public void adddEdge(GraphEdge<E, W> newEdge) throws InvalidEdgeException {
 		if (edges.findNextRef(edges.Head, newEdge) != null) {
 			throw new InvalidNodeException("newEdge already exists in the graph!");
 		}

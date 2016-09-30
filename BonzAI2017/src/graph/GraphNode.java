@@ -12,15 +12,14 @@ import linkedlist.*;
  *
  * @param <E>	The type of object stored in the node
  */
-@SuppressWarnings("rawtypes")
-public class GraphNode<E> {
+public class GraphNode<E, W extends Comparable<W>> {
 	
 	// The node's adjacency hashmap or set of all adjacent edges
-	private HashMap<GraphEdge, Integer> adjEdges;
+	private HashMap<GraphEdge<E, W>, Integer> adjEdges;
 	private E element;
 	
 	public GraphNode(E e) {
-		adjEdges = new HashMap<GraphEdge, Integer>();
+		adjEdges = new HashMap<GraphEdge<E, W>, Integer>();
 		element = e;
 	}
 	
@@ -29,7 +28,7 @@ public class GraphNode<E> {
 	 * 
 	 * @param edge	The edge to connect to this node
 	 */
-	public void addConnection(GraphEdge edge) {
+	public void addConnection(GraphEdge<E, W> edge) {
 		adjEdges.put(edge, 0);
 	}
 	
@@ -40,7 +39,7 @@ public class GraphNode<E> {
 	 * @return		The value associated with this edge in the adjacency
 	 * 				hashmap
 	 */
-	public Integer removeConnection(GraphEdge edge) {
+	public Integer removeConnection(GraphEdge<E, W> edge) {
 		return adjEdges.remove(edge);
 	}
 	
@@ -50,8 +49,8 @@ public class GraphNode<E> {
 	 * @param node	A non-null graph node
 	 * @return		If the given node is adjacent to this node
 	 */
-	public boolean isAdjacent(GraphNode<E> node) {
-		DualLinkList<GraphNode<E>> adjNodes = adjacentVertices();
+	public boolean isAdjacent(GraphNode<E, W> node) {
+		DualLinkList<GraphNode<E, W>> adjNodes = adjacentVertices();
 		return adjNodes.findNextRef(adjNodes.Head, node) != null;
 	}
 	
@@ -60,13 +59,12 @@ public class GraphNode<E> {
 	 * 
 	 * @return	A list of adjacent nodes
 	 */
-	@SuppressWarnings("unchecked")
-	public DualLinkList<GraphNode<E>> adjacentVertices() {
-		DualLinkList<GraphNode<E>> copyList =
-				new DualLinkList<GraphNode<E>>();
-		Set<GraphEdge> keys = adjEdges.keySet();
+	public DualLinkList<GraphNode<E, W>> adjacentVertices() {
+		DualLinkList<GraphNode<E, W>> copyList =
+				new DualLinkList<GraphNode<E, W>>();
+		Set<GraphEdge<E, W>> keys = adjEdges.keySet();
 		
-		for (GraphEdge edge : keys) {
+		for (GraphEdge<E, W> edge : keys) {
 			copyList.addToBack(edge.getOpposite(this));
 		}
 		
@@ -79,6 +77,7 @@ public class GraphNode<E> {
 	public E getElement() { return element; }
 	
 	@Override
+	@SuppressWarnings("rawtypes")
 	public boolean equals(Object obj) {
 		if (obj instanceof GraphNode) {
 			GraphNode node = (GraphNode)obj;

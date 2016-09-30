@@ -10,10 +10,9 @@ import linkedlist.*;
  * @param <E>	The type of element contained in the nodes
  * @param <W>	The type of element contained in the edges
  */
-@SuppressWarnings("rawtypes")
-public class GraphEdge<W extends Comparable<W>> {
+public class GraphEdge<E, W extends Comparable<W>> {
 	// The nodes, which this edge connects
-	private GraphNode first, second;
+	private GraphNode<E, W> first, second;
 	// The weight value associated with this edge
 	private W weight;
 	
@@ -38,17 +37,16 @@ public class GraphEdge<W extends Comparable<W>> {
 	 * 				equal to the given node
 	 * @throws		InvalidNodeException- if node is not connected to this edge
 	 */
-	@SuppressWarnings("unchecked")
-	public <E> GraphNode<E> getOpposite(GraphNode<E> node) {
+	public GraphNode<E, W> getOpposite(GraphNode<E, W> node) {
 		
 		if (!isConnected(node)) {
 			throw new InvalidNodeException("Must be connected to the edge!");
 			
 		} else if (first == node) {
-			return (GraphNode<E>)second;
+			return second;
 			
 		} else if (second == node) {
-			return (GraphNode<E>)first;
+			return first;
 			
 		}
 		
@@ -62,28 +60,26 @@ public class GraphEdge<W extends Comparable<W>> {
 	 * @param node	The node to check this edge for a connection
 	 * @return		If first or second are references to node's address space
 	 */
-	public boolean isConnected(GraphNode node) {
+	public boolean isConnected(GraphNode<E, W> node) {
 		return node != null && (node == first || node == second);
 	}
 	
 	// Getter and setters
 	
-	public void setFirst(GraphNode node) {
+	public void setFirst(GraphNode<E, W> node) {
 		first = node;
 	}
 	
-	@SuppressWarnings("unchecked")
-	public <E> GraphNode<E> getFirst() {
-		return (GraphNode<E>)first;
+	public GraphNode<E, W> getFirst() {
+		return first;
 	}
 	
-	public void setSecond(GraphNode node) {
+	public void setSecond(GraphNode<E, W> node) {
 		second = node;
 	}
 	
-	@SuppressWarnings("unchecked")
-	public <E> GraphNode<E> getSecond() {
-		return (GraphNode<E>)second;
+	public GraphNode<E, W> getSecond() {
+		return second;
 	}
 	
 	public void setWeight(W newWeight) {
@@ -93,6 +89,7 @@ public class GraphEdge<W extends Comparable<W>> {
 	public W getWeight() { return weight; }
 	
 	@Override
+	@SuppressWarnings("rawtypes")
 	public boolean equals(Object obj) {
 		if (obj instanceof GraphEdge) {
 			GraphEdge edge = (GraphEdge)obj;
