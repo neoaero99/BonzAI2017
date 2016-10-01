@@ -28,9 +28,38 @@ public class GraphNode<E, W extends Comparable<W>> {
 	 * Adds the given edge to this node's adjacency hashmap.
 	 * 
 	 * @param edge	The edge to connect to this node
+	 * @return		The old value associated with this connection, or null if
+	 * 				no such connection exists
 	 */
-	public void addConnection(WeightedEdge<E, W> edge) {
-		adjEdges.put(edge, 0);
+	public Integer addConnection(WeightedEdge<E, W> edge) {
+		return adjEdges.put(edge, 0);
+	}
+	
+	/**
+	 * Adds the given edge to this node's adjacency hashmap with the given
+	 * integer value.
+	 * 
+	 * @param edge	The edge to connect to this node
+	 * @param val	The integer to associate with the connection between
+	 * 				the given edge and this node
+	 * @return		The old value associated with this connection, or null if
+	 * 				no such connection exists
+	 */
+	public Integer addConnection(WeightedEdge<E, W> edge, int val) {
+		return adjEdges.put(edge, val);
+	}
+	
+	/**
+	 * Returns the integer value associated with the connection between the
+	 * given edge and this node. If the node is not connected, then null is
+	 * returned.
+	 * 
+	 * @param edge	The edge to query for a connection
+	 * @return		The value associated with the connection, or null if
+	 * 				there is no connection
+	 */
+	public Integer associatedInt(WeightedEdge<E, W> edge) {
+		return adjEdges.get(edge);
 	}
 	
 	/**

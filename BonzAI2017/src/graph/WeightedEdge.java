@@ -10,7 +10,9 @@ import linkedlist.*;
  * @param <E>	The type of element contained in the nodes
  * @param <W>	The type of element contained in the edges
  */
-public class WeightedEdge<E, W extends Comparable<W>> {
+public class WeightedEdge<E, W extends Comparable<W>> implements
+			Comparable<WeightedEdge<E, W>> {
+	
 	// The nodes, which this edge connects
 	private GraphNode<E, W> first, second;
 	// The weight value associated with this edge
@@ -37,20 +39,17 @@ public class WeightedEdge<E, W extends Comparable<W>> {
 	 * 				equal to the given node
 	 * @throws		InvalidNodeException- if node is not connected to this edge
 	 */
-	public GraphNode<E, W> getOpposite(GraphNode<E, W> node) {
+	public GraphNode<E, W> getOpposite(GraphNode<E, W> node) throws
+				InvalidNodeException {
 		
 		if (!isConnected(node)) {
 			throw new InvalidNodeException("Must be connected to the edge!");
 			
 		} else if (first == node) {
 			return second;
-			
-		} else if (second == node) {
-			return first;
-			
 		}
 		
-		return null;
+		return first;
 	}
 	
 	/**
@@ -87,6 +86,41 @@ public class WeightedEdge<E, W extends Comparable<W>> {
 	}
 	
 	public W getWeight() { return weight; }
+	
+	@Override
+	public int compareTo(WeightedEdge<E, W> edge) {
+		/* Compare weights */
+		int weightComp;
+		
+		if (weight == null && edge.weight == null) {
+			weightComp = 0;
+			
+		} else if (weight == null) {
+			return -1;
+			
+		} else if (edge.weight == null) {
+			return 1;
+			
+		} else {
+			weightComp = weight.compareTo(edge.weight);
+		}
+		
+		if (weightComp != 0) {
+			return weightComp;
+		}
+		
+		/* Use number of connections as tie breaker */
+		int conn = 0, eConn = 0;
+		
+		if (first != null) { ++conn; }
+		if (second != null) { ++conn; }
+		
+		if (edge.first != null) { ++eConn; }
+		
+		if (edge.second != null) { ++eConn; }
+		
+		return (conn - eConn);
+	}
 	
 	@Override
 	@SuppressWarnings("rawtypes")
