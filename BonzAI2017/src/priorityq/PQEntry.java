@@ -4,7 +4,7 @@ package priorityq;
  * A simple key-value pair heap node with an index, which allows the node to
  * be position aware.
  * 
- * @author Josh
+ * @author Joshua Hooker
  *
  * @param <K>	The type of the key to store in the node
  * @param <V>	The type of value to store in the node
@@ -25,6 +25,7 @@ public class PQEntry<K extends Comparable<K>, V> implements
 	public PQEntry(K k, V v) {
 		key = k;
 		value = v;
+		idx = -1;
 	}
 	
 	// Getters and setters for key, value, and idx fields
@@ -40,7 +41,7 @@ public class PQEntry<K extends Comparable<K>, V> implements
 
 	@Override
 	public int compareTo(PQEntry<K, V> node) {
-		/* Null values are shoved into the beginning */
+		// Null values are shoved into the beginning
 		if (node == null || node.key == null) {
 			return -1;
 			
@@ -56,7 +57,7 @@ public class PQEntry<K extends Comparable<K>, V> implements
 	public boolean equals(Object obj) {
 		if (obj instanceof PQEntry) {
 			PQEntry node = (PQEntry)obj;
-			/* Compare keys */
+			// Compare keys
 			if (key != null && node.key != null) {
 				return key.equals(node.key);
 			}
@@ -67,7 +68,7 @@ public class PQEntry<K extends Comparable<K>, V> implements
 	
 	@Override
 	public String toString() {
-		/* key points to value */
+		// key points to value
 		return String.format("{ %s -> %s }", key, value);
 	}
 }

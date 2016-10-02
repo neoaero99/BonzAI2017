@@ -8,8 +8,7 @@ import java.util.Scanner;
  * 
  * @author Joshua Hooker
  *
- * @param <E>	the type of object to store in the dual link list, which
- * 				implements the Comparable interface.
+ * @param <E>	the type of object to store in the dual link list
  */
 public class DualLinkList<E> implements Iterable<E> {
 	// Sentinel nodes
@@ -24,6 +23,11 @@ public class DualLinkList<E> implements Iterable<E> {
 		connect(Head, Tail);
 	}
 	
+	/**
+	 * Testing stuff ...
+	 * 
+	 * @param args	Unused
+	 */
 	public static void main(String[] args) {
 		
 		DualLinkList<Character> cList = new DualLinkList<Character>();

@@ -6,8 +6,7 @@ package linkedlist;
  * 
  * @author Joshua Hooker
  * 
- * @param <E>	the type of element stored in the node, which implements the
- * 				Comparable interface
+ * @param <E>	the type of element stored in the node
  */
 public class DualLinkNode<E> {
 	
