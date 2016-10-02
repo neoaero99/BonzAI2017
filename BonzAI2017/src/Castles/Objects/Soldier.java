@@ -54,7 +54,7 @@ public class Soldier extends JComponent {
 	 * 
 	 * @author David Mohrhardt
 	 */
-	public void create_soldier(VectorND base_position) {
+	public Soldier(VectorND base_position) {
 		position = base_position;
 	}
 }
