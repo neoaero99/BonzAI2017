@@ -7,14 +7,14 @@ import Castles.util.linkedlist.*;
  * 
  * @author Joshua Hooker
  *
- * @param <E>	The type of element contained in the nodes
+ * @param <E>	The type of element contained in the vertices
  * @param <W>	The type of element contained in the edges
  */
 public class WeightedEdge<E, W extends Comparable<W>> implements
-			Comparable<WeightedEdge<E, W>> {
+			Comparable<WeightedEdge<E, W>>, Node<W> {
 	
 	// The nodes, which this edge connects
-	private GraphNode<E, W> first, second;
+	private Vertex<E, W> first, second;
 	// The weight value associated with this edge
 	private W weight;
 	
@@ -39,7 +39,7 @@ public class WeightedEdge<E, W extends Comparable<W>> implements
 	 * 				equal to the given node
 	 * @throws		InvalidNodeException- if node is not connected to this edge
 	 */
-	public GraphNode<E, W> getOpposite(GraphNode<E, W> node) throws
+	public Vertex<E, W> getOpposite(Vertex<E, W> node) throws
 				InvalidNodeException {
 		
 		if (!isConnected(node)) {
@@ -59,33 +59,23 @@ public class WeightedEdge<E, W extends Comparable<W>> implements
 	 * @param node	The node to check this edge for a connection
 	 * @return		If first or second are references to node's address space
 	 */
-	public boolean isConnected(GraphNode<E, W> node) {
+	public boolean isConnected(Vertex<E, W> node) {
 		return node != null && (node == first || node == second);
 	}
 	
 	// Getter and setters
 	
-	public void setFirst(GraphNode<E, W> node) {
-		first = node;
-	}
+	public void setFirst(Vertex<E, W> node) { first = node; }
+	public Vertex<E, W> getFirst() { return first; }
 	
-	public GraphNode<E, W> getFirst() {
-		return first;
-	}
+	public void setSecond(Vertex<E, W> node) { second = node; }
+	public Vertex<E, W> getSecond() { return second; }
 	
-	public void setSecond(GraphNode<E, W> node) {
-		second = node;
-	}
+	@Override
+	public void setElement(W e) { weight = e; }
 	
-	public GraphNode<E, W> getSecond() {
-		return second;
-	}
-	
-	public void setWeight(W newWeight) {
-		weight = newWeight;
-	}
-	
-	public W getWeight() { return weight; }
+	@Override
+	public W getElement() { return weight; }
 	
 	@Override
 	public int compareTo(WeightedEdge<E, W> edge) {
@@ -148,4 +138,6 @@ public class WeightedEdge<E, W extends Comparable<W>> implements
 		return String.format("%c %s %c", firstConnect, weight,
 				secondConnect);
 	}
+
+
 }
