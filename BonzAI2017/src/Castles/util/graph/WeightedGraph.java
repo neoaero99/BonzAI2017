@@ -2,29 +2,42 @@ package Castles.util.graph;
 
 import Castles.util.linkedlist.*;
 
+/**
+ * A generic graph with weighted edges.
+ * 
+ * @author Joshua Hooker
+ *
+ * @param <E>	The type of object stored in the vertices
+ * @param <W>	The type of element contained in the edges
+ */
 public class WeightedGraph<E, W extends Comparable<W>> {
 	
 	/**
 	 * The graphs lists of nodes and edges.
 	 */
-	private DualLinkList<GraphNode<E, W>> nodes;
+	private DualLinkList<Vertex<E, W>> vertices;
 	private DualLinkList<WeightedEdge<E, W>> edges;
 	
 	public WeightedGraph() {
-		nodes = new DualLinkList<GraphNode<E, W>>();
+		vertices = new DualLinkList<Vertex<E, W>>();
 		edges = new DualLinkList<WeightedEdge<E, W>>();
 	}
 	
+	/**
+	 * Testing stuffs ...
+	 * 
+	 * @param args	Unused
+	 */
 	public static void main(String[] args) {
 		WeightedGraph<Integer, Double> g = new WeightedGraph<Integer, Double>();
-		GraphNode<Integer, Double> node1, node2, node3, node4, node5;
+		Vertex<Integer, Double> node1, node2, node3, node4, node5;
 		WeightedEdge<Integer, Double> edge1, edge2, edge3, edge4;
 		
-		node1 = new GraphNode<Integer, Double>(0);
-		node2 = new GraphNode<Integer, Double>(1);
-		node3 = new GraphNode<Integer, Double>(2);
-		node4 = new GraphNode<Integer, Double>(3);
-		node5 = new GraphNode<Integer, Double>(4);
+		node1 = new Vertex<Integer, Double>(0);
+		node2 = new Vertex<Integer, Double>(1);
+		node3 = new Vertex<Integer, Double>(2);
+		node4 = new Vertex<Integer, Double>(3);
+		node5 = new Vertex<Integer, Double>(4);
 		
 		edge1 = new WeightedEdge<Integer, Double>(5.0);
 		edge2 = new WeightedEdge<Integer, Double>(10.0);
@@ -68,7 +81,7 @@ public class WeightedGraph<E, W extends Comparable<W>> {
 		
 		
 		System.out.printf("Node %d is connected to Edge %f: %b\n",
-				node3.getElement(), edge1.getWeight(), edge1.isConnected(node3));
+				node3.getElement(), edge1.getElement(), edge1.isConnected(node3));
 		
 		disconnect(node1, edge2);
 		
@@ -86,8 +99,8 @@ public class WeightedGraph<E, W extends Comparable<W>> {
 	 * @throws 		InvalidNodeException- if either fNode or sNode are null
 	 * @throws 		InvalidEdgeException- if edge is null
 	 */
-	public static <E, W extends Comparable<W>> void connect(GraphNode<E, W> fNode,
-			GraphNode<E, W> sNode, WeightedEdge<E, W> edge) throws InvalidNodeException,
+	public static <E, W extends Comparable<W>> void connect(Vertex<E, W> fNode,
+			Vertex<E, W> sNode, WeightedEdge<E, W> edge) throws InvalidNodeException,
 			InvalidEdgeException {
 		
 		if (fNode == null || sNode == null) {
@@ -111,7 +124,7 @@ public class WeightedGraph<E, W extends Comparable<W>> {
 	 * @throws 		InvalidNodeException- if node is null
 	 * @throws 		InvalidEdgeException- if edge is null
 	 */
-	public static <E, W extends Comparable<W>> void disconnect(GraphNode<E, W> node,
+	public static <E, W extends Comparable<W>> void disconnect(Vertex<E, W> node,
 			WeightedEdge<E, W> edge) throws InvalidNodeException, InvalidEdgeException  {
 		
 		if (node == null) {
@@ -143,15 +156,15 @@ public class WeightedGraph<E, W extends Comparable<W>> {
 	 * @throws 			InvalidNodeException-  If the give node is null or
 	 * 						already belongs to the graph
 	 */
-	public void addNode(GraphNode<E, W> newNode) throws InvalidNodeException {
+	public void addNode(Vertex<E, W> newNode) throws InvalidNodeException {
 		if (newNode == null) {
 			throw new InvalidNodeException("newNode cannot be null!");
 			
-		} else if (nodes.findNextRef(nodes.Head, newNode) != null) {
+		} else if (vertices.findNextRef(vertices.Head, newNode) != null) {
 			throw new InvalidNodeException("newNode already exists in the graph!");
 		}
 		
-		nodes.addToBack(newNode);
+		vertices.addToBack(newNode);
 	}
 	
 	/**
@@ -164,13 +177,13 @@ public class WeightedGraph<E, W extends Comparable<W>> {
 	 * @throws 			InvalidNodeException- if the node does not exists in
 	 * 						the graph or is null
 	 */
-	public E removeNode(GraphNode<E, W> target) throws InvalidNodeException {
+	public E removeNode(Vertex<E, W> target) throws InvalidNodeException {
 		if (target == null) {
 			throw new InvalidNodeException("target cannot be null!");
 			
 		}
 		
-		if (nodes.removeRef(target)) {
+		if (vertices.removeRef(target)) {
 			return invalidateNode(target);
 		}
 		// Does not exist in the graph
@@ -226,7 +239,7 @@ public class WeightedGraph<E, W extends Comparable<W>> {
 	 * @return		The element stored in the node
 	 * @throws		InvalidNodeException- if the node is null
 	 */
-	private static <E, W extends Comparable<W>> E invalidateNode(GraphNode<E, W> node)
+	private static <E, W extends Comparable<W>> E invalidateNode(Vertex<E, W> node)
 			throws InvalidNodeException {
 		
 		if (node == null) {
@@ -267,9 +280,36 @@ public class WeightedGraph<E, W extends Comparable<W>> {
 			disconnect(edge.getSecond(), edge);
 		}
 		
-		W val = edge.getWeight();
-		edge.setWeight(null);
+		W val = edge.getElement();
+		edge.setElement(null);
 		return val;
+	}
+	
+	/**
+	 * @return	A copy of the list of nodes in the graph
+	 */
+	public DualLinkList<Vertex<E, W>> vertexList() {
+		DualLinkList<Vertex<E, W>> copy = new DualLinkList<Vertex<E, W>>();
+		
+		for (Vertex<E, W> v : vertices) {
+			copy.addToBack(v);
+		}
+		
+		return copy;
+	}
+	
+	/**
+	 * @return	A copy of the list of edges in the graph
+	 */
+	public DualLinkList<WeightedEdge<E, W>> edgeList() {
+		DualLinkList<WeightedEdge<E, W>> copy =
+				new DualLinkList<WeightedEdge<E, W>>();
+		
+		for (WeightedEdge<E, W> v : edges) {
+			copy.addToBack(v);
+		}
+		
+		return copy;
 	}
 	
 	@Override
@@ -278,7 +318,7 @@ public class WeightedGraph<E, W extends Comparable<W>> {
 		if (obj instanceof WeightedGraph) {
 			WeightedGraph g = (WeightedGraph)obj;
 			/* Check if each graph has equivalent nodes and edges */
-			return nodes.equals(g.nodes) && edges.equals(g.edges);
+			return vertices.equals(g.vertices) && edges.equals(g.edges);
 			
 			/* TODO trace graphs to check all connections */
 		}
@@ -289,6 +329,6 @@ public class WeightedGraph<E, W extends Comparable<W>> {
 	@Override
 	public String toString() {
 		/* List nodes followed by edges, each on separate lines */
-		return String.format("N: %s\nE: %s", nodes, edges);
+		return String.format("N: %s\nE: %s", vertices, edges);
 	}
 }
