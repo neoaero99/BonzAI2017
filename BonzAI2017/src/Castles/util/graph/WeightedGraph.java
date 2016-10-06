@@ -247,7 +247,7 @@ public class WeightedGraph<E, W extends Comparable<W>> {
 		}
 		
 		/* Remove node connections */
-		DualLinkList<WeightedEdge<E, W>> adjEdges = node.adjEdges();
+		DualLinkList<WeightedEdge<E, W>> adjEdges = node.incidentEdges();
 		for (WeightedEdge<E, W> edge : adjEdges) {
 			disconnect(node, edge);
 		}

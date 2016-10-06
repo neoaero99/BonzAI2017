@@ -26,7 +26,7 @@ public class AdaptablePQ<K extends Comparable<K>, V> {
 	public AdaptablePQ() {
 		heap = (PQEntry<K, V>[]) new PQEntry[1];
 		size = 0;
-		mediator = new MinComparator<PQEntry<K, V>>();
+		mediator = new MaxComparator<PQEntry<K, V>>();
 	}
 	
 	/**

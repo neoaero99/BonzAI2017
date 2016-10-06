@@ -15,28 +15,28 @@ import Castles.util.linkedlist.*;
  */
 public class Vertex<E, W extends Comparable<W>> implements Node<E>{
 	
-	// The node's adjacency hashmap or set of all adjacent edges
-	private HashMap<WeightedEdge<E, W>, Integer> adjEdges;
+	// The vertex's adjacency hashmap or set of all adjacent edges
+	private HashMap<WeightedEdge<E, W>, Integer> incEdges;
 	private E element;
 	
 	public Vertex(E e) {
-		adjEdges = new HashMap<WeightedEdge<E, W>, Integer>();
+		incEdges = new HashMap<WeightedEdge<E, W>, Integer>();
 		element = e;
 	}
 	
 	/**
-	 * Adds the given edge to this node's adjacency hashmap.
+	 * Adds the given edge to this vertex's adjacency hashmap.
 	 * 
 	 * @param edge	The edge to connect to this node
 	 * @return		The old value associated with this connection, or null if
 	 * 				no such connection exists
 	 */
 	public Integer addConnection(WeightedEdge<E, W> edge) {
-		return adjEdges.put(edge, 0);
+		return incEdges.put(edge, 0);
 	}
 	
 	/**
-	 * Adds the given edge to this node's adjacency hashmap with the given
+	 * Adds the given edge to this vertex's adjacency hashmap with the given
 	 * integer value.
 	 * 
 	 * @param edge	The edge to connect to this node
@@ -46,12 +46,12 @@ public class Vertex<E, W extends Comparable<W>> implements Node<E>{
 	 * 				no such connection exists
 	 */
 	public Integer addConnection(WeightedEdge<E, W> edge, int val) {
-		return adjEdges.put(edge, val);
+		return incEdges.put(edge, val);
 	}
 	
 	/**
 	 * Returns the integer value associated with the connection between the
-	 * given edge and this node. If the node is not connected, then null is
+	 * given edge and this vertex. If the vertex is not connected, then null is
 	 * returned.
 	 * 
 	 * @param edge	The edge to query for a connection
@@ -59,27 +59,28 @@ public class Vertex<E, W extends Comparable<W>> implements Node<E>{
 	 * 				there is no connection
 	 */
 	public Integer associatedInt(WeightedEdge<E, W> edge) {
-		return adjEdges.get(edge);
+		return incEdges.get(edge);
 	}
 	
 	/**
-	 * Removes the given edge from this node's adjacency hashmap, if it exists.
+	 * Removes the given edge from this vertex's adjacency hashmap, if it
+	 * exists.
 	 * 
 	 * @param edge	The edge from which to remove all connections
 	 * @return		The value associated with this edge in the adjacency
 	 * 				hashmap
 	 */
 	public Integer removeConnection(WeightedEdge<E, W> edge) {
-		return adjEdges.remove(edge);
+		return incEdges.remove(edge);
 	}
 	
 	/**
-	 * @return	A list of edges adjacent to this node
+	 * @return	A list of edges that connect to this vertex
 	 */
-	public DualLinkList<WeightedEdge<E, W>> adjEdges() {
+	public DualLinkList<WeightedEdge<E, W>> incidentEdges() {
 		DualLinkList<WeightedEdge<E, W>> dupEdges = new
 				DualLinkList<WeightedEdge<E, W>>();
-		Set<WeightedEdge<E, W>> edgeSet = adjEdges.keySet();
+		Set<WeightedEdge<E, W>> edgeSet = incEdges.keySet();
 		
 		for (WeightedEdge<E, W> edge : edgeSet) {
 			dupEdges.addToBack(edge);
@@ -89,10 +90,17 @@ public class Vertex<E, W extends Comparable<W>> implements Node<E>{
 	}
 	
 	/**
-	 * Determines if the given node is adjacent to this node.
+	 * Returns the number of edges connected to this vertex.
+	 * 
+	 * @return	the degree of this vertex
+	 */
+	public int degree() { return incEdges.size(); }
+	
+	/**
+	 * Determines if the given node is adjacent to this vertex.
 	 * 
 	 * @param node	A non-null graph node
-	 * @return		If the given node is adjacent to this node
+	 * @return		If the given node is adjacent to this vertex
 	 */
 	public boolean isAdjacent(Vertex<E, W> node) {
 		DualLinkList<Vertex<E, W>> adjNodes = adjacentVertices();
@@ -100,14 +108,14 @@ public class Vertex<E, W extends Comparable<W>> implements Node<E>{
 	}
 	
 	/**
-	 * Return a list of nodes, which are adjacent to this node.
+	 * Return a list of nodes, which are adjacent to this vertex.
 	 * 
-	 * @return	A list of adjacent nodes
+	 * @return	A list of adjacent vertices
 	 */
 	public DualLinkList<Vertex<E, W>> adjacentVertices() {
 		DualLinkList<Vertex<E, W>> copyList =
 				new DualLinkList<Vertex<E, W>>();
-		Set<WeightedEdge<E, W>> keys = adjEdges.keySet();
+		Set<WeightedEdge<E, W>> keys = incEdges.keySet();
 		
 		for (WeightedEdge<E, W> edge : keys) {
 			copyList.addToBack(edge.getOpposite(this));
