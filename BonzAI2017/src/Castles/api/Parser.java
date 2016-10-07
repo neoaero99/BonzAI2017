@@ -18,7 +18,8 @@ public class Parser {
 	}
 
 	public static CastlesMap parseFile(File file) throws FileNotFoundException {
-		Scanner in = new Scanner(file);
+		return new CastlesMap();
+		/*Scanner in = new Scanner(file);
 
 		CastlesMap map = new CastlesMap();
 		int id = -1;	//Incremented before first use
@@ -116,9 +117,9 @@ public class Parser {
 		for (Repeater r : map.getRepeaters()) {
 			r.findTarget();
 		}*/
-		
+		/*
 		map.calculateCanHit();
 
-		return map;
+		return map;*/
 	}
 }
