@@ -1,7 +1,7 @@
 <project name = "castles" default = "build">
 	<import file = "common.xml"/>
 	
-	<path id = "lazers.classpath">
+	<path id = "castles.classpath">
 		<pathelement location = "${package}/castles.jar" />
 	</path>
 
@@ -40,7 +40,7 @@
 
 	<!-- Build Target(s) -->
 	<target name = "build" depends = "compile">
-		<build jar = "castles.jar" source = "./" main = "castles.Main">
+		<build jar = "castles.jar" source = "./" main = "Castles.CastlesMain">
 			<external>
 				<fileset dir = "${lib}" includes="**/*.jar"/>
 			</external>
@@ -104,7 +104,7 @@
 			windowtitle = "BonzAI 2017: Castles">
 
 			<packageset dir = "src" defaultexcludes = "yes">
-				<include name="lazers/api/**"/>
+				<include name="castles/api/**"/>
     			</packageset>
 
 			<link href="http://docs.oracle.com/javase/7/docs/api/"/>
