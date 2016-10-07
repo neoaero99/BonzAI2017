@@ -10,6 +10,7 @@ local.properties
 .loadpath
 .recommenders
 BonzAI2016/*
+BonzAI2017/BonzAI2017/*
 
 # Mac .DS_STORE
 .DS_STORE
