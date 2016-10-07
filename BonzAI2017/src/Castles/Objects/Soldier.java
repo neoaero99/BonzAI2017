@@ -43,7 +43,6 @@ import Castles.util.VectorND;
  * 
  * Vertex Path List
  * 
- * 
  */
 
 public class Soldier extends JComponent {
