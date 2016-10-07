@@ -31,6 +31,21 @@ import Castles.util.VectorND;
  * And increment the version number please.
  */
 
+/**
+ * @TODO
+ * 
+ * Inumeration for states of the soldier:
+ * Standby, Moving, Conflict, Sieging, Defending
+ * 
+ * Team Color Flag
+ * 
+ * Sprite
+ * 
+ * Vertex Path List
+ * 
+ * 
+ */
+
 public class Soldier extends JComponent {
 	
 	// The shared sprite for the soldier
