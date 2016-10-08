@@ -7,8 +7,7 @@ import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 
-import Castles.Objects.Target;
-import Castles.Objects.Wall;
+import Castles.Objects.*;
 import bonzai.Identifiable;
 import bonzai.Position;
 import bonzai.Positionable;
@@ -24,8 +23,8 @@ public class CastlesMap {
 	private int min, mid;
 	int width,height;
 	
-	private static HashMap<Integer, Collection<Integer>> hitMatrix = new HashMap<>();
 	private HashMap<String, String> fields = new HashMap<>();
+	private HashMap<Integer, Traversable> entities = new HashMap<>();
 
 
 	public CastlesMap(){
@@ -50,19 +49,12 @@ public class CastlesMap {
 	}
 	
 	
-	
-	
-	
-	
-	
-	//TODO	
 	/**
-	 *	not needed for our map, not needed for now
 	 * @param input
 	 * @return
 	 */
 	public String getField(String input){
-		return null;
+		return fields.get(input);
 	}
 
 	public void addTarget(Target target) {
@@ -76,18 +68,16 @@ public class CastlesMap {
 	}
 
 	public void setField(String string, String string2) {
-		// TODO Auto-generated method stub
-		
+		if(!string.equals("size")){
+			fields.put(string, string2);
+		}else{
+			String[] parts = string2.split(", ");
+			width = Integer.parseInt(parts[0]);
+			height = Integer.parseInt(parts[1]);
+		}
 	}
 
-	/*
-	 * change to canPassThroug(), makes a list
-	 * of nodes and edges that troops CAN pass through
-	 */
-	public void calculateCanHit() {
-		// TODO Auto-generated method stub
-		
-	}
+	
 
 	public void removePlayer(int i) {
 		// TODO Auto-generated method stub
@@ -95,18 +85,40 @@ public class CastlesMap {
 	}
 
 	public int getWidth() {
-		// TODO Auto-generated method stub
-		return 0;
+		return width;
 	}
 
 	public int getHeight() {
-		// TODO Auto-generated method stub
-		return 0;
+		return height;
 	}
 
 	public Position getEntity(int i) {
 		// TODO Auto-generated method stub
 		return null;
+	}
+	
+	public void addPlayer(int x, int y, String name){
+		
+	}
+	
+	public void addCastle(int x, int y, String name){
+		
+	}
+	
+	public void addRally(int x, int y, String name){
+		
+	}
+	
+	public void connect(String n1, String n2, int weight){
+		
+	}
+	
+	/*
+	 * change to canPassThroug(), makes a list
+	 * of nodes and edges that troops CAN pass through
+	 */
+	public void calculatePaths(){
+		
 	}
 	
 }

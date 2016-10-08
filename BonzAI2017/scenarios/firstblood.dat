@@ -1,0 +1,37 @@
+# this is a comment describing the map
+# this map is totally to debug the parser class
+# BONZAI CONFIDENTIAL
+
+name: First Blood
+playercount: 2
+theme: plains
+size: 25, 25
+players:
+# x, y, name
+	<1, 1, P1>
+	<24, 1, P2>
+castles:
+# x, y, name
+	<24, 24, C1>
+	<1, 24, C2>
+rally:
+# x, y, name
+	<10,10,R1>
+	<1,10,R2>
+	<10,1,R3>
+	<10,24,R4>
+	<24,10,R5>
+paths:
+# vertex1, vertex2, weight
+	<P1,R2,9>
+	<P1,R3,9>
+	<P1,R1,14>
+	<R2,C1,14>
+	<R1,C1,14>
+	<R1,P2,14>
+	<R1,C2,14>
+	<R3,P2,9>
+	<P2,R5,9>
+	<R5,C2,9>
+	<C1,R4,9>
+	<R4,C2,9>

@@ -10,7 +10,7 @@ import bonzai.Team;
 public class Parser {
 	private Parser() {}
 
-	private static final int PARSE_NONE = 0, PARSE_EMITTER = 1, PARSE_REPEATER = 2, PARSE_TARGET = 3, PARSE_WALL = 4;
+	private static final int PARSE_NONE = 0, PARSE_PLAYER = 1, PARSE_CASTLE = 2, PARSE_RALLY = 3, PARSE_PATH = 4;
 	private static int parse_mode;
 
 	public static CastlesMap parseFile(String file) throws FileNotFoundException{
@@ -18,8 +18,9 @@ public class Parser {
 	}
 
 	public static CastlesMap parseFile(File file) throws FileNotFoundException {
-		return new CastlesMap();
-		/*Scanner in = new Scanner(file);
+		System.out.println("" + file.getPath());
+		//return new CastlesMap();
+		Scanner in = new Scanner(file);
 
 		CastlesMap map = new CastlesMap();
 		int id = -1;	//Incremented before first use
@@ -39,38 +40,38 @@ public class Parser {
 
 				id++;
 				switch(parse_mode) {
-				case PARSE_TARGET:								// target
-					map.addTarget(new Target(
-							new Position(
-									Integer.parseInt(row[0]),
-									Integer.parseInt(row[1])),
-							id));
+				case PARSE_PLAYER:								
+					map.addPlayer(Integer.parseInt(row[0]), Integer.parseInt(row[1]), row[2]);
 					break;
 
-				case PARSE_WALL:								// walls
-					map.addWall(new Wall(
-							Integer.parseInt(row[0]),	// x1
-							Integer.parseInt(row[1]),	//y1
-							id));
+				case PARSE_CASTLE:								// walls
+					map.addCastle(Integer.parseInt(row[0]), Integer.parseInt(row[1]), row[2]);
+					break;
+				case PARSE_RALLY:
+					map.addRally(Integer.parseInt(row[0]), Integer.parseInt(row[1]), row[2]);
+					break;
+					
+				case PARSE_PATH:
+					map.connect(row[0], row[1], Integer.parseInt(row[2]));
 					break;
 
 				default: // parse mode/general
 					id--;	//This is not considered a game object
 					switch(ls[0]) {
 					case "players":
-						parse_mode = PARSE_EMITTER;
+						parse_mode = PARSE_PLAYER;
 						break;
 
-					case "repeaters":
-						parse_mode = PARSE_REPEATER;
+					case "castles":
+						parse_mode = PARSE_CASTLE;
 						break;
 
-					case "targets":
-						parse_mode = PARSE_TARGET;
+					case "rally":
+						parse_mode = PARSE_RALLY;
 						break;
 
-					case "walls":
-						parse_mode = PARSE_WALL;
+					case "paths":
+						parse_mode = PARSE_PATH;
 						break;
 
 					default:
@@ -85,7 +86,7 @@ public class Parser {
 		}
 		
 		//Get the map size
-		String[] size = map.getField("size").split(",");
+		/*String[] size = map.getField("size").split(",");
 		map.width = Integer.parseInt(size[0].trim());
 		map.height = Integer.parseInt(size[1].trim());
 
@@ -101,25 +102,14 @@ public class Parser {
 			map.addWall(new Wall( 0,y,id++));
 			map.addWall(new Wall(map.width,y,id++));
 			map.addWall(new Wall(map.width+1,y,id++));
-		}
+		}*/
 
 		if(in != null) {
 			in.close();                                    // RAII semantics are really useful
 		};
+		
+		map.calculatePaths();
 
-		//Set up the initial targets for each emitter and repeater.
-		//Need to do this once the map is fully made, rather than on 
-		//creation of the emitter or repeater.
-		/*for (Emitter e : map.getEmitters()) {
-			e.findTarget();
-		}
-
-		for (Repeater r : map.getRepeaters()) {
-			r.findTarget();
-		}*/
-		/*
-		map.calculateCanHit();
-
-		return map;*/
+		return map;
 	}
 }
