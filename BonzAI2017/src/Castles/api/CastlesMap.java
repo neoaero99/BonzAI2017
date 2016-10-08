@@ -29,7 +29,7 @@ public class CastlesMap {
 	private HashMap<Integer, Traversable> entities = new HashMap<>();
 	
 	//E will be the parent for castles and rallypoint, once created;
-	private WeightedGraph<Position,Double> graph=new WeightedGraph<>();
+	private WeightedGraph<Position,Integer> graph=new WeightedGraph<>();
 	private GraphPathSet<Position> paths= new GraphPathSet<>(graph);
 	
 	//WeightedGraph
