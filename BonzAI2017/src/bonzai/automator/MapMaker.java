@@ -9,23 +9,23 @@ import javax.imageio.ImageIO;
 
 class Entry {
 	int x,y;
-	float rotation;
-	boolean hasRotation = false;
+	String name;
+	boolean hasName = false;
 	
 	public Entry(int x, int y) {
 		this.x = x;
 		this.y = y;
 	}
 	
-	public Entry(int x, int y, float rotation) {
+	public Entry(int x, int y, String name) {
 		this(x,y);
-		this.rotation = rotation;
-		hasRotation = true;
+		this.name = name;
+		hasName = true;
 	}
 	
 	public String toString() {
-		if (hasRotation) {
-			return "    <" + x + ", " + y + ", " + rotation + ">";
+		if (hasName) {
+			return "    <" + x + ", " + y + ", " + name + ">";
 		}
 		return "    <" + x + ", " + y + ">";
 	}
@@ -35,10 +35,10 @@ public class MapMaker {
 	public static void main(String[] args) throws Exception{
 		
 		System.out.println("Key:");
-		System.out.println("     Repeaters: #0000ff (blue)");
-		System.out.println("     Emitters:  #fff000 (yellow)");
-		System.out.println("     Targets:   #ff00ff (red)");
-		System.out.println("     Walls:     #000000 (black)");
+		System.out.println("     Rally: #0000ff (blue)");
+		System.out.println("     Player:  #fff000 (yellow)");
+		System.out.println("     Castles:   #ff00ff (red)");
+		System.out.println("     Path:     #000000 (black)");
 		System.out.println();
 		
 		System.out.println("Please enter path to map file (must be .bmp)");
@@ -75,14 +75,10 @@ public class MapMaker {
 		pw.println("size: " + image.getWidth() + ", " + image.getHeight());
 		pw.println("theme: DEFAULT");
 		
-		ArrayList<Entry> repeaters = new ArrayList<Entry>();
-		ArrayList<Entry> emitters = new ArrayList<Entry>();
-		ArrayList<Entry> walls = new ArrayList<Entry>();
-		ArrayList<Entry> targets = new ArrayList<Entry>();
-		
-		//Populated afterward with duplicates
-		ArrayList<Entry> rotatable = new ArrayList<Entry>();
-		
+		ArrayList<Entry> rallys = new ArrayList<Entry>();
+		ArrayList<Entry> players = new ArrayList<Entry>();
+		ArrayList<Entry> castles = new ArrayList<Entry>();
+		ArrayList<Entry> paths = new ArrayList<Entry>();
 		
 		
 		//COUNT THE PLAYERS
@@ -93,131 +89,56 @@ public class MapMaker {
 				
 				
 				//Calculate the angle to the center of the map
-				float xi = x - (image.getWidth() / 2.0f);
-				float yi = y - (image.getHeight() / 2.0f);
+				/*float xi = x - (image.getWidth() / 2.0f);
+				float yi = y - (image.getHeight() / 2.0f);*/
 				
 				//Get the angle fom xi,yi to 0 0
-				float rotation = (float)Math.toDegrees(Math.atan(yi/xi));
-				if (xi > 0 / 2.0f) { rotation += 180; }
+				/*float rotation = (float)Math.toDegrees(Math.atan(yi/xi));
+				if (xi > 0 / 2.0f) { rotation += 180; }*/
 				
-				if (point == 2) {
-					rotation += 180;
-				}else if (point == 3) {
-					rotation = (float)Math.random() * 360;
-				}
-				
-				
+				//Red
 				if (c == 0x00ff0000) {
-					targets.add(new Entry(x,y));
+					castles.add(new Entry(x,y,"C"+castles.size()));
+				//black
 				} else if (c == 0x00000000) {
-					walls.add(new Entry(x,y));
+					//paths.add(new Entry(x,y));
+				//yellow
 				} else if (c == 0x00fff000) {
-					emitters.add(new Entry(x,y,rotation));
+					players.add(new Entry(x,y, "P"+players.size()));
+				//blue
 				} else if (c == 0x000000ff) {
-					repeaters.add(new Entry(x,y,rotation));
+					rallys.add(new Entry(x,y, "R"+rallys.size()));
+				//white
 				} else if (c == 0x00ffffff) {
-					//White!
+				//not reconized
 				} else {
 					System.out.printf("Color 0x%x unknown at x=%d y=%d\n",c,x,y);
 				}
 			}
 		}
 		
-		rotatable.addAll(emitters);
-		rotatable.addAll(repeaters);
-		
-		/********************************
-		 * TOWARD / AWAY NEAREST TARGET *
-		 ********************************/
-		if (point == 4 || point == 5) {
-			//Find the nearest target
-			for (Entry r : rotatable) {
-				//Find the closest target
-				Entry nearest = targets.get(0);
-				for (Entry t : targets) {
-					if (distance(t.x, t.y, r.x, r.y) < distance(nearest.x, nearest.y, r.x, r.y)) {
-						nearest = t;
-					}
-				}
-				
-				//Point at it
-				r.rotation = getRotation(r, nearest);
-				if (point == 5) {
-					r.rotation += 180;
-				}
-			}
-			
-		}
-		
-		/********************************
-		 * TOWARD / AWAY NEAREST WALL   *
-		 ********************************/
-		if (point == 6 || point == 7) {
-			//Find the nearest target
-			for (Entry r : rotatable) {
-				//Find the closest target
-				Entry nearest = targets.get(0);
-				for (Entry t : walls) {
-					if (distance(t.x, t.y, r.x, r.y) < distance(nearest.x, nearest.y, r.x, r.y)) {
-						nearest = t;
-					}
-				}
-				
-				//Point at it
-				r.rotation = getRotation(r, nearest);
-				if (point == 7) {
-					r.rotation += 180;
-				}
-			}
-			
-		}
-		
-		/**********************************
-		 * TOWARD / AWAY NEAREST REPEATER *
-		 **********************************/
-		if (point == 8 || point == 9) {
-			//Find the nearest target
-			for (Entry r : rotatable) {
-				//Find the closest target
-				Entry nearest = targets.get(0);
-				for (Entry t : repeaters) {
-					if (distance(t.x, t.y, r.x, r.y) < distance(nearest.x, nearest.y, r.x, r.y)) {
-						nearest = t;
-					}
-				}
-				
-				//Point at it
-				r.rotation = getRotation(r, nearest);
-				if (point == 9) {
-					r.rotation += 180;
-				}
-			}
-			
-		}
-		
-		
-		pw.println("playercount: " + emitters.size());
+		pw.println("playercount: " + players.size());
 		pw.println();
 		pw.println("players:");
-		for (Entry s : emitters) {
+		for (Entry s : players) {
 			pw.println(s);
 		}
 		
 		pw.println();
-		pw.println("repeaters:");
-		for (Entry s : repeaters) {
+		pw.println("castles:");
+		for (Entry s : castles) {
 			pw.println(s);
 		}
 		
 		pw.println();
-		pw.println("targets:");
-		for (Entry s : targets) {
+		pw.println("rally:");
+		for (Entry s : rallys) {
 			pw.println(s);
 		}
 		
 		pw.println();
-		pw.println("walls:");
-		for (Entry s : walls) {
+		pw.println("paths:");
+		for (Entry s : paths) {
 			pw.println(s);
 		}
 		

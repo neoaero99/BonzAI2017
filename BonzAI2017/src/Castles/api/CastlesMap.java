@@ -7,8 +7,9 @@ import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 
-import Castles.Objects.Target;
-import Castles.Objects.Wall;
+import Castles.Objects.*;
+import Castles.util.*;
+import Castles.util.graph.*;
 import bonzai.Identifiable;
 import bonzai.Position;
 import bonzai.Positionable;
@@ -24,10 +25,17 @@ public class CastlesMap {
 	private int min, mid;
 	int width,height;
 	
-	private static HashMap<Integer, Collection<Integer>> hitMatrix = new HashMap<>();
 	private HashMap<String, String> fields = new HashMap<>();
-
-
+	private HashMap<Integer, Traversable> entities = new HashMap<>();
+	
+	//E will be the parent for castles and rallypoint, once created;
+	private WeightedGraph<Position,Double> graph=new WeightedGraph<>();
+	private GraphPathSet<Position> paths= new GraphPathSet<>(graph);
+	
+	//WeightedGraph
+	//GraphPathSet
+	//
+	
 	public CastlesMap(){
 		
 	}
@@ -50,19 +58,12 @@ public class CastlesMap {
 	}
 	
 	
-	
-	
-	
-	
-	
-	//TODO	
 	/**
-	 *	not needed for our map, not needed for now
 	 * @param input
 	 * @return
 	 */
 	public String getField(String input){
-		return null;
+		return fields.get(input);
 	}
 
 	public void addTarget(Target target) {
@@ -76,37 +77,57 @@ public class CastlesMap {
 	}
 
 	public void setField(String string, String string2) {
-		// TODO Auto-generated method stub
-		
+		if(!string.equals("size")){
+			fields.put(string, string2);
+		}else{
+			String[] parts = string2.split(", ");
+			width = Integer.parseInt(parts[0]);
+			height = Integer.parseInt(parts[1]);
+		}
 	}
 
-	/*
-	 * change to canPassThroug(), makes a list
-	 * of nodes and edges that troops CAN pass through
-	 */
-	public void calculateCanHit() {
-		// TODO Auto-generated method stub
-		
-	}
+	
 
 	public void removePlayer(int i) {
-		// TODO Auto-generated method stub
+		// 
 		
 	}
 
 	public int getWidth() {
-		// TODO Auto-generated method stub
-		return 0;
+		return width;
 	}
 
 	public int getHeight() {
-		// TODO Auto-generated method stub
-		return 0;
+		return height;
 	}
 
 	public Position getEntity(int i) {
-		// TODO Auto-generated method stub
+		// will return the place where the shouts will eventually come from
 		return null;
+	}
+	
+	public void addPlayer(int x, int y, String name){
+		//add starting point
+	}
+	
+	public void addCastle(int x, int y, String name){
+		//add each unclaimed castle
+	}
+	
+	public void addRally(int x, int y, String name){
+		//add a rally point
+	}
+	
+	public void connect(String n1, String n2, int weight){
+		//connect 2 points, either castle, rally point, and starting points
+	}
+	
+	/*
+	 * change to canPassThroug(), makes a list
+	 * of nodes and edges that troops CAN pass through
+	 */
+	public void calculatePaths(){
+		
 	}
 	
 }

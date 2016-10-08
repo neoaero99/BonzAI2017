@@ -3,7 +3,7 @@ package bonzai;
 /**
  * A coordinate pair.
  **/
-public class Position {
+public class Position implements Comparable<Position> {
 	private final int x;
 	private final int y;
 
@@ -67,5 +67,22 @@ public class Position {
 	@Override
 	public String toString() {
 		return String.format("[%d, %d]", x, y);
+	}
+
+	@Override
+	public int compareTo(Position o) {
+		if(this.x<o.getX()){
+			return -1;
+		}
+		if(this.x>o.getX()){
+			return 1;
+		}
+		if(this.y<o.getY()){
+			return -1;
+		}
+		if(this.y>o.getY()){
+			return 1;
+		}
+		return 0;
 	}
 }

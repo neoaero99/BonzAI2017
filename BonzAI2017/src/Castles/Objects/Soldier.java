@@ -1,6 +1,7 @@
 package Castles.Objects;
 
 import java.awt.image.BufferedImage;
+import java.util.ArrayList;
 
 import javax.swing.JComponent;
 import Castles.util.VectorND;
@@ -31,19 +32,36 @@ import Castles.util.VectorND;
  * And increment the version number please.
  */
 
+/**
+ * @TODO
+ * 
+ * Inumeration for states of the soldier:
+ * 
+ * Team Color Flag
+ * 
+ * Sprite
+ * 
+ * Vertex Path List
+ * 
+ */
+
 public class Soldier extends JComponent {
 	
 	// The shared sprite for the soldier
-	private static BufferedImage sprite;
+	public static BufferedImage sprite;
 	// The combat value this unit has
 	public int value = 1;
 	// The radius used in collision
 	public float radius = 0f;
 	// The position of the soldier on the map (on screen)
 	public VectorND position;
+	// An array list that is the current path (in nodes on the graph)
+	public ArrayList<VectorND> given_path;
+	// The current status of the soldier (always defaults to standby)
+	public SoldierState state;
 	
 	/**
-	 * Method:	create_soldier(VectorND base_position)
+	 * Method:	Soldier(VectorND base_position)
 	 * Returns:	Void
 	 * Takes:	VectorND base_position
 	 * 				An <X,Y> position so that soldiers spawn in the right
@@ -56,5 +74,6 @@ public class Soldier extends JComponent {
 	 */
 	public Soldier(VectorND base_position) {
 		position = base_position;
+		state = SoldierState.STANDBY;
 	}
 }
