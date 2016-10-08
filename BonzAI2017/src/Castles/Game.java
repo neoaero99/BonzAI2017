@@ -16,15 +16,15 @@ public class Game {
 	/**
 	 * list of colors that have jars selected
 	 */
-	//private List<lazers.api.Color> activeColors;
-	//private LazersMap map;
+	private List<Castles.api.Color> activeColors;
+	private CastlesMap map;
 
 	/**
 	 *
 	 **/
 	public Game(int teamID, int turns, CastlesMap map, List<Castles.api.Color> colors) {
 		this.remaining = turns;
-		//this.map = map;
+		this.map = map;
 		this.history = new ArrayList<Turn>(turns);
 		this.history.add(new Turn(teamID, 0, map, turns));	//Create the first turn of the game
 	}
