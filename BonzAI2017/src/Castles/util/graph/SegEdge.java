@@ -5,7 +5,10 @@ import Castles.util.VectorND;
 import bonzai.Position;
 
 /**
- * This is the edge class for the BonzAI Graph structure, that will contain a number of way points associated with the weight of the edge.
+ * The segmented edge class is used for the edges of the BonzAI Graph structure.
+ * It contains a number of way points, which break the edge up into equal
+ * segments based on its weighted.
+ * 
  * @author Joshua Hooker
  *
  */
@@ -36,30 +39,35 @@ public class SegEdge extends WeightedEdge<RallyPoint, Integer> {
 	}
 	
 	/**
-	 * Space out the way points of this edge based on the weight associated with the edge
+	 * Space out the way points of this edge based on the weight associated with
+	 * the edge and the distance between the vertices connected to this edge.
 	 */
 	private void updateWayPoints() {
 		if (getElement() != waypoints.length) {
-			/* Resize the way points array to match the weight of the edge */
+			// Resize the way points array to match the weight of the edge
 			waypoints = new RallyPoint[ getElement() ];
 		}
 		
 		if (getFirst() != null && getSecond() != null) {
-			/* Update the positions of each way point based on the vertices connected to this edge */
 			Position start = getFirst().getElement().getPosition();
 			Position end = getSecond().getElement().getPosition();
 			
+			/* Create a direction vector, which is scaled by the the distance
+			 * between the first and second vertices over the weight of this
+			 * edge. */
 			double dist = start.getDistanceBetween(end);
+			VectorND dir = new VectorND(end.getX() - start.getX(),
+					end.getY() - start.getY());
+			dir.scalarMult( dist / ((waypoints.length + 1) * dir.magnitude()) );
 			
-			VectorND direction = new VectorND(end.getX() - start.getX(), end.getY() - start.getY());
-			direction.normalize();
-			
-			for (int idx = 0; idx < waypoints.length; ++idx) {
-				int posX = start.getX() + (int)(idx * direction.get(0) / dist);
-				int posY = start.getY() + (int)(idx * direction.get(1) / dist);
+			// Update the positions of each way point
+			for (int idx = 1; idx <= waypoints.length; ++idx) {
+				int posX = start.getX() + (int)(idx * dir.get(0));
+				int posY = start.getY() + (int)(idx * dir.get(1));
 				
 				if (waypoints[idx] == null) {
 					waypoints[idx] = new RallyPoint(posX, posY);
+					
 				} else {
 					waypoints[idx].setPosition( new Position(posX, posY) );
 				}
@@ -68,9 +76,7 @@ public class SegEdge extends WeightedEdge<RallyPoint, Integer> {
 	}
 	
 	/**
-	 * TODO
-	 * @param idx
-	 * @return
+	 * Get the way point associated with the given index value.
 	 */
 	public RallyPoint getWayPoint(int idx) {
 		if (idx >= 0 && idx < waypoints.length) {
