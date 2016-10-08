@@ -1,4 +1,4 @@
-package castle;
+package Castles.Objects;
 
 import java.awt.Color;
 
