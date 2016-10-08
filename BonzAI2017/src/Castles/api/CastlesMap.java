@@ -8,6 +8,8 @@ import java.util.LinkedList;
 import java.util.List;
 
 import Castles.Objects.*;
+import Castles.util.*;
+import Castles.util.graph.*;
 import bonzai.Identifiable;
 import bonzai.Position;
 import bonzai.Positionable;
@@ -25,8 +27,15 @@ public class CastlesMap {
 	
 	private HashMap<String, String> fields = new HashMap<>();
 	private HashMap<Integer, Traversable> entities = new HashMap<>();
-
-
+	
+	//E will be the parent for castles and rallypoint, once created;
+	private WeightedGraph<Position,Double> graph=new WeightedGraph<>();
+	private GraphPathSet<Position> paths= new GraphPathSet<>(graph);
+	
+	//WeightedGraph
+	//GraphPathSet
+	//
+	
 	public CastlesMap(){
 		
 	}
@@ -80,7 +89,7 @@ public class CastlesMap {
 	
 
 	public void removePlayer(int i) {
-		// TODO Auto-generated method stub
+		// 
 		
 	}
 
@@ -93,24 +102,24 @@ public class CastlesMap {
 	}
 
 	public Position getEntity(int i) {
-		// TODO Auto-generated method stub
+		// will return the place where the shouts will eventually come from
 		return null;
 	}
 	
 	public void addPlayer(int x, int y, String name){
-		
+		//add starting point
 	}
 	
 	public void addCastle(int x, int y, String name){
-		
+		//add each unclaimed castle
 	}
 	
 	public void addRally(int x, int y, String name){
-		
+		//add a rally point
 	}
 	
 	public void connect(String n1, String n2, int weight){
-		
+		//connect 2 points, either castle, rally point, and starting points
 	}
 	
 	/*
