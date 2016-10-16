@@ -66,7 +66,7 @@ public class SegEdge extends WeightedEdge<RallyPoint, Integer> {
 				int posY = start.getY() + (int)(idx * dir.get(1));
 				
 				if (waypoints[idx] == null) {
-					waypoints[idx] = new RallyPoint(posX, posY);
+					waypoints[idx] = new RallyPoint(posX, posY,null);
 					
 				} else {
 					waypoints[idx].setPosition( new Position(posX, posY) );

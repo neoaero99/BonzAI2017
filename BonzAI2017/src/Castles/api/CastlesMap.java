@@ -28,16 +28,15 @@ public class CastlesMap {
 	private HashMap<String, String> fields = new HashMap<>();
 	private HashMap<Integer, Traversable> entities = new HashMap<>();
 	
-	//E will be the parent for castles and rallypoint, once created;
-	private WeightedGraph<Position,Integer> graph=new WeightedGraph<>();
-	private GraphPathSet<Position> paths= new GraphPathSet<>(graph);
+	private WeightedGraph<RallyPoint,Integer> graph=new WeightedGraph<>();
+	private GraphPathSet<RallyPoint> paths= new GraphPathSet<>(graph);
 	
-	//WeightedGraph
-	//GraphPathSet
-	//
+	boolean players[]={true,true,true,true,true,true};
+	
+	private int x;
 	
 	public CastlesMap(){
-		
+		x=0;
 	}
 
 	public CastlesMap(CastlesMap previousTurn) {
@@ -55,6 +54,7 @@ public class CastlesMap {
 	 * @return 
 	 */
 	protected CastlesMap(CastlesMap previousTurn, boolean decCooldown) {
+	
 	}
 	
 	
@@ -89,8 +89,7 @@ public class CastlesMap {
 	
 
 	public void removePlayer(int i) {
-		// 
-		
+		players[i]=false;
 	}
 
 	public int getWidth() {
@@ -107,15 +106,22 @@ public class CastlesMap {
 	}
 	
 	public void addPlayer(int x, int y, String name){
-		//add starting point
+		Castle temp=new Castle(x,y,name,Castles.api.Color.values()[x]);
+		Vertex <RallyPoint,Integer> temp2=new Vertex<RallyPoint, Integer>(temp);
+		graph.addNode(temp2);
+		x++;
 	}
 	
 	public void addCastle(int x, int y, String name){
-		//add each unclaimed castle
+		Castle temp=new Castle(x,y,name,null);
+		Vertex <RallyPoint,Integer> temp2=new Vertex<RallyPoint, Integer>(temp);
+		graph.addNode(temp2);
 	}
 	
 	public void addRally(int x, int y, String name){
-		//add a rally point
+		RallyPoint temp=new RallyPoint(x,y,name);
+		Vertex <RallyPoint,Integer> temp2=new Vertex<RallyPoint, Integer>(temp);
+		graph.addNode(temp2);
 	}
 	
 	public void connect(String n1, String n2, int weight){

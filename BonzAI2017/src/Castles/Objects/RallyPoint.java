@@ -5,15 +5,17 @@ import bonzai.*;
  * Rally Point is a node that soldiers can traverse
  * to get to castles and villages
  */
-public class RallyPoint {
+public class RallyPoint implements Comparable<RallyPoint> {
 Position pos;
+final String ID;
 /**
  * initialize start position
  * @param x x position
  * @param y y position
  */
-	public RallyPoint(int x, int y){
+	public RallyPoint(int x, int y, String ID){
 		pos = new Position(x,y);
+		this.ID=ID;
 		
 	}
 	/**
@@ -27,5 +29,12 @@ Position pos;
 	 */
 	public void setPosition(Position pos){
 		this.pos=pos;
+	}
+	@Override
+	public int compareTo(RallyPoint o) {
+		return pos.compareTo(o.getPosition());
+	}
+	public String getName(){
+		return ID;
 	}
 }
