@@ -10,6 +10,7 @@ import java.util.List;
 import Castles.Objects.*;
 import Castles.util.*;
 import Castles.util.graph.*;
+import Castles.util.linkedlist.DualLinkList;
 import bonzai.Identifiable;
 import bonzai.Position;
 import bonzai.Positionable;
@@ -101,7 +102,18 @@ public class CastlesMap {
 	}
 
 	public Position getEntity(int i) {
-		// will return the place where the shouts will eventually come from
+		if(!players[i]){
+			return null;
+		}
+		Castles.api.Color c=Castles.api.Color.values()[i];
+		DualLinkList<Vertex<RallyPoint, Integer>> list=graph.vertexList();
+		for(Vertex<RallyPoint, Integer> v:list){
+			if(v.getElement() instanceof Building ){
+				if(((Building)v.getElement()).getColor()==c){
+					return v.getElement().getPosition();
+				}
+			}
+		}
 		return null;
 	}
 	
@@ -123,9 +135,29 @@ public class CastlesMap {
 		Vertex <RallyPoint,Integer> temp2=new Vertex<RallyPoint, Integer>(temp);
 		graph.addNode(temp2);
 	}
-	
+	/**
+	 * POTENTIAL ISSUE:
+	 *     ALL points must be loaded in prior to calling this method
+	 * @param n1
+	 * @param n2
+	 * @param weight
+	 */
 	public void connect(String n1, String n2, int weight){
-		//connect 2 points, either castle, rally point, and starting points
+		DualLinkList<Vertex<RallyPoint, Integer>> list=graph.vertexList();
+		Vertex<RallyPoint, Integer> one=null;
+		Vertex<RallyPoint, Integer> two=null;
+		for(Vertex<RallyPoint, Integer> v:list){
+			if(v.getElement().getName()==n1){
+				one=v;
+			}
+			if(v.getElement().getName()==n2){
+				two=v;
+			}
+		}
+		WeightedEdge<RallyPoint, Integer> temp=new WeightedEdge<RallyPoint, Integer>();
+		temp.setFirst(one);
+		temp.setSecond(two);
+		graph.addEdge(temp);
 	}
 	
 	/*
