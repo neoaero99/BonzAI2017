@@ -39,26 +39,15 @@ public class MapMaker {
 		System.out.println("     Player:  #fff000 (yellow)");
 		System.out.println("     Castles:   #ff00ff (red)");
 		System.out.println("     Path:     #000000 (black)");
+		System.out.println("     Village:  #008000 (green)");
 		System.out.println();
 		
 		System.out.println("Please enter path to map file (must be .bmp)");
 		Scanner scanner = new Scanner(System.in);
 		String path = scanner.nextLine();
 		
-		BufferedImage image = ImageIO.read(new File(path));
-		System.out.println("Where would you like repeaters to point?");
-		System.out.println("1:  Map center");
-		System.out.println("2:  Away from map center");
-		System.out.println("3:  Random");
-		System.out.println("4:  Nearest Target");
-		System.out.println("5:  Away From Nearest Target");
-		System.out.println("6:  Nearest Wall");
-		System.out.println("7:  Away From Nearest Walls");
-		System.out.println("8:  Nearest Repeater");
-		System.out.println("9:  Away From Nearest Repeater");
-		
-		
-		int point = scanner.nextInt();
+		BufferedImage image = ImageIO.read(new File("/users/danejensen/bonzai2017/bonzai2017/bonzai2017/bonzai2017"
+				+ "/src/bonzai/automator/images/" + path));
 		
 		String name = path.replace(".bmp", "");
 		
@@ -78,7 +67,8 @@ public class MapMaker {
 		ArrayList<Entry> rallys = new ArrayList<Entry>();
 		ArrayList<Entry> players = new ArrayList<Entry>();
 		ArrayList<Entry> castles = new ArrayList<Entry>();
-		ArrayList<Entry> paths = new ArrayList<Entry>();
+		ArrayList<Path> paths = new ArrayList<Path>();
+		ArrayList<Entry> villages = new ArrayList<Entry>();
 		
 		
 		//COUNT THE PLAYERS
@@ -97,19 +87,22 @@ public class MapMaker {
 				if (xi > 0 / 2.0f) { rotation += 180; }*/
 				
 				//Red
-				if (c == 0x00ff0000) {
+				if (c == 0x00ff00ff) {
 					castles.add(new Entry(x,y,"C"+castles.size()));
 				//black
 				} else if (c == 0x00000000) {
-					//paths.add(new Entry(x,y));
+					
 				//yellow
 				} else if (c == 0x00fff000) {
 					players.add(new Entry(x,y, "P"+players.size()));
 				//blue
 				} else if (c == 0x000000ff) {
 					rallys.add(new Entry(x,y, "R"+rallys.size()));
+				//green
+				}else if (c == 0x00008000){
+					villages.add(new Entry(x,y, "V"+villages.size()));
 				//white
-				} else if (c == 0x00ffffff) {
+				}else if (c == 0x00ffffff) {
 				//not reconized
 				} else {
 					System.out.printf("Color 0x%x unknown at x=%d y=%d\n",c,x,y);
@@ -117,6 +110,11 @@ public class MapMaker {
 			}
 		}
 		
+		for(Path s : paths){
+			System.out.println(s);
+			
+		}
+		System.exit(0);
 		pw.println("playercount: " + players.size());
 		pw.println();
 		pw.println("players:");
@@ -131,6 +129,12 @@ public class MapMaker {
 		}
 		
 		pw.println();
+		pw.println("villages:");
+		for(Entry s : villages){
+			pw.println(s);
+		}
+		
+		pw.println();
 		pw.println("rally:");
 		for (Entry s : rallys) {
 			pw.println(s);
@@ -138,7 +142,7 @@ public class MapMaker {
 		
 		pw.println();
 		pw.println("paths:");
-		for (Entry s : paths) {
+		for (Path s : paths) {
 			pw.println(s);
 		}
 		
@@ -159,5 +163,48 @@ public class MapMaker {
 	
 	public static float getRotation(Entry a, Entry b) {
 		return (float)Math.atan2(b.y - a.y, b.x - a.x) * (float)(180 / Math.PI);
+	}
+	
+	
+	private class Path{
+		ArrayList<Entry> points = new ArrayList<Entry>();
+		Integer rx = 0, ry = 0;
+		String name;
+		
+		public Path(String name){
+			this.name = name;
+		}
+		
+		public int getRequiredX(){
+			return rx;
+		}
+		
+		public int getRequiredY(){
+			return ry;
+		}
+		
+		public boolean insertPoint(int x, int y){
+			if(rx == 0 && ry == 0){
+				if(points.size() == 0){
+					points.add(new Entry(x,y));
+				}else{
+					if(points.get(0).x == x){
+						rx = x;
+						points.add(new Entry(x,y));
+					}else if(points.get(0).y == y){
+						points.add(new Entry(x,y));
+					}else{
+						return false;
+					}
+				}
+			}else if(rx == 0 && y == ry){
+				points.add(new Entry(x,y));
+			}else if(ry == 0 && x == rx){
+				points.add(new Entry(x,y));
+			}else{
+				return false;
+			}
+			return true;
+		}
 	}
 }
