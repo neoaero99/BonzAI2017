@@ -12,6 +12,7 @@ import Castles.api.*;
 public class Game {
 	private final List<Turn> history;
 	private int remaining;
+	private CastlesMap map;
 	
 	/**
 	 * list of colors that have jars selected
@@ -24,7 +25,7 @@ public class Game {
 	 **/
 	public Game(int teamID, int turns, CastlesMap map, List<Castles.api.Color> colors) {
 		this.remaining = turns;
-		//this.map = map;
+		this.map = map;
 		this.history = new ArrayList<Turn>(turns);
 		this.history.add(new Turn(teamID, 0, map, turns));	//Create the first turn of the game
 	}
