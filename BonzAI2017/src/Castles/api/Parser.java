@@ -108,7 +108,7 @@ public class Parser {
 			in.close();                                    // RAII semantics are really useful
 		};
 		
-		map.calculatePaths();
+//		map.calculatePaths();
 
 		return map;
 	}

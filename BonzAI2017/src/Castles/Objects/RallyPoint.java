@@ -37,4 +37,7 @@ final String ID;
 	public String getName(){
 		return ID;
 	}
+	public RallyPoint copy(){
+		return new RallyPoint(pos.getX(),pos.getY(),ID);
+	}
 }

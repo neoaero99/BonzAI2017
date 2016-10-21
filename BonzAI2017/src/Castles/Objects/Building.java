@@ -67,4 +67,7 @@ public class Building extends RallyPoint {
 	public Castles.api.Color getColor(){
 		return color;
 	}
+	public RallyPoint copy(){
+		return new Building(super.getPosition().getX(),super.getPosition().getY(),defenseValue,captureValue,super.getName(),color);
+	}
 }

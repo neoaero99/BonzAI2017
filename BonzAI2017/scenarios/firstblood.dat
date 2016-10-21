@@ -6,14 +6,19 @@ name: First Blood
 playercount: 2
 theme: plains
 size: 25, 25
+
 players:
 # x, y, name
 	<1, 1, P1>
 	<24, 1, P2>
+
 castles:
 # x, y, name
 	<24, 24, C1>
 	<1, 24, C2>
+
+villages:
+
 rally:
 # x, y, name
 	<10, 10, R1>
@@ -21,6 +26,7 @@ rally:
 	<10, 1, R3>
 	<10, 24, R4>
 	<24, 10, R5>
+
 paths:
 # vertex1, vertex2, weight
 	<P1, R2, 9>

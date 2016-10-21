@@ -29,14 +29,16 @@ public class CastlesMap {
 	private HashMap<String, String> fields = new HashMap<>();
 	private HashMap<Integer, Traversable> entities = new HashMap<>();
 	
-	private WeightedGraph<RallyPoint,Integer> graph=new WeightedGraph<>();
-	private GraphPathSet<RallyPoint> paths= new GraphPathSet<>(graph);
+	private WeightedGraph<RallyPoint,Integer> graph;
+	private GraphPathSet<RallyPoint> paths;
 	
-	boolean players[]={true,true,true,true,true,true};
+	private boolean players[]={true,true,true,true,true,true};
 	
 	private int x;
 	
 	public CastlesMap(){
+		graph=new WeightedGraph<>();
+		paths= new GraphPathSet<>(graph);
 		x=0;
 	}
 
@@ -55,8 +57,24 @@ public class CastlesMap {
 	 * @return 
 	 */
 	protected CastlesMap(CastlesMap previousTurn, boolean decCooldown) {
-	
-	}
+		graph=new WeightedGraph<>();
+		DualLinkList<Vertex<RallyPoint, Integer>> list=previousTurn.getGraph().vertexList();
+		for(Vertex<RallyPoint, Integer> v:list){
+			Vertex<RallyPoint,Integer> newVert=new Vertex<RallyPoint, Integer>(v.getElement().copy());
+			graph.addNode(newVert);
+		}
+		DualLinkList<WeightedEdge<RallyPoint,Integer>> list2=previousTurn.getGraph().edgeList();
+		for(WeightedEdge<RallyPoint,Integer> w:list2){
+			String name1=w.getFirst().getElement().getName();
+			String name2=w.getSecond().getElement().getName();
+			int weight=w.getElement();
+			connect(name1,name2,weight);
+		}
+		players=previousTurn.getPlayers();
+		height=previousTurn.getHeight();
+		width=previousTurn.getWidth();
+		paths=getPaths();
+	}	
 	
 	
 	/**
@@ -164,8 +182,13 @@ public class CastlesMap {
 	 * change to canPassThroug(), makes a list
 	 * of nodes and edges that troops CAN pass through
 	 */
-	public void calculatePaths(){
-		
+	public GraphPathSet<RallyPoint> getPaths(){
+		return paths;
 	}
-	
+	public WeightedGraph<RallyPoint,Integer> getGraph(){
+		return graph;
+	}
+	public boolean[] getPlayers(){
+		return players;
+	}
 }
