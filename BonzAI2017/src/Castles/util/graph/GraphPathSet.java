@@ -14,48 +14,48 @@ public class GraphPathSet<E extends Comparable<E>> {
 	 * Yes, it is a hashmap, of hashmaps of doubly linked lists sorted by
 	 * the edge weights, sorted by node pairs.
 	 */
-	private final HashMap<VertexPair<E, Double>, HashMap<Double, DualLinkList<WeightedEdge<E, Double>>>> VPPathsSet;
-	private final WeightedGraph<E, Double> graph;
+	private final HashMap<VertexPair<E, Integer>, HashMap<Integer, DualLinkList<WeightedEdge<E, Integer>>>> VPPathsSet;
+	private final WeightedGraph<E, Integer> graph;
 	
-	public GraphPathSet(WeightedGraph<E, Double> g) {
-		VPPathsSet = new HashMap<VertexPair<E, Double>, HashMap<Double, DualLinkList<WeightedEdge<E, Double>>>>();
+	public GraphPathSet(WeightedGraph<E, Integer> g) {
+		VPPathsSet = new HashMap<VertexPair<E, Integer>, HashMap<Integer, DualLinkList<WeightedEdge<E, Integer>>>>();
 		graph = g;
 	}
 	
-	public DualLinkList<WeightedEdge<E, Double>> getPath(/* Parameters? */) {
+	public DualLinkList<WeightedEdge<E, Integer>> getPath(/* Parameters? */) {
 		// TODO
 		return null;
 	}
 	
-	public DualLinkList<WeightedEdge<E, Double>> shortestPath(Vertex<E, Double> start, Vertex<E, Double> end) {
-		DualLinkList<Vertex<E, Double>> vertices = graph.vertexList();
+	public DualLinkList<WeightedEdge<E, Integer>> shortestPath(Vertex<E, Integer> start, Vertex<E, Integer> end) {
+		DualLinkList<Vertex<E, Integer>> vertices = graph.vertexList();
 		
-		HashMap<Vertex<E, Double>, ExtraData> vertexData = new HashMap<Vertex<E, Double>, ExtraData>();
-		AdaptablePQ<Double, Vertex<E, Double>> remaining = new AdaptablePQ<Double, Vertex<E, Double>>( 
-				vertices.size(), new MinComparator<PQEntry<Double, Vertex<E, Double>>>() );
+		HashMap<Vertex<E, Integer>, ExtraData> vertexData = new HashMap<Vertex<E, Integer>, ExtraData>();
+		AdaptablePQ<Integer, Vertex<E, Integer>> remaining = new AdaptablePQ<Integer, Vertex<E, Integer>>( 
+				vertices.size(), new MinComparator<PQEntry<Integer, Vertex<E, Integer>>>() );
 		
 		
 		
-		for (Vertex<E, Double> v : vertices) {
-			double iniWeight = (v == start) ? 0.0 : Double.MAX_VALUE;
+		for (Vertex<E, Integer> v : vertices) {
+			int iniWeight = (v == start) ? 0 : Integer.MAX_VALUE;
 			vertexData.put(v, new ExtraData(0, iniWeight, remaining.insert(iniWeight, v), null));
 		}
 		
 		while (!remaining.isEmpty()) {
-			Vertex<E, Double> least = remaining.removeMax();
+			Vertex<E, Integer> least = remaining.removeMax();
 			ExtraData ltData = vertexData.get(least);
 			ltData.flag = 1;
 			
 			if (least == end) { break; }
 			
-			DualLinkList<WeightedEdge<E, Double>> incEdges = least.incidentEdges();
+			DualLinkList<WeightedEdge<E, Integer>> incEdges = least.incidentEdges();
 			
-			for (WeightedEdge<E, Double> e : incEdges) {
-				Vertex<E, Double> opposite = e.getOpposite(least);
+			for (WeightedEdge<E, Integer> e : incEdges) {
+				Vertex<E, Integer> opposite = e.getOpposite(least);
 				ExtraData oppData = vertexData.get(opposite);
 				
 				if (oppData.flag == 0) {
-					Double newWeight = e.getElement() + ltData.weight;
+					Integer newWeight = e.getElement() + ltData.weight;
 					
 					if (newWeight < oppData.entryRef.getKey()) {
 						remaining.replaceKey(oppData.entryRef.getIndex(), newWeight);
@@ -66,8 +66,8 @@ public class GraphPathSet<E extends Comparable<E>> {
 			}
 		}
 		
-		DualLinkList<WeightedEdge<E, Double>> path = new DualLinkList<WeightedEdge<E, Double>>();
-		Vertex<E, Double> limbo = end;
+		DualLinkList<WeightedEdge<E, Integer>> path = new DualLinkList<WeightedEdge<E, Integer>>();
+		Vertex<E, Integer> limbo = end;
 		ExtraData data = vertexData.get(limbo);
 		
 		while (limbo != null && limbo != start && data.backEdge != null) {
@@ -78,21 +78,21 @@ public class GraphPathSet<E extends Comparable<E>> {
 		return path;
 	}
 	
-	public boolean pathExists(GraphPath<E, Double> path) {
+	public boolean pathExists(GraphPath<E, Integer> path) {
 		// TODO
 		return false;
 	}
 	
-	public WeightedGraph<E, Double> getGraph() { return graph; }
+	public WeightedGraph<E, Integer> getGraph() { return graph; }
 	
 	private class ExtraData {
 		private int flag;
-		private double weight;
-		private PQEntry<Double, Vertex<E, Double>> entryRef;
-		private WeightedEdge<E, Double> backEdge;
+		private int weight;
+		private PQEntry<Integer, Vertex<E, Integer>> entryRef;
+		private WeightedEdge<E, Integer> backEdge;
 		
-		public ExtraData(int f, double w, PQEntry<Double, Vertex<E, Double>>
-								entry, WeightedEdge<E, Double> bEdge) {
+		public ExtraData(int f, int w, PQEntry<Integer, Vertex<E, Integer>>
+								entry, WeightedEdge<E, Integer> bEdge) {
 			
 			flag = f;
 			weight = w;

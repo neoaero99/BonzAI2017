@@ -1,23 +1,34 @@
-package castle;
+package Castles.Objects;
 
 import java.awt.Color;
 
-public class Building {
+
+import java.awt.Color;
+
+public class Building extends RallyPoint {
 	
-	final int ID;						   // the ID of the building
+							   // the ID of the building
 	private final int defenseValue;        // how strong is the castle?
 	private int soldiers;                  // the number of soldiers in the castle
 	private int counter;                   // 
 	private final int captureValue;        // number of turns to capture building
 	private int soldierCreationRate;       // number of soldiers being produced (more details needed!)
 	
-	Color color = null;                    // not sure what this is for yet
+	Castles.api.Color color = null;                    // not sure what this is for yet
 	
 	public Building(int newDefenseValue, int newCaptureValue, int newID){
+		super(0,0,""+newID);
 		defenseValue = newDefenseValue;
 		captureValue = newCaptureValue;
-		ID = newID;
 		soldierCreationRate = 0;
+	Castles.api.Color color = null;}                    // Determine which team is which
+	
+	public Building(int x, int y, int newDefenseValue, int newCaptureValue, String newID,Castles.api.Color c){
+		super(x,y,newID);
+		defenseValue = newDefenseValue;
+		captureValue = newCaptureValue;
+		soldierCreationRate = 0;
+		color=c;
 	}
 	
 	/**************************
@@ -53,7 +64,7 @@ public class Building {
 	public void decrementSoldier(){
 		soldiers -= 1;
 	}
-	
-	
-	
+	public Castles.api.Color getColor(){
+		return color;
+	}
 }
