@@ -7,6 +7,7 @@ import java.awt.geom.*;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -45,14 +46,16 @@ public class CastlesRenderer extends bonzai.Renderer {
 //			new File("art/sprites/target_pyramid.png"),
 //			new File("art/sprites/target_mountain.png")};
 //
-//	static File[] selectorFiles = {new File("art/sprites/turn_red.png"),
-//			new File("art/sprites/turn_yellow.png"),
-//			new File("art/sprites/turn_blue.png"),
-//			new File("art/sprites/turn_green.png"),
-//			new File("art/sprites/turn_orange.png"),
-//			new File("art/sprites/turn_purple.png")};
-//
-//	static File repeaterFile = new File("art/sprites/repeater.png");
+	static File[] selectorFiles = {new File("art/sprites/turn_red.png"),
+			new File("art/sprites/turn_yellow.png"),
+			new File("art/sprites/turn_blue.png"),
+			new File("art/sprites/turn_green.png"),
+			new File("art/sprites/turn_orange.png"),
+			new File("art/sprites/turn_purple.png")};
+	
+	
+//TODO castles are defined here
+	static File castleFile = new File("art/sprites/repeater.png");
 //
 //	static File[] lazerFiles = {new File("art/sprites/Castles_red.png"),
 //			new File("art/sprites/Castles_yellow.png"), 
@@ -60,15 +63,15 @@ public class CastlesRenderer extends bonzai.Renderer {
 //			new File("art/sprites/Castles_green.png"),
 //			new File("art/sprites/Castles_orange.png"),
 //			new File("art/sprites/Castles_purple.png")};
+//TODO captured castles files
+	static File[] playerFiles = {  new File("art/sprites/fox_red.png"), 
+			new File("art/sprites/fox_yellow.png"), 
+			new File("art/sprites/fox_blue.png"),
+			new File("art/sprites/fox_green.png"),
+			new File("art/sprites/fox_orange.png"),
+			new File("art/sprites/fox_purple.png")};
 //
-//	static File[] emitterFiles = {  new File("art/sprites/fox_red.png"), 
-//			new File("art/sprites/fox_yellow.png"), 
-//			new File("art/sprites/fox_blue.png"),
-//			new File("art/sprites/fox_green.png"),
-//			new File("art/sprites/fox_orange.png"),
-//			new File("art/sprites/fox_purple.png")};
-//
-//	static File wallFile 		= new File("art/sprites/wall.png");
+	static File wallFile 		= new File("art/sprites/wall.png");
 //	static File discoveryFile 	= new File("art/sprites/discovery.png");
 //	static File cloudFile 		= new File("art/sprites/cloud.png");
 //	
@@ -76,11 +79,11 @@ public class CastlesRenderer extends bonzai.Renderer {
 
 	//These data structures hold the actual images that get pulled from the above files
 	private static final Map<Castles.api.Color, Color> colors = new HashMap<>();
-//	private static Map<lazers.api.Color, BufferedImage> emitterImages = new HashMap<>();
-//	private static Map<lazers.api.Color, BufferedImage> lazerImages = new HashMap<>();
-//	private static Map<lazers.api.Color, BufferedImage> selectorImages = new HashMap<>();
+	private static Map<Castles.api.Color, BufferedImage> emitterImages = new HashMap<>();
+	private static Map<Castles.api.Color, BufferedImage> lazerImages = new HashMap<>();
+	private static Map<Castles.api.Color, BufferedImage> selectorImages = new HashMap<>();
 //	private static BufferedImage[] targetImages = new BufferedImage[targetFiles.length];
-//	private static BufferedImage wallImage,repeaterImage,discoveryImage,cloudImage;
+	private static BufferedImage wallImage,repeaterImage;
 
 
 	static {
@@ -93,37 +96,18 @@ public class CastlesRenderer extends bonzai.Renderer {
 		colors.put(Castles.api.Color.PURPLE, new Color(207,  71,  207)); // Purple
 
 
-
+		getBackgroundImages();
 		try { 
 			//Read the images into the data structures, given the file names defined above.
-//			repeaterImage = ImageIO.read(repeaterFile);
-
-//			backgroundImages.put("base", 	ImageIO.read(new File("art/maps/desert.png")));
-//			backgroundImages.put("desert", 	ImageIO.read(new File("art/maps/desert.png")));
-//			backgroundImages.put("moon", 	ImageIO.read(new File("art/maps/moon.png")));
-//			backgroundImages.put("mars", 	ImageIO.read(new File("art/maps/mars.png")));
-//			backgroundImages.put("water", 	ImageIO.read(new File("art/maps/water.png")));
-//			backgroundImages.put("forest", 	ImageIO.read(new File("art/maps/forest.png")));
-//			backgroundImages.put("space", 	ImageIO.read(new File("art/maps/space.png")));
-//			backgroundImages.put("plains", 	ImageIO.read(new File("art/maps/plains.jpg")));
-//			backgroundImages.put("planet", 	ImageIO.read(new File("art/maps/planet.jpg")));
-//			backgroundImages.put("supernova", 	ImageIO.read(new File("art/maps/supernova.jpg")));
-//			backgroundImages.put("grass", 	ImageIO.read(new File("art/maps/grass.jpg")));
-//			backgroundImages.put("desert_small", 	ImageIO.read(new File("art/maps/desert_small.png")));
+			repeaterImage = ImageIO.read(new File("art/sprites/repeater.png"));
 //			
-
-			//Load target images into array.
-//			for (int i = 0; i < targetImages.length; i++) {
-//				targetImages[i] = ImageIO.read(targetFiles[i]);
-//			}
 //
 //
 //			//load our png's
-//			emitterImages = loadIntoMap(emitterFiles); 
-//			lazerImages = loadIntoMap(lazerFiles);
-//			selectorImages = loadIntoMap(selectorFiles);
+			emitterImages = loadIntoMap(playerFiles);
+			selectorImages = loadIntoMap(selectorFiles);
 //
-//			wallImage = ImageIO.read(wallFile);
+			wallImage = ImageIO.read(wallFile);
 //			discoveryImage = ImageIO.read(discoveryFile);
 //			cloudImage = ImageIO.read(cloudFile);
 
@@ -141,6 +125,25 @@ public class CastlesRenderer extends bonzai.Renderer {
 		Game game = new Game(0, 2, map, colors);
 		render(g, game.turn(0), game.turn(0), null, 1);
 
+	}
+
+	private static void getBackgroundImages() {
+		String path = "art/maps/";
+		File temp = new File(path);//opens the map directory
+		String[] files = temp.list(); //gets all files in the directory
+		for(int i = 0; i < files.length; i++){
+			if(temp.isDirectory()){
+				continue;
+			}else{
+				String name = files[i].replace(".png", "");
+				try {
+					backgroundImages.put(name, ImageIO.read(new File(path+files[i])));
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+			}
+		}
+		
 	}
 
 	public static void setBackground(String theme) {

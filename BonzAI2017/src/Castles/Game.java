@@ -17,8 +17,8 @@ public class Game {
 	/**
 	 * list of colors that have jars selected
 	 */
-	//private List<lazers.api.Color> activeColors;
-	//private LazersMap map;
+	private List<Castles.api.Color> activeColors;
+	private CastlesMap map;
 
 	/**
 	 *
