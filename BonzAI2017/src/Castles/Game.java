@@ -12,12 +12,12 @@ import Castles.api.*;
 public class Game {
 	private final List<Turn> history;
 	private int remaining;
+	private CastlesMap map;
 	
 	/**
 	 * list of colors that have jars selected
 	 */
 	private List<Castles.api.Color> activeColors;
-	private CastlesMap map;
 
 	/**
 	 *
