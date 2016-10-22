@@ -21,34 +21,63 @@ public class GraphPathSet<E extends Comparable<E>> {
 	public static void main(String[] args){
 		WeightedGraph<Integer, Integer> g = new WeightedGraph<Integer, Integer>();
 		GraphPathSet<Integer> gpath = new GraphPathSet<Integer>(g);
-		Vertex<Integer, Integer> node1, node2, node3, node4, node5;
-		WeightedEdge<Integer, Integer> edge1, edge2, edge3, edge4, edge5,edge6;
+		Vertex<Integer, Integer> node0, node1, node2, node3, node4, node5, node6,node7, node8, node9, node10;
+		WeightedEdge<Integer, Integer> edge1, edge2, edge3, edge4, edge5, edge6, edge7,edge8,edge9,edge10,edge11,edgei1,edgei2,edgei3,edgei4;
 		
-		node1 = new Vertex<Integer, Integer>(0);
-		node2 = new Vertex<Integer, Integer>(1);
-		node3 = new Vertex<Integer, Integer>(2);
-		node4 = new Vertex<Integer, Integer>(3);
-		node5 = new Vertex<Integer, Integer>(4);
+		node1 = new Vertex<Integer, Integer>(1);
+		node2 = new Vertex<Integer, Integer>(2);
+		node3 = new Vertex<Integer, Integer>(3);
+		node4 = new Vertex<Integer, Integer>(4);
+		node5 = new Vertex<Integer, Integer>(5);
+		node0 = new Vertex<Integer, Integer>(0);
+		node6 = new Vertex<Integer, Integer>(6);
+		node7 = new Vertex<Integer, Integer>(7);
+		node8 = new Vertex<Integer, Integer>(8);
+		node9 = new Vertex<Integer, Integer>(9);
+		node10 = new Vertex<Integer, Integer>(10);
 		
-		edge1 = new WeightedEdge<Integer, Integer>(5);
-		edge2 = new WeightedEdge<Integer, Integer>(10);
-		edge3 = new WeightedEdge<Integer, Integer>(8);
-		edge4 = new WeightedEdge<Integer, Integer>(3);
-		edge5 = new WeightedEdge<Integer, Integer>(6);
-		edge6 = new WeightedEdge<Integer, Integer>(100);
+		edge1 = new WeightedEdge<Integer, Integer>(2);
+		edge2 = new WeightedEdge<Integer, Integer>(1);
+		edge3 = new WeightedEdge<Integer, Integer>(2);
+		edge4 = new WeightedEdge<Integer, Integer>(2);
+		edge5 = new WeightedEdge<Integer, Integer>(1);
+		edge6 = new WeightedEdge<Integer, Integer>(2);
+		edge7 = new WeightedEdge<Integer, Integer>(1);
+		edge8 = new WeightedEdge<Integer, Integer>(2);
+		edge9 = new WeightedEdge<Integer, Integer>(1);
+		edge10 = new WeightedEdge<Integer, Integer>(2);
+		edge11 = new WeightedEdge<Integer, Integer>(1);
+		edgei1 = new WeightedEdge<Integer, Integer>(11);
+		edgei2 = new WeightedEdge<Integer, Integer>(7);
+		edgei3 = new WeightedEdge<Integer, Integer>(5);
+		edgei4 = new WeightedEdge<Integer, Integer>(9);
 		
-		WeightedGraph.connect(node1, node2, edge1);
-		WeightedGraph.connect(node1, node1, edge2);
-		WeightedGraph.connect(node1, node3, edge3);
-		WeightedGraph.connect(node4, node5, edge4);
-		WeightedGraph.connect(node3, node4, edge5);
-		WeightedGraph.connect(node1, node5, edge6);
-		
+		WeightedGraph.connect(node0, node1, edge1);
+		WeightedGraph.connect(node1, node2, edge2);
+		WeightedGraph.connect(node2, node3, edge3);
+		WeightedGraph.connect(node3, node4, edge4);
+		WeightedGraph.connect(node4, node5, edge5);
+		WeightedGraph.connect(node5, node6, edge6);
+		WeightedGraph.connect(node6, node7, edge7);
+		WeightedGraph.connect(node7, node8, edge8);
+		WeightedGraph.connect(node8, node9, edge9);
+		WeightedGraph.connect(node9, node10, edge10);
+		WeightedGraph.connect(node10, node0, edge11);
+		WeightedGraph.connect(node0, node5, edgei1);
+		WeightedGraph.connect(node2, node6, edgei2);
+		WeightedGraph.connect(node4, node10, edgei3);
+		WeightedGraph.connect(node3, node8, edgei4);
 		g.addNode(node1);		
 		g.addNode(node2);
 		g.addNode(node3);
 		g.addNode(node4);
 		g.addNode(node5);
+		g.addNode(node0);		
+		g.addNode(node6);
+		g.addNode(node7);
+		g.addNode(node8);
+		g.addNode(node9);
+		g.addNode(node10);
 		
 		g.addEdge(edge1);
 		g.addEdge(edge2);
@@ -56,10 +85,19 @@ public class GraphPathSet<E extends Comparable<E>> {
 		g.addEdge(edge4);
 		g.addEdge(edge5);
 		g.addEdge(edge6);
+		g.addEdge(edge7);
+		g.addEdge(edge8);
+		g.addEdge(edge9);
+		g.addEdge(edge10);
+		g.addEdge(edge11);
+		g.addEdge(edgei1);
+		g.addEdge(edgei2);
+		g.addEdge(edgei3);
+		g.addEdge(edgei4);
 		
-		DualLinkList<WeightedEdge<Integer, Integer>> path = gpath.shortestPath(node1,node5);
+		DualLinkList<WeightedEdge<Integer, Integer>> path = gpath.shortestPath(node0, node1);
 		for(WeightedEdge<Integer, Integer> t: path){
-			System.out.printf("(%d) ", t.getElement());
+			System.out.printf("([%s] to [%s]) ", t.getFirst(), t.getSecond());
 		}
 
 	}
@@ -91,7 +129,7 @@ public class GraphPathSet<E extends Comparable<E>> {
 			Vertex<E, Integer> least = remaining.removeMax();
 			ExtraData ltData = vertexData.get(least);
 			ltData.flag = 1;
-			//System.out.printf("%s\n", remaining);
+			System.out.printf("%s\n", remaining);
 			if (least == end) { break; }
 			
 			DualLinkList<WeightedEdge<E, Integer>> incEdges = least.incidentEdges();
@@ -116,7 +154,7 @@ public class GraphPathSet<E extends Comparable<E>> {
 		}
 		
 		System.out.println("PATH CALCULATED!");
-		/**
+		/**/
 		Set<Vertex<E, Integer>> keys = vertexData.keySet();
 		
 		System.out.print("[ ");
