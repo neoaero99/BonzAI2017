@@ -34,12 +34,12 @@ public class CastlesMap {
 	
 	private boolean players[]={true,true,true,true,true,true};
 	
-	private int x;
+	private int z;
 	
 	public CastlesMap(){
 		graph=new WeightedGraph<>();
 		paths= new GraphPathSet<>(graph);
-		x=0;
+		z=0;
 	}
 
 	public CastlesMap(CastlesMap previousTurn) {
@@ -136,14 +136,19 @@ public class CastlesMap {
 	}
 	
 	public void addPlayer(int x, int y, String name){
-		Castle temp=new Castle(x,y,name,Castles.api.Color.values()[x]);
+		Castle temp=new Castle(x,y,name,Castles.api.Color.values()[z]);
 		Vertex <RallyPoint,Integer> temp2=new Vertex<RallyPoint, Integer>(temp);
 		graph.addNode(temp2);
-		x++;
+		z++;
 	}
 	
 	public void addCastle(int x, int y, String name){
 		Castle temp=new Castle(x,y,name,null);
+		Vertex <RallyPoint,Integer> temp2=new Vertex<RallyPoint, Integer>(temp);
+		graph.addNode(temp2);
+	}
+	public void addVillage(int x, int y, String name){
+		Village temp=new Village(x,y,name,null);
 		Vertex <RallyPoint,Integer> temp2=new Vertex<RallyPoint, Integer>(temp);
 		graph.addNode(temp2);
 	}

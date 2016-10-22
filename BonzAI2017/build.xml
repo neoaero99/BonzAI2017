@@ -11,9 +11,9 @@
 		<delete includeemptydirs = "true"><fileset dir = "ais" includes="**/bin/" /></delete>
 		<!-- Change -->
 		<delete file = "${package}/castles.jar" />
-		<delete dir  = "${package}/ais/" />
-		<delete dir  = "${package}/scenarios/" />
-		<delete dir  = "${package}/art/" />
+		<!--<delete dir  = "${package}/ais/" />-->
+		<!--<delete dir  = "${package}/scenarios/" />-->
+		<!--<delete dir  = "${package}/art/" />-->
 		<delete dir  = "${package}/docs/" />
 		<delete dir  = "${package}/automation/" />
 		<delete>

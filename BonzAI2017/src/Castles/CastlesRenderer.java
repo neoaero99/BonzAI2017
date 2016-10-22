@@ -15,6 +15,7 @@ import java.util.Map;
 
 import javax.imageio.ImageIO;
 
+import Castles.Objects.*;
 import Castles.api.CastlesMap;
 //import Castles.api.Color;
 import Castles.api.Turn;
@@ -82,8 +83,9 @@ public class CastlesRenderer extends bonzai.Renderer {
 	private static Map<Castles.api.Color, BufferedImage> emitterImages = new HashMap<>();
 	private static Map<Castles.api.Color, BufferedImage> lazerImages = new HashMap<>();
 	private static Map<Castles.api.Color, BufferedImage> selectorImages = new HashMap<>();
+//	private static Map<Castles.api.Color, BufferedImage> castleImages = new HashMap<>();
 //	private static BufferedImage[] targetImages = new BufferedImage[targetFiles.length];
-	private static BufferedImage wallImage,repeaterImage;
+	private static BufferedImage wallImage,repeaterImage,castleImage;
 
 
 	static {
@@ -106,7 +108,7 @@ public class CastlesRenderer extends bonzai.Renderer {
 //			//load our png's
 			emitterImages = loadIntoMap(playerFiles);
 			selectorImages = loadIntoMap(selectorFiles);
-//
+			castleImage = ImageIO.read(castleFile);
 			wallImage = ImageIO.read(wallFile);
 //			discoveryImage = ImageIO.read(discoveryFile);
 //			cloudImage = ImageIO.read(cloudFile);
@@ -223,10 +225,14 @@ public class CastlesRenderer extends bonzai.Renderer {
 //		renderRepeaters(g, turn, nextTurn, bellTween,smoothTween);
 //		renderTargets(g, turn, nextTurn,getBellCurve(part3Tween),getSmoothCurve(part3Tween));
 		renderShoutActions(g, turn, nextTurn, smoothTween);
+		renderRallyPoints(g,turn);
+		renderBuildings(g,turn);
+		renderCastles(g,turn);
+		
 
 		g.setTransform(oldTransform);
 		//TODO: Figure out how this is done. It is literally mystifying
-		//renderAction(g, turn, turn.actor(), nextTurn.current(turn.actor()), action, tweenPercent);
+		//renderAction();(g, turn, turn.actor(), nextTurn.current(turn.actor()), action, tweenPercent);
 	}
 
 	private static void renderShoutActions(Graphics2D g, Turn turn, Turn nextTurn, float smoothTween) {
@@ -390,6 +396,25 @@ public class CastlesRenderer extends bonzai.Renderer {
 
 	
 	//TODO 2017: Replace these methods with your methods to render your game objects.
+	private static void renderRallyPoints(Graphics2D g, Turn turn){
+		for(Position p:turn.getRallyPointsPositions()){
+			drawToScale(g,wallImage,p.getX(),p.getY(),0,1,1);
+		}
+	}
+	private static void renderBuildings(Graphics2D g, Turn turn){
+		for(Building p:turn.getBuilding()){
+			drawToScale(g,castleImage,p.getPosition().getX(),p.getPosition().getY(),0,1,1);
+		}
+	}
+	private static void renderCastles(Graphics2D g, Turn turn){
+		for(Building p:turn.getCastle()){
+			drawToScale(g,emitterImages.get(p.getColor()),p.getPosition().getX(),p.getPosition().getY(),0,1,1);
+		}
+	}
+//	private static void renderPaths
+	
+	
+	
 //	/**
 //	 * Draw each emitter onto the screen.
 //	 * 

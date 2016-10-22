@@ -75,7 +75,7 @@ public class Parser {
 						break;
 
 					default:
-						map.setField(ls[0], ls[1]);
+						//map.setField(ls[0], ls[1]);
 						break;
 					}
 

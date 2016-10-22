@@ -6,8 +6,14 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 
+
+import Castles.Objects.*;
+import Castles.util.graph.Vertex;
+import Castles.util.graph.WeightedEdge;
+import Castles.util.linkedlist.DualLinkList;
 import bonzai.Action;
 import bonzai.Identifiable;
+import bonzai.Position;
 import bonzai.Positionable;
 import bonzai.Team;
 import bonzai.ShoutAction;
@@ -419,4 +425,34 @@ public class Turn {
 		((Emitter) map.getEntity(teamID)).setTeam(teams.get(teamID));			// Update the team's emitter to have the correct reference
 	}
 	*/
+	public DualLinkList<Position> getRallyPointsPositions(){
+		DualLinkList<Position> pos= new DualLinkList<Position>();
+		for(Vertex<RallyPoint, Integer> r:map.getGraph().vertexList()){
+			if(!(r.getElement()instanceof Building)){
+				pos.addToFront(r.getElement().getPosition());
+			}
+		}
+		return pos;
+	}
+	public DualLinkList<Building> getBuilding(){
+		DualLinkList<Building> pos= new DualLinkList<Building>();
+		for(Vertex<RallyPoint, Integer> r:map.getGraph().vertexList()){
+			if(r.getElement()instanceof Building&&!(r.getElement()instanceof Castle)){
+				pos.addToFront((Building)r.getElement());
+			}
+		}
+		return pos;
+	}
+	public DualLinkList<Building> getCastle(){
+		DualLinkList<Building> pos= new DualLinkList<Building>();
+		for(Vertex<RallyPoint, Integer> r:map.getGraph().vertexList()){
+			if(r.getElement()instanceof Castle){
+				pos.addToFront((Building)r.getElement());
+			}
+		}
+		return pos;
+	}
+	public DualLinkList<WeightedEdge<RallyPoint, Integer>> getEdges(){
+		return map.getGraph().edgeList();
+	}
 }
