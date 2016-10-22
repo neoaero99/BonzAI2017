@@ -50,7 +50,7 @@ public class AdaptablePQ<K extends Comparable<K>, V> {
 	@SuppressWarnings("unchecked")
 	public AdaptablePQ(int iniSize) {
 		heap = (PQEntry<K, V>[]) new PQEntry[ Math.max(1, iniSize) ];
-		size = iniSize;
+		size = 0;
 		mediator = new MinComparator<PQEntry<K, V>>();
 	}
 	
@@ -64,7 +64,7 @@ public class AdaptablePQ<K extends Comparable<K>, V> {
 	@SuppressWarnings("unchecked")
 	public AdaptablePQ(int iniSize, Comparator<PQEntry<K, V>> mediator) {
 		heap = (PQEntry<K, V>[]) new PQEntry[ Math.max(1, iniSize) ];
-		size = iniSize;
+		size = 0;
 		this.mediator = mediator;
 	}
 	
@@ -140,7 +140,8 @@ public class AdaptablePQ<K extends Comparable<K>, V> {
 	 * 						the heap
 	 */
 	public K replaceKey(int posIdx, K newKey) throws PQOpException {
-		if (posIdx < 0 || posIdx >= size) {
+		
+		if (posIdx < 0 || posIdx > size) {
 			String msg = String.format("Position %d is out of bounds!", posIdx);
 			throw new PQOpException(msg);
 		}
@@ -189,11 +190,11 @@ public class AdaptablePQ<K extends Comparable<K>, V> {
 		}
 		
 		V val = heap[0].getValue();
-		// Remove all entry references
-		invalidate(heap[0]);
+		swapEntries(0, --size);
 		
-		heap[0] = heap[--size];
-		heap[size] = null;
+		// Remove entry reference
+		invalidate(heap[size]);
+		
 		// If necessary, reorganize the heap
 		heapDown(0);
 		
