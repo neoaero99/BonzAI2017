@@ -22,12 +22,98 @@ class Entry {
 		this.name = name;
 		hasName = true;
 	}
+
+	public String getName(){
+		return name;
+	}
 	
 	public String toString() {
 		if (hasName) {
 			return "    <" + x + ", " + y + ", " + name + ">";
 		}
 		return "    <" + x + ", " + y + ">";
+	}
+	
+	
+}
+
+class Path{
+	ArrayList<Entry> points = new ArrayList<Entry>();
+	int rx = 0, ry = 0;
+	String name,v1,v2;
+	char cd = 0;
+	
+	public Path(String name){
+		this.name = name;
+	}
+	
+	public boolean insertPoint(int x, int y){
+		if(points.size() <= 1){
+			if(points.size() == 0){
+				points.add(new Entry(x,y));
+			}else{
+				if(points.get(0).x == x && points.get(0).y + 1 == y){
+					cd = 'x';
+					rx = x;
+					points.add(new Entry(x,y));
+				}else if(points.get(0).y == y && points.get(0).x + 1 == x){
+					cd = 'y';
+					ry = y;
+					points.add(new Entry(x,y));
+				}else{
+					return false;
+				}
+			}
+		}else if(y == ry && cd == 'y' && points.get(points.size()-1).x+1 == x){
+			points.add(new Entry(x,y));
+		}else if(x == rx && cd == 'x' && points.get(points.size()-1).y+1 == y){
+			points.add(new Entry(x,y));
+		}else{
+			return false;
+		}
+		return true;
+	}
+	
+	public char getCriticalDimention(){
+		return cd;
+	}
+	
+	public int[] getVertex1Coords(){
+		int[] out = new int[2];
+		if(cd == 'x'){
+			out[0] = points.get(0).x;
+			out[1] = points.get(0).y-1;
+		}else{
+			out[0] = points.get(0).x-1;
+			out[1] = points.get(0).y;
+		}
+		return out;
+	}
+	
+	public int[] getVertex2Coords(){
+		int[] out = new int[2];
+		if(cd == 'x'){
+			out[0] = points.get(points.size()-1).x;
+			out[1] = points.get(points.size()-1).y+1;
+		}else{
+			out[0] = points.get(points.size()-1).x+1;
+			out[1] = points.get(points.size()-1).y;
+		}
+		return out;
+	}
+	
+	public void setVertex1(String n){
+		v1 = n;
+	}
+	
+	public void setVertex2(String n){
+		v2 = n;
+	}
+	
+	@Override
+	public String toString(){
+		if(points.size() == 1) return null;
+		return "    <" + v1 + ", " + v2 + ", " + points.size() + ">";
 	}
 }
 
@@ -53,7 +139,8 @@ public class MapMaker {
 		
 		System.out.println("Saving map as " + name + ".dat");
 		
-		File f = new File(name + ".dat");
+		File f = new File("/users/danejensen/bonzai2017/bonzai2017/bonzai2017/bonzai2017"
+				+ "/src/bonzai/automator/images/" + name + ".dat");
 		PrintWriter pw = new PrintWriter(f);
 		
 		pw.println("# BONZAI CONFIDENTIAL");
@@ -71,37 +158,46 @@ public class MapMaker {
 		ArrayList<Entry> villages = new ArrayList<Entry>();
 		
 		
-		//COUNT THE PLAYERS
+		/*****************************************
+		 * Read Bit Map and convert to entities  *
+		 ****************************************/
 		for (int x = 0; x < image.getWidth(); x++) {
 			for (int y = 0; y < image.getHeight(); y++) {
 				int c = image.getRGB(x, y);
 				c &= 0x00ffffff;	//Ignore first 2 for transparency
 				
 				
-				//Calculate the angle to the center of the map
-				/*float xi = x - (image.getWidth() / 2.0f);
-				float yi = y - (image.getHeight() / 2.0f);*/
-				
-				//Get the angle fom xi,yi to 0 0
-				/*float rotation = (float)Math.toDegrees(Math.atan(yi/xi));
-				if (xi > 0 / 2.0f) { rotation += 180; }*/
-				
-				//Red
+				//Red = castles
 				if (c == 0x00ff00ff) {
 					castles.add(new Entry(x,y,"C"+castles.size()));
-				//black
+				//black = paths
 				} else if (c == 0x00000000) {
-					
-				//yellow
+					//Insert the point into an existing path if
+					//it is on one of the path's critical dimentions
+					//and is only 1 point away on its other dimention
+					boolean inserted = false;
+					for(Path p : paths){
+						if(p.insertPoint(x, y)){
+							inserted = true;
+							break;
+						}
+					}
+					if(!inserted){
+						Path p;
+						p = new Path("P" + paths.size());
+						p.insertPoint(x, y);
+						paths.add(p);
+					}
+				//yellow = players
 				} else if (c == 0x00fff000) {
 					players.add(new Entry(x,y, "P"+players.size()));
-				//blue
+				//blue = rally points
 				} else if (c == 0x000000ff) {
 					rallys.add(new Entry(x,y, "R"+rallys.size()));
-				//green
+				//green = villages
 				}else if (c == 0x00008000){
 					villages.add(new Entry(x,y, "V"+villages.size()));
-				//white
+				//white = blank
 				}else if (c == 0x00ffffff) {
 				//not reconized
 				} else {
@@ -110,11 +206,36 @@ public class MapMaker {
 			}
 		}
 		
+		//Set name for each path
+		//needs to find the end point on each side of the path
+		//the end point is either a castle, village, rally point or player
+		//put all parsed objects, except path points, into the same arraylist
+		//and search that list for each end point of each path
+		ArrayList<Entry> e = new ArrayList<Entry>();
+		e.addAll(castles);
+		e.addAll(villages);
+		e.addAll(rallys);
+		e.addAll(players);
 		for(Path s : paths){
-			System.out.println(s);
+			int[] v1 = s.getVertex1Coords();
+			int[] v2 = s.getVertex2Coords();
+			for(int i = 0; i < e.size(); i++){
+				if(e.get(i).x == v1[0] && e.get(i).y == v1[1]){
+					s.setVertex1(e.get(i).getName());
+					continue;
+				}
+			
+				if(e.get(i).x == v2[0] && e.get(i).y == v2[1]){
+					s.setVertex2(e.get(i).getName());
+					continue;
+				}
+				
+			}
 			
 		}
-		System.exit(0);
+		/*******************************************************
+		 * Prints the Parsed information to [inputed name].dat *
+		 ******************************************************/
 		pw.println("playercount: " + players.size());
 		pw.println();
 		pw.println("players:");
@@ -166,45 +287,5 @@ public class MapMaker {
 	}
 	
 	
-	private class Path{
-		ArrayList<Entry> points = new ArrayList<Entry>();
-		Integer rx = 0, ry = 0;
-		String name;
-		
-		public Path(String name){
-			this.name = name;
-		}
-		
-		public int getRequiredX(){
-			return rx;
-		}
-		
-		public int getRequiredY(){
-			return ry;
-		}
-		
-		public boolean insertPoint(int x, int y){
-			if(rx == 0 && ry == 0){
-				if(points.size() == 0){
-					points.add(new Entry(x,y));
-				}else{
-					if(points.get(0).x == x){
-						rx = x;
-						points.add(new Entry(x,y));
-					}else if(points.get(0).y == y){
-						points.add(new Entry(x,y));
-					}else{
-						return false;
-					}
-				}
-			}else if(rx == 0 && y == ry){
-				points.add(new Entry(x,y));
-			}else if(ry == 0 && x == rx){
-				points.add(new Entry(x,y));
-			}else{
-				return false;
-			}
-			return true;
-		}
-	}
+	
 }

@@ -10,7 +10,7 @@ import bonzai.Team;
 public class Parser {
 	private Parser() {}
 
-	private static final int PARSE_NONE = 0, PARSE_PLAYER = 1, PARSE_CASTLE = 2, PARSE_RALLY = 3, PARSE_PATH = 4;
+	private static final int PARSE_VILLAGE = 5,PARSE_NONE = 0, PARSE_PLAYER = 1, PARSE_CASTLE = 2, PARSE_RALLY = 3, PARSE_PATH = 4;
 	private static int parse_mode;
 
 	public static CastlesMap parseFile(String file) throws FileNotFoundException{
@@ -53,6 +53,10 @@ public class Parser {
 					
 				case PARSE_PATH:
 					map.connect(row[0], row[1], Integer.parseInt(row[2]));
+					break;
+					
+				case PARSE_VILLAGE:
+					
 					break;
 
 				default: // parse mode/general
