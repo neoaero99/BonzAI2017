@@ -34,16 +34,16 @@ public class CastlesMap {
 	
 	private boolean players[]={true,true,true,true,true,true};
 	
-	private int z;
+	private int numTeams;
 	
 	public CastlesMap(){
 		graph=new WeightedGraph<>();
 		paths= new GraphPathSet<>(graph);
-		z=0;
+		numTeams=0;
 	}
 
 	public CastlesMap(CastlesMap previousTurn) {
-		graph=new WeightedGraph<>();
+		super();
 		DualLinkList<Vertex<RallyPoint, Integer>> list=previousTurn.getGraph().vertexList();
 		for(Vertex<RallyPoint, Integer> v:list){
 			Vertex<RallyPoint,Integer> newVert=new Vertex<RallyPoint, Integer>(v.getElement().copy());
@@ -63,7 +63,7 @@ public class CastlesMap {
 		players=previousTurn.getPlayers();
 		height=previousTurn.getHeight();
 		width=previousTurn.getWidth();
-		paths=getPaths();
+		paths=previousTurn.getPaths();
 	}
 
 	/**
@@ -86,6 +86,9 @@ public class CastlesMap {
 	 * @return
 	 */
 	public String getField(String input){
+		if(input.equals("size")){
+			return height + " " + width;
+		}
 		return fields.get(input);
 	}
 
@@ -139,11 +142,41 @@ public class CastlesMap {
 		return null;
 	}
 	
+	/**
+	 * returns an entity based on a unique id
+	 * @param s
+	 * @return
+	 */
+	public RallyPoint getEntity(String s){
+		for(Vertex<RallyPoint, Integer> v : graph.vertexList()){
+			if(v.getElement().getName().equals(s)){
+				return v.getElement();
+			}
+		}
+		return null;
+	}
+	
+	/**
+	 * returns the vertex containing an entity based on a unique id
+	 * the I param is useless, so set it to whatever you want
+	 * @param s the unique id of the entitiy
+	 * @param i useless
+	 * @return
+	 */
+	private Vertex<RallyPoint, Integer> getNode(String s){
+		for(Vertex<RallyPoint, Integer> v : graph.vertexList()){
+			if(v.getElement().getName().equals(s)){
+				return v;
+			}
+		}
+		return null;
+	}
+	
 	public void addPlayer(int x, int y, String name){
-		Castle temp=new Castle(x,y,name,Castles.api.Color.values()[z]);
+		Castle temp=new Castle(x,y,name,Castles.api.Color.values()[numTeams]);
 		Vertex <RallyPoint,Integer> temp2=new Vertex<RallyPoint, Integer>(temp);
 		graph.addNode(temp2);
-		z++;
+		numTeams++;
 	}
 	
 	public void addCastle(int x, int y, String name){
@@ -170,21 +203,10 @@ public class CastlesMap {
 	 * @param weight
 	 */
 	public void connect(String n1, String n2, int weight){
-		DualLinkList<Vertex<RallyPoint, Integer>> list=graph.vertexList();
-		Vertex<RallyPoint, Integer> one=null;
-		Vertex<RallyPoint, Integer> two=null;
-		for(Vertex<RallyPoint, Integer> v:list){
-			if(v.getElement().getName()==n1){
-				one=v;
-			}
-			if(v.getElement().getName()==n2){
-				two=v;
-			}
-		}
-		WeightedEdge<RallyPoint, Integer> temp=new WeightedEdge<RallyPoint, Integer>();
-		temp.setFirst(one);
-		temp.setSecond(two);
-		graph.addEdge(temp);
+		Vertex<RallyPoint, Integer> one= getNode(n1);
+		Vertex<RallyPoint, Integer> two= getNode(n2);
+		WeightedEdge<RallyPoint, Integer> temp=new WeightedEdge<RallyPoint, Integer>(weight);
+		graph.connect(one, two, temp);
 	}
 	
 	/*
@@ -200,4 +222,51 @@ public class CastlesMap {
 	public boolean[] getPlayers(){
 		return players;
 	}
+	
+	public DualLinkList<Position> getRallyPointsPositions(){
+		DualLinkList<Position> pos= new DualLinkList<Position>();
+		for(Vertex<RallyPoint, Integer> r: getGraph().vertexList()){
+			if(!(r.getElement()instanceof Building)){
+				pos.addToFront(r.getElement().getPosition());
+			}
+		}
+		return pos;
+	}
+	public DualLinkList<Building> getBuildings(){
+		DualLinkList<Building> pos= new DualLinkList<Building>();
+		for(Vertex<RallyPoint, Integer> r: getGraph().vertexList()){
+			if(r.getElement()instanceof Building&&!(r.getElement()instanceof Castle)){
+				pos.addToFront((Building)r.getElement());
+			}
+		}
+		return pos;
+	}
+	public DualLinkList<Building> getCastles(){
+		DualLinkList<Building> pos= new DualLinkList<Building>();
+		for(Vertex<RallyPoint, Integer> r: getGraph().vertexList()){
+			if(r.getElement()instanceof Castle){
+				pos.addToFront((Building)r.getElement());
+			}
+		}
+		return pos;
+	}
+	
+	/**
+	 * Takes in 2 object unique identifiers and checks if they are in the
+	 * graph and are adjacent
+	 * 
+	 * @param o1 an object
+	 * @param o2 an object
+	 * @return true if o1 and o2 are in the graph and have an edge
+	 * 			connecting them
+	 */
+	public boolean isAdjecent(String o1, String o2){
+		Vertex<RallyPoint, Integer> p1 = getNode(o1);
+		Vertex<RallyPoint, Integer> p2 = getNode(o2);
+		if(p1 == null || p2 == null){
+			return false;
+		}
+		return p1.isAdjacent(p2);
+	}
+	
 }
