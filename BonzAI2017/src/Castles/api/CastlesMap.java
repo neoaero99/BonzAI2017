@@ -170,10 +170,10 @@ public class CastlesMap {
 		Vertex<RallyPoint, Integer> one=null;
 		Vertex<RallyPoint, Integer> two=null;
 		for(Vertex<RallyPoint, Integer> v:list){
-			if(v.getElement().getName()==n1){
+			if(v.getElement().getName().equals(n1)){
 				one=v;
 			}
-			if(v.getElement().getName()==n2){
+			if(v.getElement().getName().equals(n2)){
 				two=v;
 			}
 		}
