@@ -36,14 +36,18 @@ public class CastlesMap {
 	
 	private int numTeams;
 	
+	private ArrayList<Team> teams= new ArrayList<Team>();
+	
 	public CastlesMap(){
 		graph=new WeightedGraph<>();
 		paths= new GraphPathSet<>(graph);
+		
 		numTeams=0;
 	}
 
 	public CastlesMap(CastlesMap previousTurn) {
 		super();
+		teams=(ArrayList<Team>) previousTurn.getTeams();
 		DualLinkList<Vertex<RallyPoint, Integer>> list=previousTurn.getGraph().vertexList();
 		for(Vertex<RallyPoint, Integer> v:list){
 			Vertex<RallyPoint,Integer> newVert=new Vertex<RallyPoint, Integer>(v.getElement().copy());
@@ -64,6 +68,20 @@ public class CastlesMap {
 		height=previousTurn.getHeight();
 		width=previousTurn.getWidth();
 		paths=previousTurn.getPaths();
+	}
+
+	/**
+	 * Copy constructor
+	 * 
+	 * I WANT A WAY AROUND THIS
+	 * Moves on to the next turn
+	 * 
+	 * @param previousTurn - the map of the previous turn to clone
+	 * @param decCooldown - whether or not to decrement Repeater cooldowns
+	 * @return 
+	 */
+	protected CastlesMap(CastlesMap previousTurn, boolean decCooldown) {
+		
 	}
 
 	/**
@@ -173,10 +191,12 @@ public class CastlesMap {
 	}
 	
 	public void addPlayer(int x, int y, String name){
-		Castle temp=new Castle(x,y,name,Castles.api.Color.values()[numTeams]);
+		Team newTeam=new Team(Castles.api.Color.values()[numTeams],numTeams);
+		Castle temp=new Castle(x,y,name,newTeam);
 		Vertex <RallyPoint,Integer> temp2=new Vertex<RallyPoint, Integer>(temp);
 		graph.addNode(temp2);
 		numTeams++;
+		teams.add(newTeam);
 	}
 	
 	public void addCastle(int x, int y, String name){
@@ -207,6 +227,7 @@ public class CastlesMap {
 		Vertex<RallyPoint, Integer> two= getNode(n2);
 		WeightedEdge<RallyPoint, Integer> temp=new WeightedEdge<RallyPoint, Integer>(weight);
 		graph.connect(one, two, temp);
+
 	}
 	
 	/*
@@ -267,6 +288,10 @@ public class CastlesMap {
 			return false;
 		}
 		return p1.isAdjacent(p2);
+	}
+	
+	public List<Team> getTeams(){
+		return teams;
 	}
 	
 }
