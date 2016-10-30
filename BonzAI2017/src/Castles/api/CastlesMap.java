@@ -41,12 +41,33 @@ public class CastlesMap {
 	public CastlesMap(){
 		graph=new WeightedGraph<>();
 		paths= new GraphPathSet<>(graph);
+		
 		numTeams=0;
 	}
 
 	public CastlesMap(CastlesMap previousTurn) {
-		this(previousTurn, true);
+		super();
 		teams=(ArrayList<Team>) previousTurn.getTeams();
+		DualLinkList<Vertex<RallyPoint, Integer>> list=previousTurn.getGraph().vertexList();
+		for(Vertex<RallyPoint, Integer> v:list){
+			Vertex<RallyPoint,Integer> newVert=new Vertex<RallyPoint, Integer>(v.getElement().copy());
+			graph.addNode(newVert);
+		}
+		DualLinkList<WeightedEdge<RallyPoint,Integer>> list2=previousTurn.getGraph().edgeList();
+		for(WeightedEdge<RallyPoint,Integer> w:list2){
+			if(w == null || w.getFirst() == null || w.getElement() == null){
+				System.err.println("Null edge");
+				break;
+			}
+			String name1=w.getFirst().getElement().getName();
+			String name2=w.getSecond().getElement().getName();
+			int weight=w.getElement();
+			connect(name1,name2,weight);
+		}
+		players=previousTurn.getPlayers();
+		height=previousTurn.getHeight();
+		width=previousTurn.getWidth();
+		paths=previousTurn.getPaths();
 	}
 
 	/**
@@ -60,23 +81,21 @@ public class CastlesMap {
 	 * @return 
 	 */
 	protected CastlesMap(CastlesMap previousTurn, boolean decCooldown) {
-		graph=new WeightedGraph<>();
-		DualLinkList<Vertex<RallyPoint, Integer>> list=previousTurn.getGraph().vertexList();
-		for(Vertex<RallyPoint, Integer> v:list){
-			Vertex<RallyPoint,Integer> newVert=new Vertex<RallyPoint, Integer>(v.getElement().copy());
-			graph.addNode(newVert);
-		}
-		DualLinkList<WeightedEdge<RallyPoint,Integer>> list2=previousTurn.getGraph().edgeList();
-		for(WeightedEdge<RallyPoint,Integer> w:list2){
-			String name1=w.getFirst().getElement().getName();
-			String name2=w.getSecond().getElement().getName();
-			int weight=w.getElement();
-			connect(name1,name2,weight);
-		}
-		players=previousTurn.getPlayers();
-		height=previousTurn.getHeight();
-		width=previousTurn.getWidth();
-		paths=getPaths();
+		
+	}
+
+	/**
+	 * Copy constructor
+	 * 
+	 * I WANT A WAY AROUND THIS
+	 * Moves on to the next turn
+	 * 
+	 * @param previousTurn - the map of the previous turn to clone
+	 * @param decCooldown - whether or not to decrement Repeater cooldowns
+	 * @return 
+	 */
+	protected CastlesMap(CastlesMap previousTurn, boolean decCooldown) {
+		
 	}	
 	
 	
@@ -85,6 +104,9 @@ public class CastlesMap {
 	 * @return
 	 */
 	public String getField(String input){
+		if(input.equals("size")){
+			return height + " " + width;
+		}
 		return fields.get(input);
 	}
 
@@ -138,6 +160,36 @@ public class CastlesMap {
 		return null;
 	}
 	
+	/**
+	 * returns an entity based on a unique id
+	 * @param s
+	 * @return
+	 */
+	public RallyPoint getEntity(String s){
+		for(Vertex<RallyPoint, Integer> v : graph.vertexList()){
+			if(v.getElement().getName().equals(s)){
+				return v.getElement();
+			}
+		}
+		return null;
+	}
+	
+	/**
+	 * returns the vertex containing an entity based on a unique id
+	 * the I param is useless, so set it to whatever you want
+	 * @param s the unique id of the entitiy
+	 * @param i useless
+	 * @return
+	 */
+	private Vertex<RallyPoint, Integer> getNode(String s){
+		for(Vertex<RallyPoint, Integer> v : graph.vertexList()){
+			if(v.getElement().getName().equals(s)){
+				return v;
+			}
+		}
+		return null;
+	}
+	
 	public void addPlayer(int x, int y, String name){
 		Team newTeam=new Team(Castles.api.Color.values()[numTeams],numTeams);
 		Castle temp=new Castle(x,y,name,newTeam);
@@ -171,21 +223,11 @@ public class CastlesMap {
 	 * @param weight
 	 */
 	public void connect(String n1, String n2, int weight){
-		DualLinkList<Vertex<RallyPoint, Integer>> list=graph.vertexList();
-		Vertex<RallyPoint, Integer> one=null;
-		Vertex<RallyPoint, Integer> two=null;
-		for(Vertex<RallyPoint, Integer> v:list){
-			if(v.getElement().getName().equals(n1)){
-				one=v;
-			}
-			if(v.getElement().getName().equals(n2)){
-				two=v;
-			}
-		}
+		Vertex<RallyPoint, Integer> one= getNode(n1);
+		Vertex<RallyPoint, Integer> two= getNode(n2);
 		WeightedEdge<RallyPoint, Integer> temp=new WeightedEdge<RallyPoint, Integer>(weight);
-		temp.setFirst(one);
-		temp.setSecond(two);
-		graph.addEdge(temp);
+		graph.connect(one, two, temp);
+
 	}
 	
 	/*
@@ -201,7 +243,55 @@ public class CastlesMap {
 	public boolean[] getPlayers(){
 		return players;
 	}
+	
+	public DualLinkList<Position> getRallyPointsPositions(){
+		DualLinkList<Position> pos= new DualLinkList<Position>();
+		for(Vertex<RallyPoint, Integer> r: getGraph().vertexList()){
+			if(!(r.getElement()instanceof Building)){
+				pos.addToFront(r.getElement().getPosition());
+			}
+		}
+		return pos;
+	}
+	public DualLinkList<Building> getBuildings(){
+		DualLinkList<Building> pos= new DualLinkList<Building>();
+		for(Vertex<RallyPoint, Integer> r: getGraph().vertexList()){
+			if(r.getElement()instanceof Building&&!(r.getElement()instanceof Castle)){
+				pos.addToFront((Building)r.getElement());
+			}
+		}
+		return pos;
+	}
+	public DualLinkList<Building> getCastles(){
+		DualLinkList<Building> pos= new DualLinkList<Building>();
+		for(Vertex<RallyPoint, Integer> r: getGraph().vertexList()){
+			if(r.getElement()instanceof Castle){
+				pos.addToFront((Building)r.getElement());
+			}
+		}
+		return pos;
+	}
+	
+	/**
+	 * Takes in 2 object unique identifiers and checks if they are in the
+	 * graph and are adjacent
+	 * 
+	 * @param o1 an object
+	 * @param o2 an object
+	 * @return true if o1 and o2 are in the graph and have an edge
+	 * 			connecting them
+	 */
+	public boolean isAdjecent(String o1, String o2){
+		Vertex<RallyPoint, Integer> p1 = getNode(o1);
+		Vertex<RallyPoint, Integer> p2 = getNode(o2);
+		if(p1 == null || p2 == null){
+			return false;
+		}
+		return p1.isAdjacent(p2);
+	}
+	
 	public List<Team> getTeams(){
 		return teams;
 	}
+	
 }
