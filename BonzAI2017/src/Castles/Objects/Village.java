@@ -1,6 +1,7 @@
 package Castles.Objects;
 
 import Castles.api.Color;
+import bonzai.Team;
 
 public class Village extends Building {
 
@@ -9,7 +10,7 @@ public class Village extends Building {
 		// TODO Auto-generated constructor stub
 	}
 
-	public Village(int x, int y, String newID, Color c) {
+	public Village(int x, int y, String newID, Team c) {
 		super(x, y, 10, 10, newID, c);
 		// TODO Auto-generated constructor stub
 	}

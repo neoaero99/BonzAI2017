@@ -11,15 +11,31 @@
 		<delete includeemptydirs = "true"><fileset dir = "ais" includes="**/bin/" /></delete>
 		<!-- Change -->
 		<delete file = "${package}/castles.jar" />
-		<!--<delete dir  = "${package}/ais/" />-->
-		<!--<delete dir  = "${package}/scenarios/" />-->
-		<!--<delete dir  = "${package}/art/" />-->
+		<delete dir  = "${package}/ais/" />
+		<delete dir  = "${package}/scenarios/" />
+		<delete dir  = "${package}/art/" />
 		<delete dir  = "${package}/docs/" />
 		<delete dir  = "${package}/automation/" />
 		<delete>
 			<fileset dir = "${package}" includes="*.err"/>
 		 	<fileset dir = "${package}" includes="*.out"/>
 		</delete>
+	</target>
+	
+	<!-- Replace Deleted Folders -->
+	<target name = "replace" depends = "clean">
+		<mkdir dir = "${package}/ais/" />
+		<mkdir dir = "${package}/scenarios/" />
+		<mkdir dir = "${package}/art/" />
+		<copy todir="${package}/ais/">
+		    <fileset dir="/ais/" />
+		</copy>
+		<copy todir="${package}/art/">
+			<fileset dir="/art/" />
+		</copy>
+		<copy todir="${package}/scenarios/">
+			<fileset dir="/scenarios/" />
+		</copy>
 	</target>
 
 	<!-- Stage Target(s) -->

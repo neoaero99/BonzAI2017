@@ -23,7 +23,6 @@ public class Parser {
 		Scanner in = new Scanner(file);
 
 		CastlesMap map = new CastlesMap();
-		int id = -1;	//Incremented before first use
 		
 		while (in.hasNextLine()) {
 			String line = in.nextLine().trim();
@@ -38,7 +37,6 @@ public class Parser {
 				else
 					row = ls[0].substring(1, ls[0].length() - 1).split("> #")[0].split(",? ");
 
-				id++;
 				switch(parse_mode) {
 				case PARSE_PLAYER:								
 					map.addPlayer(Integer.parseInt(row[0]), Integer.parseInt(row[1]), row[2]);
@@ -56,11 +54,10 @@ public class Parser {
 					break;
 					
 				case PARSE_VILLAGE:
-					
+					map.addVillage(Integer.parseInt(row[0]), Integer.parseInt(row[1]), row[2]);
 					break;
 
 				default: // parse mode/general
-					id--;	//This is not considered a game object
 					switch(ls[0]) {
 					case "players":
 						parse_mode = PARSE_PLAYER;
@@ -77,9 +74,13 @@ public class Parser {
 					case "paths":
 						parse_mode = PARSE_PATH;
 						break;
+						
+					case "villages":
+						parse_mode = PARSE_VILLAGE;
+						break;
 
 					default:
-						//map.setField(ls[0], ls[1]);
+						map.setField(ls[0], ls[1]);
 						break;
 					}
 
@@ -113,6 +114,7 @@ public class Parser {
 		};
 		
 //		map.calculatePaths();
+		
 
 		return map;
 	}

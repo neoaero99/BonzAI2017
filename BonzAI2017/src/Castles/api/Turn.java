@@ -204,7 +204,7 @@ public class Turn {
 	 */
 	public List<Team> getAllTeams() {
 		
-		return null;
+		return map.getTeams();
 	}
 
 	/**
