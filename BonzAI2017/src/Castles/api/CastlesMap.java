@@ -94,9 +94,6 @@ public class CastlesMap {
 	 * @param decCooldown - whether or not to decrement Repeater cooldowns
 	 * @return 
 	 */
-	protected CastlesMap(CastlesMap previousTurn, boolean decCooldown) {
-		
-	}	
 	
 	
 	/**
