@@ -43,7 +43,27 @@ public class CastlesMap {
 	}
 
 	public CastlesMap(CastlesMap previousTurn) {
-		this(previousTurn, true);
+		graph=new WeightedGraph<>();
+		DualLinkList<Vertex<RallyPoint, Integer>> list=previousTurn.getGraph().vertexList();
+		for(Vertex<RallyPoint, Integer> v:list){
+			Vertex<RallyPoint,Integer> newVert=new Vertex<RallyPoint, Integer>(v.getElement().copy());
+			graph.addNode(newVert);
+		}
+		DualLinkList<WeightedEdge<RallyPoint,Integer>> list2=previousTurn.getGraph().edgeList();
+		for(WeightedEdge<RallyPoint,Integer> w:list2){
+			if(w == null || w.getFirst() == null || w.getElement() == null){
+				System.err.println("Null edge");
+				break;
+			}
+			String name1=w.getFirst().getElement().getName();
+			String name2=w.getSecond().getElement().getName();
+			int weight=w.getElement();
+			connect(name1,name2,weight);
+		}
+		players=previousTurn.getPlayers();
+		height=previousTurn.getHeight();
+		width=previousTurn.getWidth();
+		paths=getPaths();
 	}
 
 	/**
@@ -57,23 +77,7 @@ public class CastlesMap {
 	 * @return 
 	 */
 	protected CastlesMap(CastlesMap previousTurn, boolean decCooldown) {
-		graph=new WeightedGraph<>();
-		DualLinkList<Vertex<RallyPoint, Integer>> list=previousTurn.getGraph().vertexList();
-		for(Vertex<RallyPoint, Integer> v:list){
-			Vertex<RallyPoint,Integer> newVert=new Vertex<RallyPoint, Integer>(v.getElement().copy());
-			graph.addNode(newVert);
-		}
-		DualLinkList<WeightedEdge<RallyPoint,Integer>> list2=previousTurn.getGraph().edgeList();
-		for(WeightedEdge<RallyPoint,Integer> w:list2){
-			String name1=w.getFirst().getElement().getName();
-			String name2=w.getSecond().getElement().getName();
-			int weight=w.getElement();
-			connect(name1,name2,weight);
-		}
-		players=previousTurn.getPlayers();
-		height=previousTurn.getHeight();
-		width=previousTurn.getWidth();
-		paths=getPaths();
+		
 	}	
 	
 	
