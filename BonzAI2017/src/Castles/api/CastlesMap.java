@@ -34,16 +34,19 @@ public class CastlesMap {
 	
 	private boolean players[]={true,true,true,true,true,true};
 	
-	private int z;
+	private int numTeams;
+	
+	private ArrayList<Team> teams= new ArrayList<Team>();
 	
 	public CastlesMap(){
 		graph=new WeightedGraph<>();
 		paths= new GraphPathSet<>(graph);
-		z=0;
+		numTeams=0;
 	}
 
 	public CastlesMap(CastlesMap previousTurn) {
 		this(previousTurn, true);
+		teams=(ArrayList<Team>) previousTurn.getTeams();
 	}
 
 	/**
@@ -136,10 +139,12 @@ public class CastlesMap {
 	}
 	
 	public void addPlayer(int x, int y, String name){
-		Castle temp=new Castle(x,y,name,Castles.api.Color.values()[z]);
+		Team newTeam=new Team(Castles.api.Color.values()[numTeams],numTeams);
+		Castle temp=new Castle(x,y,name,newTeam);
 		Vertex <RallyPoint,Integer> temp2=new Vertex<RallyPoint, Integer>(temp);
 		graph.addNode(temp2);
-		z++;
+		numTeams++;
+		teams.add(newTeam);
 	}
 	
 	public void addCastle(int x, int y, String name){
@@ -195,5 +200,8 @@ public class CastlesMap {
 	}
 	public boolean[] getPlayers(){
 		return players;
+	}
+	public List<Team> getTeams(){
+		return teams;
 	}
 }
