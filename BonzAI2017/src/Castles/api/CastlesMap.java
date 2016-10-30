@@ -1,22 +1,23 @@
 package Castles.api;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedList;
 import java.util.List;
 
-import Castles.Objects.*;
-import Castles.util.*;
-import Castles.util.graph.*;
+import Castles.Objects.Building;
+import Castles.Objects.Castle;
+import Castles.Objects.RallyPoint;
+import Castles.Objects.Target;
+import Castles.Objects.Traversable;
+import Castles.Objects.Village;
+import Castles.Objects.Wall;
+import Castles.util.graph.GraphPathSet;
+import Castles.util.graph.Vertex;
+import Castles.util.graph.WeightedEdge;
+import Castles.util.graph.WeightedGraph;
 import Castles.util.linkedlist.DualLinkList;
-import bonzai.Identifiable;
 import bonzai.Position;
-import bonzai.Positionable;
 import bonzai.Team;
-import bonzai.util.Predicate;
-import bonzai.util.Utility;
 
 public class CastlesMap {
 	
@@ -83,17 +84,7 @@ public class CastlesMap {
 	protected CastlesMap(CastlesMap previousTurn, boolean decCooldown) {
 		
 	}
-
-	/**
-	 * Copy constructor
-	 * 
-	 * I WANT A WAY AROUND THIS
-	 * Moves on to the next turn
-	 * 
-	 * @param previousTurn - the map of the previous turn to clone
-	 * @param decCooldown - whether or not to decrement Repeater cooldowns
-	 * @return 
-	 */
+//github.com/neoaero99/BonzAI2017
 	
 	
 	/**
