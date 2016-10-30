@@ -13,18 +13,18 @@ public class GraphPathSet<E extends Comparable<E>> {
 	 * the path's start and end vertices in the outer hashmap. Also, the set of
 	 * paths, which connect to the same node, are organized by their length.
 	 * 
-	 * Yes, it is a hashmap, of hashmaps of doubly linked lists sorted by
-	 * the edge weights, sorted by node pairs.
+	 * Yes, it is a hashmap, of hashmaps of doubly linked lists sorted by the
+	 * edge weights, sorted by node pairs.
 	 */
-	private final HashMap<VertexPair<E, Integer>, HashMap<Integer, DualLinkList<WeightedEdge<E, Integer>>>> VPPathsSet;
+	private final HashMap<VertexPair<E, Integer>, DualLinkList<WeightedEdge<E, Integer>>> VPPathsSet;
 	private final WeightedGraph<E, Integer> graph;
-	public static void main(String[] args){
+
+	public static void main(String[] args) {
 		WeightedGraph<Integer, Integer> g = new WeightedGraph<Integer, Integer>();
 		GraphPathSet<Integer> gpath = new GraphPathSet<Integer>(g);
-		Vertex<Integer, Integer> node0, node1, node2, node3, node4, node5, node6,node7, node8, node9, node10;
-		WeightedEdge<Integer, Integer> edge0, edge1, edge2, edge3, edge4, edge5, edge6, edge7, edge8, edge9, edge10,
-									   edge11, edge12, edge13, edge14;
-		
+		Vertex<Integer, Integer> node0, node1, node2, node3, node4, node5, node6, node7, node8, node9, node10;
+		WeightedEdge<Integer, Integer> edge0, edge1, edge2, edge3, edge4, edge5, edge6, edge7, edge8, edge9, edge10, edge11, edge12, edge13, edge14;
+
 		node0 = new Vertex<Integer, Integer>(0);
 		node1 = new Vertex<Integer, Integer>(1);
 		node2 = new Vertex<Integer, Integer>(2);
@@ -36,7 +36,7 @@ public class GraphPathSet<E extends Comparable<E>> {
 		node8 = new Vertex<Integer, Integer>(8);
 		node9 = new Vertex<Integer, Integer>(9);
 		node10 = new Vertex<Integer, Integer>(10);
-		
+
 		edge0 = new WeightedEdge<Integer, Integer>(2);
 		edge1 = new WeightedEdge<Integer, Integer>(1);
 		edge2 = new WeightedEdge<Integer, Integer>(2);
@@ -52,7 +52,7 @@ public class GraphPathSet<E extends Comparable<E>> {
 		edge12 = new WeightedEdge<Integer, Integer>(7);
 		edge13 = new WeightedEdge<Integer, Integer>(5);
 		edge14 = new WeightedEdge<Integer, Integer>(9);
-		
+
 		WeightedGraph.connect(node0, node1, edge0);
 		WeightedGraph.connect(node1, node2, edge1);
 		WeightedGraph.connect(node2, node3, edge2);
@@ -68,19 +68,19 @@ public class GraphPathSet<E extends Comparable<E>> {
 		WeightedGraph.connect(node2, node6, edge12);
 		WeightedGraph.connect(node4, node10, edge13);
 		WeightedGraph.connect(node3, node8, edge14);
-		
+
 		g.addNode(node0);
-		g.addNode(node1);		
+		g.addNode(node1);
 		g.addNode(node2);
 		g.addNode(node3);
 		g.addNode(node4);
-		g.addNode(node5);	
+		g.addNode(node5);
 		g.addNode(node6);
 		g.addNode(node7);
 		g.addNode(node8);
 		g.addNode(node9);
 		g.addNode(node10);
-		
+
 		g.addEdge(edge0);
 		g.addEdge(edge1);
 		g.addEdge(edge2);
@@ -96,60 +96,88 @@ public class GraphPathSet<E extends Comparable<E>> {
 		g.addEdge(edge12);
 		g.addEdge(edge13);
 		g.addEdge(edge14);
-		
-		DualLinkList<WeightedEdge<Integer, Integer>> path = gpath.shortestPath(node0, node5);
-		
-		for(WeightedEdge<Integer, Integer> t: path){
-			System.out.printf("([%s] to [%s]) ", t.getFirst(), t.getSecond());
+
+		DualLinkList<WeightedEdge<Integer, Integer>> path = gpath.shortestPath(
+				node0, node5);
+		for (WeightedEdge<Integer, Integer> t : path) {
+			System.out.printf("([%s] to [%s]) \n", t.getFirst(), t.getSecond());
 		}
 	}
-	
+
 	public GraphPathSet(WeightedGraph<E, Integer> g) {
-		VPPathsSet = new HashMap<VertexPair<E, Integer>, HashMap<Integer, DualLinkList<WeightedEdge<E, Integer>>>>();
+		VPPathsSet = new HashMap<VertexPair<E, Integer>, DualLinkList<WeightedEdge<E, Integer>>>();
 		graph = g;
+		generatePaths();
 	}
-	
+
 	public DualLinkList<WeightedEdge<E, Integer>> getPath(/* Parameters? */) {
 		// TODO
 		return null;
 	}
-	
-	public DualLinkList<WeightedEdge<E, Integer>> shortestPath(Vertex<E, Integer> start, Vertex<E, Integer> end) {
+
+	/**
+	 * Generates paths creates a hashmap containing all shortests paths for a
+	 * given graph
+	 */
+	private void generatePaths() {
+		for (Vertex<E, Integer> v : graph.vertexList()) {
+			for (Vertex<E, Integer> u : graph.vertexList()) {
+				if (v.equals(u))
+					continue;
+				VertexPair<E, Integer> current = new VertexPair<E, Integer>(v,
+						u);
+				if (!VPPathsSet.containsKey(current)) {
+					VPPathsSet.put(current, shortestPath(u, v));
+				}
+			}
+		}
+
+	}
+
+	public DualLinkList<WeightedEdge<E, Integer>> shortestPath(
+			Vertex<E, Integer> start, Vertex<E, Integer> end) {
 		DualLinkList<Vertex<E, Integer>> vertices = graph.vertexList();
-		
+
 		HashMap<Vertex<E, Integer>, ExtraData> vertexData = new HashMap<Vertex<E, Integer>, ExtraData>();
-		AdaptablePQ<Integer, Vertex<E, Integer>> remaining = new AdaptablePQ<Integer, Vertex<E, Integer>>( 
-				vertices.size(), new MinComparator<PQEntry<Integer, Vertex<E, Integer>>>() );	
-		
+		AdaptablePQ<Integer, Vertex<E, Integer>> remaining = new AdaptablePQ<Integer, Vertex<E, Integer>>(
+				vertices.size(),
+				new MinComparator<PQEntry<Integer, Vertex<E, Integer>>>());
+
 		for (Vertex<E, Integer> v : vertices) {
 			int iniWeight = (v == start) ? 0 : Integer.MAX_VALUE;
-			vertexData.put(v, new ExtraData(0, iniWeight, remaining.insert(iniWeight, v), null));
+			vertexData.put(v,
+					new ExtraData(0, iniWeight, remaining.insert(iniWeight, v),
+							null));
 		}
-		
+
 		System.out.println(remaining.toString(1));
-		
+
 		while (!remaining.isEmpty()) {
 			Vertex<E, Integer> least = remaining.removeMax();
 			ExtraData ltData = vertexData.get(least);
 			ltData.flag = 1;
-			
-			//System.out.printf("%s\n", remaining);
-			
-			if (least == end) { break; }
-			
-			DualLinkList<WeightedEdge<E, Integer>> incEdges = least.incidentEdges();
-			
+
+			// System.out.printf("%s\n", remaining);
+
+			if (least == end) {
+				break;
+			}
+
+			DualLinkList<WeightedEdge<E, Integer>> incEdges = least
+					.incidentEdges();
+
 			for (WeightedEdge<E, Integer> e : incEdges) {
 				Vertex<E, Integer> opposite = e.getOpposite(least);
-				
+
 				if (opposite != least) {
 					ExtraData oppData = vertexData.get(opposite);
-					
+
 					if (oppData.flag == 0) {
 						Integer newWeight = e.getElement() + ltData.weight;
-						
+
 						if (newWeight < oppData.entryRef.getKey()) {
-							remaining.replaceKey(oppData.entryRef.getIndex(), newWeight);
+							remaining.replaceKey(oppData.entryRef.getIndex(),
+									newWeight);
 							oppData.weight = newWeight;
 							oppData.backEdge = e;
 						}
@@ -157,52 +185,55 @@ public class GraphPathSet<E extends Comparable<E>> {
 				}
 			}
 		}
-		
+
 		DualLinkList<WeightedEdge<E, Integer>> path = new DualLinkList<WeightedEdge<E, Integer>>();
 		Vertex<E, Integer> limbo = end;
 		ExtraData data = vertexData.get(limbo);
-		
+
 		/**/
 		System.out.println("PATH CALCULATED!");
-		
+
 		Set<Vertex<E, Integer>> keys = vertexData.keySet();
-		
+
 		System.out.print("[ ");
 		for (Vertex<E, Integer> v : keys) {
 			System.out.printf("%s : %s; ", v, vertexData.get(v).backEdge);
 		}
 		System.out.println("]");
-		
+
 		System.out.println(limbo);
 		/**/
-		
+
 		while (limbo != null && limbo != start && data.backEdge != null) {
 			path.addToFront(data.backEdge);
 			limbo = data.backEdge.getOpposite(limbo);
 			data = vertexData.get(limbo);
 		}
-		
+
 		System.out.println("FINISHED!");
-		
+
 		return path;
 	}
-	
+
 	public boolean pathExists(GraphPath<E, Integer> path) {
 		// TODO
 		return false;
 	}
-	
-	public WeightedGraph<E, Integer> getGraph() { return graph; }
-	
+
+	public WeightedGraph<E, Integer> getGraph() {
+		return graph;
+	}
+
 	private class ExtraData {
 		private int flag;
 		private int weight;
 		private PQEntry<Integer, Vertex<E, Integer>> entryRef;
 		private WeightedEdge<E, Integer> backEdge;
-		
-		public ExtraData(int f, int w, PQEntry<Integer, Vertex<E, Integer>>
-								entry, WeightedEdge<E, Integer> bEdge) {
-			
+
+		public ExtraData(int f, int w,
+				PQEntry<Integer, Vertex<E, Integer>> entry,
+				WeightedEdge<E, Integer> bEdge) {
+
 			flag = f;
 			weight = w;
 			entryRef = entry;
