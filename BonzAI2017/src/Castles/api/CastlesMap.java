@@ -182,7 +182,7 @@ public class CastlesMap {
 				two=v;
 			}
 		}
-		WeightedEdge<RallyPoint, Integer> temp=new WeightedEdge<RallyPoint, Integer>();
+		WeightedEdge<RallyPoint, Integer> temp=new WeightedEdge<RallyPoint, Integer>(weight);
 		temp.setFirst(one);
 		temp.setSecond(two);
 		graph.addEdge(temp);
