@@ -18,6 +18,7 @@ public class GraphPathSet<E extends Comparable<E>> {
 	 */
 	private final HashMap<VertexPair<E, Integer>, HashMap<Integer, DualLinkList<WeightedEdge<E, Integer>>>> VPPathsSet;
 	private final WeightedGraph<E, Integer> graph;
+	
 	public static void main(String[] args){
 		WeightedGraph<Integer, Integer> g = new WeightedGraph<Integer, Integer>();
 		GraphPathSet<Integer> gpath = new GraphPathSet<Integer>(g);
