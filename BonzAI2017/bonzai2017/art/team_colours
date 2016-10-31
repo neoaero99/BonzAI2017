@@ -1,5 +1,6 @@
 Team Colours:
 
+<<<<<<< HEAD
 
 Red: d93315
 
@@ -10,5 +11,17 @@ Blue: 44378e
 Green: 00ad3b
 
 Orange: ec8700
+=======
+
+Red: d93315
+
+Yellow: eeda66
+
+Blue: 44378e
+
+Green: 00ad3b
+
+Orange: ec8700
+>>>>>>> master
 
 Purple: cf47cf
