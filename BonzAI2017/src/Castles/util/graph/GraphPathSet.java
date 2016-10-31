@@ -25,13 +25,8 @@ public class GraphPathSet<E extends Comparable<E>> {
 	 * The graph associated with the VPPathsSet
 	 */
 	private final WeightedGraph<E, Integer> graph;
-<<<<<<< HEAD
-	
-	public static void main(String[] args){
-=======
 
 	public static void main(String[] args) {
->>>>>>> master
 		WeightedGraph<Integer, Integer> g = new WeightedGraph<Integer, Integer>();
 		GraphPathSet<Integer> gpath = new GraphPathSet<Integer>(g);
 		Vertex<Integer, Integer> node0, node1, node2, node3, node4, node5, node6, node7, node8,
