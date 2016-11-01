@@ -5,6 +5,9 @@ import java.util.ArrayList;
 
 import javax.swing.JComponent;
 import Castles.util.VectorND;
+import Castles.util.graph.Node;
+import Castles.util.graph.WeightedEdge;
+import Castles.util.linkedlist.DualLinkList;
 
 /**
  * Class:	Soldier.java
@@ -53,10 +56,19 @@ public class Soldier extends JComponent {
 	public int value = 1;
 	// The radius used in collision
 	public float radius = 0f;
+	
+	/**
+	 * So, I replaced your position reference to a node (which can be either
+	 * a vertex or edge), so that a soldier can reference the graph directly.
+	 * Also, all path generations return a linked list of edges, so I
+	 * modified your given_path as such.
+	 * 		- Joshua
+	 */
+	
 	// The position of the soldier on the map (on screen)
-	public VectorND position;
+	public Node<RallyPoint> position;
 	// An array list that is the current path (in nodes on the graph)
-	public ArrayList<VectorND> given_path;
+	public DualLinkList<WeightedEdge<RallyPoint, Integer>> given_path;
 	// The current status of the soldier (always defaults to standby)
 	public SoldierState state;
 	
@@ -72,7 +84,7 @@ public class Soldier extends JComponent {
 	 * 
 	 * @author David Mohrhardt
 	 */
-	public Soldier(VectorND base_position) {
+	public Soldier(Node<RallyPoint> base_position) {
 		position = base_position;
 		state = SoldierState.STANDBY;
 	}
