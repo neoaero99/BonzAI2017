@@ -497,6 +497,10 @@ public class Turn {
 		}
 		return pos;
 	}
+	/**
+	 * Gets all Villages
+	 * @return a dual linked list of all villages
+	 */
 	public DualLinkList<Building> getVillages(){
 		DualLinkList<Building> pos= new DualLinkList<Building>();
 		for(Vertex<RallyPoint, Integer> r:map.getGraph().vertexList()){
@@ -506,10 +510,7 @@ public class Turn {
 		}
 		return pos;
 	}
-	/**
-	 * Gets all Villages
-	 * @return a dual linked list of all villages
-	 */
+	
 	public DualLinkList<WeightedEdge<RallyPoint, Integer>> getEdges(){
 		return map.getGraph().edgeList();
 	}
