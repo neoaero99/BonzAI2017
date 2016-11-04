@@ -111,6 +111,7 @@ public class CastlesMap {
 	public void setField(String string, String string2) {
 		if(!string.equals("size")){
 			fields.put(string, string2);
+			
 		} else {
 			String[] parts = string2.split(", ");
 			width = Integer.parseInt(parts[0]);
