@@ -129,7 +129,7 @@ public class AIHost {
 	
 	public static AIHost spawn(String timestamp, bonzai.Scenario scenario, bonzai.Jar me, List<bonzai.Jar> jars, int id) throws IOException {
 		List<String> command = new ArrayList<>();
-		command.addAll(Arrays.asList("java", "-cp", "lazers.jar", "bonzai.AIClient"));
+		command.addAll(Arrays.asList("java", "-cp", "castles.jar", "bonzai.AIClient"));
 		command.add(String.format("%s", me.name()));
 		command.add(String.format("%d", id));
 		command.add(scenario.getFile().getAbsolutePath());
