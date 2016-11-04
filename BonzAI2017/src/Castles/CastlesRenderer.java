@@ -447,12 +447,12 @@ public class CastlesRenderer extends bonzai.Renderer {
 		}
 	}
 	private static void renderBuildings(Graphics2D g, Turn turn){
-		for(Building p:turn.getBuilding()){
+		for(Building p:turn.getDefaults()){
 			drawToScale(g,castleImage,p.getPosition().getX(),p.getPosition().getY(),0,1,1);
 		}
 	}
 	private static void renderCastles(Graphics2D g, Turn turn){
-		for(Building p:turn.getCastle()){
+		for(Building p:turn.getCastles()){
 			drawToScale(g,emitterImages.get(p.getColor()),p.getPosition().getX(),p.getPosition().getY(),0,1,1);
 		}
 	}
@@ -752,6 +752,32 @@ public class CastlesRenderer extends bonzai.Renderer {
 //		//Adjust the scale to be 1 unit
 //		float scale = 1f/img.getWidth();
 //		double rotation = Math.atan2(line.y2 - line.y1, line.x2 - line.x1);
+//
+//		float beamWidthScale = 0.4f;
+//
+//		af.translate(line.x1, line.y1);
+//		af.rotate(rotation);
+//		af.translate(0, -0.5f);
+//		af.scale(length*scale, scale);
+//
+//		g.transform(af);
+//		g.drawImage(img,0,0,null);
+//
+//		g.setTransform(original);
+//	}
+//
+//	private static float lineLength(Line2D line) {
+//		double deltaX = line.getX2() - line.getX1();
+//		double deltaY = line.getY2() - line.getY1();
+//		return (float)Math.sqrt((deltaX*deltaX) + (deltaY*deltaY));
+//	}
+//
+//	private static Line2D.Float partOfLine(Line2D.Float line,float percent) {
+//		float xOffset = (line.x2-line.x1) * percent;
+//		float yOffset = (line.y2-line.y1) * percent;
+//		return new Line2D.Float(line.x1,line.y1,line.x1+xOffset,line.y1+yOffset);
+//	}
+//}line.x1);
 //
 //		float beamWidthScale = 0.4f;
 //

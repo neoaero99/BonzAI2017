@@ -246,7 +246,7 @@ public class CastlesMap {
 		}
 		return pos;
 	}
-	public DualLinkList<Building> getBuildings(){
+	public DualLinkList<Building> getDefaultss(){
 		DualLinkList<Building> pos= new DualLinkList<Building>();
 		for(Vertex<RallyPoint, Integer> r: getGraph().vertexList()){
 			if(r.getElement()instanceof Building&&!(r.getElement()instanceof Castle)){
