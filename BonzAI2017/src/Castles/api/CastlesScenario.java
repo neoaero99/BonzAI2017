@@ -133,7 +133,7 @@ public class CastlesScenario implements bonzai.Scenario {
 
 	@Override
 	public int getNumTeams() {
-		return Integer.parseInt(map.getField("players"));
+		return Integer.parseInt(map.getField("playercount"));
 	}
 
 

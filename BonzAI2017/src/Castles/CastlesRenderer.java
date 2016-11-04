@@ -238,7 +238,7 @@ public class CastlesRenderer extends bonzai.Renderer {
 //		renderRepeaters(g, turn, nextTurn, bellTween,smoothTween);
 //		renderTargets(g, turn, nextTurn,getBellCurve(part3Tween),getSmoothCurve(part3Tween));
 		renderShoutActions(g, turn, nextTurn, smoothTween);
-		renderNodes(g, turn);
+		//renderNodes(g, turn);
 		//renderRallyPoints(g,turn);
 		//renderBuildings(g,turn);
 		//renderCastles(g,turn);
