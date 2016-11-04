@@ -772,4 +772,30 @@ public class CastlesRenderer extends bonzai.Renderer {
 //		float yOffset = (line.y2-line.y1) * percent;
 //		return new Line2D.Float(line.x1,line.y1,line.x1+xOffset,line.y1+yOffset);
 //	}
+//}line.x1);
+//
+//		float beamWidthScale = 0.4f;
+//
+//		af.translate(line.x1, line.y1);
+//		af.rotate(rotation);
+//		af.translate(0, -0.5f);
+//		af.scale(length*scale, scale);
+//
+//		g.transform(af);
+//		g.drawImage(img,0,0,null);
+//
+//		g.setTransform(original);
+//	}
+//
+//	private static float lineLength(Line2D line) {
+//		double deltaX = line.getX2() - line.getX1();
+//		double deltaY = line.getY2() - line.getY1();
+//		return (float)Math.sqrt((deltaX*deltaX) + (deltaY*deltaY));
+//	}
+//
+//	private static Line2D.Float partOfLine(Line2D.Float line,float percent) {
+//		float xOffset = (line.x2-line.x1) * percent;
+//		float yOffset = (line.y2-line.y1) * percent;
+//		return new Line2D.Float(line.x1,line.y1,line.x1+xOffset,line.y1+yOffset);
+//	}
 }
