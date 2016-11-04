@@ -425,6 +425,12 @@ public class Turn {
 		((Emitter) map.getEntity(teamID)).setTeam(teams.get(teamID));			// Update the team's emitter to have the correct reference
 	}
 	*/
+	
+	
+	/**
+	 * Gets all rally points positions within the map, not including buildings
+	 * @return a dual linked list of the positions of each rally point
+	 */
 	public DualLinkList<Position> getRallyPointsPositions(){
 		DualLinkList<Position> pos= new DualLinkList<Position>();
 		for(Vertex<RallyPoint, Integer> r:map.getGraph().vertexList()){
@@ -434,16 +440,25 @@ public class Turn {
 		}
 		return pos;
 	}
-	public DualLinkList<Building> getBuilding(){
+	/**
+	 * Gets all buldings, but none of the children classes. This will not be needed outside of having
+	 *  a default render method method.
+	 * @return a dual linked list of the buildings only
+	 */
+	public DualLinkList<Building> getDefaults(){
 		DualLinkList<Building> pos= new DualLinkList<Building>();
 		for(Vertex<RallyPoint, Integer> r:map.getGraph().vertexList()){
-			if(r.getElement()instanceof Building&&!(r.getElement()instanceof Castle)){
+			if(r.getElement()instanceof Building&&!(r.getElement()instanceof Castle)&&!(r.getElement() instanceof Village)){
 				pos.addToFront((Building)r.getElement());
 			}
 		}
 		return pos;
 	}
-	public DualLinkList<Building> getCastle(){
+	/**
+	 * gets all Castles within the map
+	 * @return a dual linked list of the catles
+	 */
+	public DualLinkList<Building> getCastles(){
 		DualLinkList<Building> pos= new DualLinkList<Building>();
 		for(Vertex<RallyPoint, Integer> r:map.getGraph().vertexList()){
 			if(r.getElement()instanceof Castle){
@@ -452,6 +467,32 @@ public class Turn {
 		}
 		return pos;
 	}
+	/**
+	 * Gets all buildings, Including anything that would extend it.
+	 * @return a dual linked list of anything that is a building
+	 */
+	public DualLinkList<Building> getBuildings(){
+		DualLinkList<Building> pos= new DualLinkList<Building>();
+		for(Vertex<RallyPoint, Integer> r:map.getGraph().vertexList()){
+			if(r.getElement()instanceof Building){
+				pos.addToFront((Building)r.getElement());
+			}
+		}
+		return pos;
+	}
+	public DualLinkList<Building> getVillages(){
+		DualLinkList<Building> pos= new DualLinkList<Building>();
+		for(Vertex<RallyPoint, Integer> r:map.getGraph().vertexList()){
+			if(r.getElement()instanceof Village){
+				pos.addToFront((Building)r.getElement());
+			}
+		}
+		return pos;
+	}
+	/**
+	 * Gets all Villages
+	 * @return a dual linked list of all villages
+	 */
 	public DualLinkList<WeightedEdge<RallyPoint, Integer>> getEdges(){
 		return map.getGraph().edgeList();
 	}

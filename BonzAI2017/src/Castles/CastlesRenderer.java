@@ -409,12 +409,12 @@ public class CastlesRenderer extends bonzai.Renderer {
 		}
 	}
 	private static void renderBuildings(Graphics2D g, Turn turn){
-		for(Building p:turn.getBuilding()){
+		for(Building p:turn.getDefaults()){
 			drawToScale(g,castleImage,p.getPosition().getX(),p.getPosition().getY(),0,1,1);
 		}
 	}
 	private static void renderCastles(Graphics2D g, Turn turn){
-		for(Building p:turn.getCastle()){
+		for(Building p:turn.getCastles()){
 			drawToScale(g,emitterImages.get(p.getColor()),p.getPosition().getX(),p.getPosition().getY(),0,1,1);
 		}
 	}
