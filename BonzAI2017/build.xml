@@ -24,22 +24,23 @@
 	
 	<!-- Replace Deleted Folders -->
 	<target name = "replace" depends = "clean">
-		<mkdir dir = "${package}/ais/" />
-		<mkdir dir = "${package}/scenarios/" />
-		<mkdir dir = "${package}/art/" />
-		<copy todir="${package}/ais/">
-		    <fileset dir="/ais/" />
+		<echo>Starting the File Replacement</echo>
+		<mkdir dir = "${package}/ais" />
+		<mkdir dir = "${package}/scenarios" />
+		<mkdir dir = "${package}/art" />
+		<copy todir="${package}/ais">
+		    <fileset dir="ais/" />
 		</copy>
-		<copy todir="${package}/art/">
-			<fileset dir="/art/" />
+		<copy todir="${package}/art">
+			<fileset dir="art/" />
 		</copy>
-		<copy todir="${package}/scenarios/">
-			<fileset dir="/scenarios/" />
+		<copy todir="${package}/scenarios">
+			<fileset dir="scenarios/" />
 		</copy>
 	</target>
 
 	<!-- Stage Target(s) -->
-	<target name = "stage" depends = "clean">
+	<target name = "stage" depends = "clean,replace">
 		<mkdir dir = "${bin}" />
 	</target>
 
