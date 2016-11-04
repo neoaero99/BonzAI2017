@@ -56,6 +56,9 @@ public class Parser {
 				case PARSE_VILLAGE:
 					map.addVillage(Integer.parseInt(row[0]), Integer.parseInt(row[1]), row[2]);
 					break;
+					
+				case PARSE_NONE:
+					break;
 
 				default: // parse mode/general
 					switch(ls[0]) {
