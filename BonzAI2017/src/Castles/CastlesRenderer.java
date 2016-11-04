@@ -148,6 +148,12 @@ public class CastlesRenderer extends bonzai.Renderer {
 		
 	}
 
+	/**
+	 * sets the backGround image to the image connected to the supplied
+	 * theme
+	 * 
+	 * @param theme the map name being set
+	 */
 	public static void setBackground(String theme) {
 		//Set the background image
 		backgroundImage = backgroundImages.get(theme);
@@ -285,7 +291,8 @@ public class CastlesRenderer extends bonzai.Renderer {
 	 * 
 	 * @param g - the graphics object to draw onto
 	 */
-	public static void renderBackground(Graphics2D g, CastlesMap map) {
+	private static void renderBackground(Graphics2D g, CastlesMap map) {
+		System.out.println(map.getField("theme"));
 		setBackground(map.getField("theme"));
 		AffineTransform original = g.getTransform();
 
