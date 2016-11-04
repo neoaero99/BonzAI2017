@@ -429,7 +429,7 @@ public class Turn {
 	 * Returns all rally points, buildings (i.e. castles, villages) in
 	 * the map.
 	 * 
-	 * @return	A lsit of all rally points, buildings in the map
+	 * @return	A list of all rally points, buildings in the map
 	 */
 	public DualLinkList<RallyPoint> getAllNodes() {
 		DualLinkList<RallyPoint> nodes = new DualLinkList<RallyPoint>();
