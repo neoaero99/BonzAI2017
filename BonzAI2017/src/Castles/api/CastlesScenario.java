@@ -27,20 +27,19 @@ public class CastlesScenario implements bonzai.Scenario {
 	
 	public CastlesScenario(File file, int teamID) throws IOException {
 		//TODO 2017: This is what we used to parse and use the map files for our game. This is an example.
-		
-		
-		
 		this.file = file;
 		this.teamID = teamID;
 		
 		try {
 			//Get the map object we need to instantiate the game.
 			map = Parser.parseFile(file);
-			
+			CastlesRenderer.loadImages();
 //			String[] size = map.getField("size").split(", *");
 //			LazersRenderer.setMapSize(Integer.parseInt(size[0]), Integer.parseInt(size[1]));
 			name = map.getField("name");
-			
+			if(name == null){
+				System.out.println("FAILED");
+			}
 		} catch (Exception e) {
 			System.err.println("Exception occured when reading the file!");
 			e.printStackTrace();
@@ -128,21 +127,18 @@ public class CastlesScenario implements bonzai.Scenario {
 
 	@Override
 	public File getFile() {
-		// TODO Auto-generated method stub
-		return null;
+		return file;
 	}
 
 
 	@Override
 	public int getNumTeams() {
-		// TODO Auto-generated method stub
-		return 0;
+		return Integer.parseInt(map.getField("players"));
 	}
 
 
 	@Override
 	public Image getImage() {
-		// TODO Auto-generated method stub
-		return null;
+		return image;
 	}
 }

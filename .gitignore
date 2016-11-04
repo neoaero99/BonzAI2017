@@ -11,6 +11,7 @@ local.properties
 .recommenders
 BonzAI2016/*
 BonzAI2017/BonzAI2017/*.jar
+BonzAI2017/BonzAI2017/*
 bonzai-2016
 
 # Mac .DS_STORE

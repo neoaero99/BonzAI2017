@@ -27,7 +27,7 @@ public class CastlesMap {
 	private int min, mid;
 	int width,height;
 	
-	private HashMap<String, String> fields = new HashMap<>();
+	private HashMap<String, String> fields = new HashMap<String, String>();
 	private HashMap<Integer, Traversable> entities = new HashMap<>();
 	
 	private WeightedGraph<RallyPoint,Integer> graph;
@@ -65,6 +65,7 @@ public class CastlesMap {
 			int weight=w.getElement();
 			connect(name1,name2,weight);
 		}
+		fields = previousTurn.getFields();
 		players=previousTurn.getPlayers();
 		height=previousTurn.getHeight();
 		width=previousTurn.getWidth();
@@ -95,6 +96,9 @@ public class CastlesMap {
 		if(input.equals("size")){
 			return height + " " + width;
 		}
+		if(fields.get(input) == null){
+			throw new IllegalArgumentException(input);
+		}
 		return fields.get(input);
 	}
 
@@ -111,7 +115,7 @@ public class CastlesMap {
 	public void setField(String string, String string2) {
 		if(!string.equals("size")){
 			fields.put(string, string2);
-			
+			System.out.println(string  + " set to " + fields.get(string));
 		} else {
 			String[] parts = string2.split(", ");
 			width = Integer.parseInt(parts[0]);
@@ -281,6 +285,10 @@ public class CastlesMap {
 	
 	public List<Team> getTeams(){
 		return teams;
+	}
+	
+	protected HashMap<String, String> getFields(){
+		return fields;
 	}
 	
 }

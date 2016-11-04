@@ -87,36 +87,42 @@ public class CastlesRenderer extends bonzai.Renderer {
 //	private static Map<Castles.api.Color, BufferedImage> castleImages = new HashMap<>();
 //	private static BufferedImage[] targetImages = new BufferedImage[targetFiles.length];
 	private static BufferedImage wallImage,repeaterImage,castleImage;
+	private static boolean imagesLoaded = false;
+
+	public CastlesRenderer(){
+		loadImages();
+	}
+	
+	public static void loadImages(){
+		if(!imagesLoaded){
+			imagesLoaded = true;
+			colors.put(Castles.api.Color.RED,    new Color(217,  51,   21)); // Red
+			colors.put(Castles.api.Color.YELLOW, new Color(238, 218,  102)); // Yellow
+			colors.put(Castles.api.Color.BLUE,   new Color(68,   55,  142)); // Blue
+			colors.put(Castles.api.Color.GREEN,  new Color(0,   173,   59)); // Green
+			colors.put(Castles.api.Color.ORANGE, new Color(236, 135,    0)); // Orange
+			colors.put(Castles.api.Color.PURPLE, new Color(207,  71,  207)); // Purple
 
 
-	static {
+			getBackgroundImages();
+			try { 
+				//Read the images into the data structures, given the file names defined above.
+				repeaterImage = ImageIO.read(new File("art/sprites/repeater.png"));
+				//TODO load out sprites here
+//				//load our png's
+				emitterImages = loadIntoMap(playerFiles);
+				selectorImages = loadIntoMap(selectorFiles);
+				castleImage = ImageIO.read(castleFile);
+				wallImage = ImageIO.read(wallFile);
+//				discoveryImage = ImageIO.read(discoveryFile);
+//				cloudImage = ImageIO.read(cloudFile);
 
-		colors.put(Castles.api.Color.RED,    new Color(217,  51,   21)); // Red
-		colors.put(Castles.api.Color.YELLOW, new Color(238, 218,  102)); // Yellow
-		colors.put(Castles.api.Color.BLUE,   new Color(68,   55,  142)); // Blue
-		colors.put(Castles.api.Color.GREEN,  new Color(0,   173,   59)); // Green
-		colors.put(Castles.api.Color.ORANGE, new Color(236, 135,    0)); // Orange
-		colors.put(Castles.api.Color.PURPLE, new Color(207,  71,  207)); // Purple
-
-
-		getBackgroundImages();
-		try { 
-			//Read the images into the data structures, given the file names defined above.
-			repeaterImage = ImageIO.read(new File("art/sprites/repeater.png"));
-//			
-//
-//
-//			//load our png's
-			emitterImages = loadIntoMap(playerFiles);
-			selectorImages = loadIntoMap(selectorFiles);
-			castleImage = ImageIO.read(castleFile);
-			wallImage = ImageIO.read(wallFile);
-//			discoveryImage = ImageIO.read(discoveryFile);
-//			cloudImage = ImageIO.read(cloudFile);
-
-		} catch (Exception e) {
-			System.out.println(e.getMessage());
-			e.printStackTrace();
+			} catch (Exception e) {
+				System.out.println(e.getMessage());
+				e.printStackTrace();
+			}
+		}else{
+			return;
 		}
 	}
 
@@ -135,16 +141,16 @@ public class CastlesRenderer extends bonzai.Renderer {
 		File temp = new File(path);//opens the map directory
 		String[] files = temp.list(); //gets all files in the directory
 		for(int i = 0; i < files.length; i++){
-			if(temp.isDirectory()){
-				continue;
-			}else{
+			System.out.println(files[i]);
+			
 				String name = files[i].replace(".png", "");
+				
 				try {
 					backgroundImages.put(name, ImageIO.read(new File(path+files[i])));
 				} catch (IOException e) {
 					e.printStackTrace();
 				}
-			}
+			
 		}
 		
 	}
@@ -294,7 +300,6 @@ public class CastlesRenderer extends bonzai.Renderer {
 	 * @param g - the graphics object to draw onto
 	 */
 	private static void renderBackground(Graphics2D g, CastlesMap map) {
-		System.out.println(map.getField("theme"));
 		setBackground(map.getField("theme"));
 		AffineTransform original = g.getTransform();
 
