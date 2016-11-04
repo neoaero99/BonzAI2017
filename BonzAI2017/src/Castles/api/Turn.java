@@ -425,6 +425,26 @@ public class Turn {
 		((Emitter) map.getEntity(teamID)).setTeam(teams.get(teamID));			// Update the team's emitter to have the correct reference
 	}
 	*/
+	
+	/**
+	 * Returns all rally points, buildings (i.e. castles, villages) in
+	 * the map.
+	 * 
+	 * @return	A lsit of all rally points, buildings in the map
+	 */
+	public DualLinkList<RallyPoint> getAllNodes() {
+		DualLinkList<RallyPoint> nodes = new DualLinkList<RallyPoint>();
+		DualLinkList<Vertex<RallyPoint, Integer>> vertexList =
+				map.getGraph().vertexList();
+		
+		for (Vertex<RallyPoint, Integer> v : vertexList) {
+			// Pull all the elements from all the vertices in the graph
+			nodes.addToBack(v.getElement());
+		}
+		
+		return nodes;
+	}
+	
 	public DualLinkList<Position> getRallyPointsPositions(){
 		DualLinkList<Position> pos= new DualLinkList<Position>();
 		for(Vertex<RallyPoint, Integer> r:map.getGraph().vertexList()){

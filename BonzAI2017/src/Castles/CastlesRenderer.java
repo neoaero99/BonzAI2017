@@ -19,6 +19,7 @@ import Castles.Objects.*;
 import Castles.api.CastlesMap;
 //import Castles.api.Color;
 import Castles.api.Turn;
+import Castles.util.linkedlist.DualLinkList;
 import bonzai.Action;
 import bonzai.Position;
 import bonzai.Positionable;
@@ -237,9 +238,10 @@ public class CastlesRenderer extends bonzai.Renderer {
 //		renderRepeaters(g, turn, nextTurn, bellTween,smoothTween);
 //		renderTargets(g, turn, nextTurn,getBellCurve(part3Tween),getSmoothCurve(part3Tween));
 		renderShoutActions(g, turn, nextTurn, smoothTween);
-		renderRallyPoints(g,turn);
-		renderBuildings(g,turn);
-		renderCastles(g,turn);
+		renderNodes(g, turn);
+		//renderRallyPoints(g,turn);
+		//renderBuildings(g,turn);
+		//renderCastles(g,turn);
 		
 
 		g.setTransform(oldTransform);
@@ -399,15 +401,46 @@ public class CastlesRenderer extends bonzai.Renderer {
 	public static Map<Castles.api.Color, BufferedImage> loadIntoMap(File[] arr) throws IOException{
 		Map<Castles.api.Color, BufferedImage> h = new HashMap<>();
 		BufferedImage image;
+		
 		for(int i = 0; i < arr.length; i++){
 			image = ImageIO.read(arr[i]);
 			h.put(Castles.api.Color.values()[i], image);
 		}
+		
 		return h;
 	}
 
 	
 	//TODO 2017: Replace these methods with your methods to render your game objects.
+	/**
+	 * Renders the elements of each vertex on the graph at their positions on the screen.
+	 * 
+	 * @param g		The graphics object
+	 * @param turn	The state of the game for the current turn
+	 */
+	private static void renderNodes(Graphics2D g, Turn turn) {
+		DualLinkList<RallyPoint> nodes = turn.getAllNodes();
+		
+		for (RallyPoint node : nodes) {
+			Position pos = node.getPosition();
+			
+			// Draw an image based on the type of the node
+			if (node instanceof Building) {
+				Castles.api.Color c = ((Building)node).getColor();
+				
+				if (node instanceof Village) {
+					drawToScale(g, emitterImages.get(c), pos.getX(), pos.getY(), 0, 1, 1);
+					
+				} else if (node instanceof Castle) {
+					drawToScale(g, castleImage, pos.getX(), pos.getY(), 0, 1, 1);
+				}
+				
+			} else {
+				drawToScale(g, wallImage, pos.getX(), pos.getY(), 0, 1, 1);
+			}
+		}
+	}
+	
 	private static void renderRallyPoints(Graphics2D g, Turn turn){
 		for(Position p:turn.getRallyPointsPositions()){
 			drawToScale(g,wallImage,p.getX(),p.getY(),0,1,1);

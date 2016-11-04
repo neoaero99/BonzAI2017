@@ -3,7 +3,7 @@
 
 name: firstblood
 size: 25, 25
-theme: desert
+theme: DEFAULT
 playercount: 2
 
 players:
