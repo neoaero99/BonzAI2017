@@ -29,27 +29,27 @@ public class CastlesScenario implements bonzai.Scenario {
 		//TODO 2017: This is what we used to parse and use the map files for our game. This is an example.
 		this.file = file;
 		this.teamID = teamID;
-		
+		CastlesMap map = new CastlesMap();
 		try {
 			//Get the map object we need to instantiate the game.
 			map = Parser.parseFile(file);
+			if(map.getGraph().vertexList().size() == 0 || map.getGraph().edgeList().size() == 0){
+				throw new IllegalStateException(map.getField("name") + "  " + map.getGraph().vertexList().size() + "  " + map.getGraph().edgeList().size());
+			}
 			CastlesRenderer.loadImages();
 //			String[] size = map.getField("size").split(", *");
 //			LazersRenderer.setMapSize(Integer.parseInt(size[0]), Integer.parseInt(size[1]));
 			name = map.getField("name");
-			if(name == null){
-				System.out.println("FAILED");
-			}
+			
 		} catch (Exception e) {
 			System.err.println("Exception occured when reading the file!");
 			e.printStackTrace();
 			System.err.println("Exiting...");
 			System.exit(-1);
 		}
-		
-		
+		this.map = map;
 		//Graphics get passed in to render here
-		{
+		
 			BufferedImage buffer = new BufferedImage(700, 500, BufferedImage.TYPE_INT_ARGB);
 			Graphics2D g = (Graphics2D)(buffer.getGraphics());
 			//g.setColor(Color.BLACK);
@@ -57,11 +57,13 @@ public class CastlesScenario implements bonzai.Scenario {
 		
 			g.translate(700 / 2, 500 / 2);
 			g.scale(700 / 2, 500 / 2);
-			
+			if(map.getGraph().vertexList().size() == 0 || map.getGraph().edgeList().size() == 0){
+				throw new IllegalStateException(map.getField("name") + "  " + map.getGraph().vertexList().size() + "  " + map.getGraph().edgeList().size());
+			}
 			CastlesRenderer.render(g, map);
 			
 			this.image = buffer;
-		}
+		
 	}
 	
 	

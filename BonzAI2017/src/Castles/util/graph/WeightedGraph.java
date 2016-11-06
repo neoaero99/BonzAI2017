@@ -290,7 +290,6 @@ public class WeightedGraph<E, W extends Comparable<W>> {
 	 */
 	public DualLinkList<Vertex<E, W>> vertexList() {
 		DualLinkList<Vertex<E, W>> copy = new DualLinkList<Vertex<E, W>>();
-		
 		for (Vertex<E, W> v : vertices) {
 			copy.addToBack(v);
 		}
@@ -304,7 +303,6 @@ public class WeightedGraph<E, W extends Comparable<W>> {
 	public DualLinkList<WeightedEdge<E, W>> edgeList() {
 		DualLinkList<WeightedEdge<E, W>> copy =
 				new DualLinkList<WeightedEdge<E, W>>();
-		
 		for (WeightedEdge<E, W> v : edges) {
 			copy.addToBack(v);
 		}

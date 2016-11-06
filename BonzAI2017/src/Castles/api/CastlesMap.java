@@ -30,8 +30,8 @@ public class CastlesMap {
 	private HashMap<String, String> fields = new HashMap<String, String>();
 	private HashMap<Integer, Traversable> entities = new HashMap<>();
 	
-	private WeightedGraph<RallyPoint,Integer> graph;
-	private GraphPathSet<RallyPoint> paths;
+	private WeightedGraph<RallyPoint,Integer> graph = new WeightedGraph<>();
+	private GraphPathSet<RallyPoint> paths = new GraphPathSet<>(graph);
 	
 	private boolean players[]={true,true,true,true,true,true};
 	
@@ -47,29 +47,50 @@ public class CastlesMap {
 	}
 
 	public CastlesMap(CastlesMap previousTurn) {
-		super();
-		teams=(ArrayList<Team>) previousTurn.getTeams();
-		DualLinkList<Vertex<RallyPoint, Integer>> list=previousTurn.getGraph().vertexList();
-		for(Vertex<RallyPoint, Integer> v:list){
-			Vertex<RallyPoint,Integer> newVert=new Vertex<RallyPoint, Integer>(v.getElement().copy());
-			graph.addNode(newVert);
-		}
-		DualLinkList<WeightedEdge<RallyPoint,Integer>> list2=previousTurn.getGraph().edgeList();
-		for(WeightedEdge<RallyPoint,Integer> w:list2){
-			if(w == null || w.getFirst() == null || w.getElement() == null){
-				System.err.println("Null edge");
-				break;
+		if(previousTurn == null){
+			graph=new WeightedGraph<>();
+			paths= new GraphPathSet<>(graph);
+			numTeams=0;
+		}else{
+			//define new variables
+			graph=new WeightedGraph<>();
+			paths= new GraphPathSet<>(graph);
+			numTeams=0;
+			//copy the list of teams
+			teams=(ArrayList<Team>) previousTurn.getTeams();
+			//check if the previous turn is returning a null map
+			if(previousTurn.getGraph() == null) throw new NullPointerException();
+			//copy vertices
+			DualLinkList<Vertex<RallyPoint, Integer>> list=previousTurn.getGraph().vertexList();
+			if(list.size() == 0) throw new NullPointerException();
+			for(Vertex<RallyPoint, Integer> v:list){
+				Vertex<RallyPoint,Integer> newVert=new Vertex<RallyPoint, Integer>(v.getElement().copy());
+				graph.addNode(newVert);
 			}
-			String name1=w.getFirst().getElement().getName();
-			String name2=w.getSecond().getElement().getName();
-			int weight=w.getElement();
-			connect(name1,name2,weight);
+			
+			//copy edges
+			DualLinkList<WeightedEdge<RallyPoint,Integer>> list2=previousTurn.getGraph().edgeList();
+			if(list2.size() == 0) throw new NullPointerException();
+			for(WeightedEdge<RallyPoint,Integer> w:list2){
+				if(w == null || w.getFirst() == null || w.getElement() == null){
+					System.err.println("Null edge");
+					break;
+				}
+				int weight=w.getElement();
+				WeightedEdge<RallyPoint,Integer> nw = new WeightedEdge<>(weight);
+				nw.setFirst(new Vertex<RallyPoint,Integer>(copy(w.getFirst().getElement())));
+				nw.setSecond(new Vertex<RallyPoint, Integer>(copy(w.getSecond().getElement())));
+				graph.addEdge(nw);
+				
+			}
+			
+			//set fields
+			fields = previousTurn.getFields();
+			players=previousTurn.getPlayers();
+			height=previousTurn.getHeight();
+			width=previousTurn.getWidth();
+			paths=previousTurn.getPaths();
 		}
-		fields = previousTurn.getFields();
-		players=previousTurn.getPlayers();
-		height=previousTurn.getHeight();
-		width=previousTurn.getWidth();
-		paths=previousTurn.getPaths();
 	}
 
 	/**
@@ -103,12 +124,10 @@ public class CastlesMap {
 	}
 
 	public void addTarget(Target target) {
-		// TODO Auto-generated method stub
 		
 	}
 
 	public void addWall(Wall wall) {
-		// TODO Auto-generated method stub
 		
 	}
 
@@ -219,7 +238,9 @@ public class CastlesMap {
 		Vertex<RallyPoint, Integer> one= getNode(n1);
 		Vertex<RallyPoint, Integer> two= getNode(n2);
 		WeightedEdge<RallyPoint, Integer> temp=new WeightedEdge<RallyPoint, Integer>(weight);
-		graph.connect(one, two, temp);
+		temp.setFirst(one);
+		temp.setSecond(two);
+		graph.addEdge(temp);
 
 	}
 	
@@ -231,6 +252,7 @@ public class CastlesMap {
 		return paths;
 	}
 	public WeightedGraph<RallyPoint,Integer> getGraph(){
+		if(graph == null) throw new NullPointerException("I lost my map");
 		return graph;
 	}
 	public boolean[] getPlayers(){
@@ -291,4 +313,32 @@ public class CastlesMap {
 		return fields;
 	}
 	
+	public DualLinkList<RallyPoint> getAllNodes() {
+		DualLinkList<RallyPoint> nodes = new DualLinkList<RallyPoint>();
+		DualLinkList<Vertex<RallyPoint, Integer>> vertexList = graph.vertexList();
+		
+		for (Vertex<RallyPoint, Integer> v : vertexList) {
+			// Pull all the elements from all the vertices in the graph
+			nodes.addToBack(v.getElement());
+		}
+		
+		return nodes;
+	}
+	
+	/**
+	 * prints out a copy of the given rally point
+	 */
+	private RallyPoint copy(RallyPoint r){
+		if(r instanceof Castle){
+			Castle c = (Castle)r;
+			Castle temp = new Castle(r.getPosition().getX(), r.getPosition().getY(), r.getName(),  c.getTeam());
+			return temp;
+		}
+		if(r instanceof Village){
+			Village temp = new Village(r.getPosition().getX(), r.getPosition().getY(), r.getName(), ((Village) r).getTeam());
+			return temp;
+		}
+		RallyPoint temp = new RallyPoint(r.getPosition().getX(), r.getPosition().getY(), r.getName());
+		return temp;
+	}
 }
