@@ -7,6 +7,8 @@ import java.util.List;
 import Castles.Objects.Building;
 import Castles.Objects.Castle;
 import Castles.Objects.RallyPoint;
+import Castles.Objects.Soldier;
+import Castles.Objects.SoldierState;
 import Castles.Objects.Target;
 import Castles.Objects.Traversable;
 import Castles.Objects.Village;
@@ -38,11 +40,14 @@ public class CastlesMap {
 	private int numTeams;
 	
 	private ArrayList<Team> teams= new ArrayList<Team>();
+	private ArrayList<Soldier> soldiers[]=(ArrayList<Soldier>[])new ArrayList[6];
 	
 	public CastlesMap(){
 		graph=new WeightedGraph<>();
 		paths= new GraphPathSet<>(graph);
-		
+		for(int i=0;i<6;i++){
+			soldiers[i]=new ArrayList<Soldier>();
+		}
 		numTeams=0;
 	}
 
@@ -91,6 +96,8 @@ public class CastlesMap {
 			width=previousTurn.getWidth();
 			paths=previousTurn.getPaths();
 		}
+		paths=previousTurn.getPaths();
+		soldiers=previousTurn.getSoldiers();
 	}
 
 	/**
@@ -340,5 +347,72 @@ public class CastlesMap {
 		}
 		RallyPoint temp = new RallyPoint(r.getPosition().getX(), r.getPosition().getY(), r.getName());
 		return temp;
+	}
+	
+	protected ArrayList<Soldier>[] getSoldiers(){
+		return soldiers;
+	}
+	public void addSoldiers(Soldier s){
+		soldiers[s.leader.getID()].add(s);
+	}
+	public Soldier splitSoliders(Soldier s, int num,DualLinkList<WeightedEdge<RallyPoint, Integer>> path){
+		Soldier split=new Soldier(s.position);
+		split.leader=s.leader;
+		split.state=SoldierState.MOVING;
+		split.given_path=path;
+		split.value=num;
+		s.value=s.value-num;
+		addSoldiers(split);
+		return split;
+		
+	}
+	/**
+	 * Handles merging of Soldiers, as well as battling
+	 * @param s1 Soldier 1, any team
+	 * @param s2 Soldier 2, any team
+	 * @return a value depending on the result:
+	 * 			-1:s1 and s2 are not on the same position
+	 * 			 0:s1 and s2 are not heading to the same end position, so no merge necessary
+	 * 			 1:s1 and s2 have merged, s2 has been destroyed
+	 * 			 2:s1 has defeated the the number of soldiers in s2, s2 has been deleted
+	 * 			 3:s2 has defeated the the number of soldiers in s1, s2 has been deleted
+	 * 			 4:s1 and s2 have both been deleted
+	 */
+	public int mergeSoldiers(Soldier s1, Soldier s2){
+		if(!s1.position.equals(s2.position)){
+			return -1;
+		}
+		if(s1.leader.equals(s2.leader)){
+			if(s1.state==SoldierState.STANDBY||s1.given_path.Tail.getPrevious().equals(s2.given_path.Tail.getPrevious())){ //We need to figure out when the soldiers should merge
+				s1.value=s1.value+s2.value;
+				soldiers[s2.leader.getID()].remove(s2);
+				s2=null;
+				return 1;
+			}
+			return 0;
+		}
+		else{
+			int amount=s1.value-s2.value;
+			if(amount>0){
+				s1.value=amount;
+				soldiers[s2.leader.getID()].remove(s2);
+				s2=null;
+				return 2;
+			}
+			else if(amount<0){
+				s2.value=amount;
+				soldiers[s1.leader.getID()].remove(s1);
+				s1=null;
+				return 3;
+			}
+			else{
+				soldiers[s1.leader.getID()].remove(s1);
+				s1=null;
+				soldiers[s2.leader.getID()].remove(s2);
+				s2=null;
+				return 4;
+			}
+		}
+		
 	}
 }

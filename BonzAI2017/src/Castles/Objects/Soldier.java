@@ -8,6 +8,7 @@ import Castles.util.VectorND;
 import Castles.util.graph.Node;
 import Castles.util.graph.WeightedEdge;
 import Castles.util.linkedlist.DualLinkList;
+import bonzai.*;
 
 /**
  * Class:	Soldier.java
@@ -72,6 +73,8 @@ public class Soldier extends JComponent {
 	// The current status of the soldier (always defaults to standby)
 	public SoldierState state;
 	
+	public Team leader;
+	
 	/**
 	 * Method:	Soldier(VectorND base_position)
 	 * Returns:	Void
@@ -88,4 +91,5 @@ public class Soldier extends JComponent {
 		position = base_position;
 		state = SoldierState.STANDBY;
 	}
+
 }

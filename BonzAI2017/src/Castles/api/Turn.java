@@ -429,7 +429,7 @@ public class Turn {
 	 * Returns all rally points, buildings (i.e. castles, villages) in
 	 * the map.
 	 * 
-	 * @return	A lsit of all rally points, buildings in the map
+	 * @return	A list of all rally points, buildings in the map
 	 */
 	public DualLinkList<RallyPoint> getAllNodes() {
 		DualLinkList<RallyPoint> nodes = new DualLinkList<RallyPoint>();
@@ -497,6 +497,10 @@ public class Turn {
 		}
 		return pos;
 	}
+	/**
+	 * Gets all Villages
+	 * @return a dual linked list of all villages
+	 */
 	public DualLinkList<Building> getVillages(){
 		DualLinkList<Building> pos= new DualLinkList<Building>();
 		for(Vertex<RallyPoint, Integer> r:map.getGraph().vertexList()){
@@ -506,10 +510,7 @@ public class Turn {
 		}
 		return pos;
 	}
-	/**
-	 * Gets all Villages
-	 * @return a dual linked list of all villages
-	 */
+	
 	public DualLinkList<WeightedEdge<RallyPoint, Integer>> getEdges(){
 		return map.getGraph().edgeList();
 	}
