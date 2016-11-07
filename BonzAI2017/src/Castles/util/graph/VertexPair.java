@@ -69,6 +69,16 @@ public class VertexPair<E extends Comparable<E>, W extends Comparable<W>>
 	}
 	
 	@Override
+	@SuppressWarnings("unchecked")
+	public boolean equals(Object obj) {
+		if (obj instanceof VertexPair) {
+			return compareTo( (VertexPair)obj ) == 0;
+		}
+		
+		return false;
+	}
+	
+	@Override
 	public String toString() {
 		return String.format("s: %s; e: %s", start, end);
 	}

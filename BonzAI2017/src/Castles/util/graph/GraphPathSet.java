@@ -15,6 +15,7 @@ import Castles.util.priorityq.*;
  * @param <E> The type of element stored in the vertices
  */
 public class GraphPathSet<E extends Comparable<E>> {
+	boolean debug =true;
 	/**
 	 * The set of shortest paths between any two vertices in the graph.
 	 * The Vertex Pair is the starting and end vertices of the graph;
@@ -28,7 +29,7 @@ public class GraphPathSet<E extends Comparable<E>> {
 
 	public static void main(String[] args) {
 		WeightedGraph<Integer, Integer> g = new WeightedGraph<Integer, Integer>();
-		GraphPathSet<Integer> gpath = new GraphPathSet<Integer>(g);
+		
 		Vertex<Integer, Integer> node0, node1, node2, node3, node4, node5, node6, node7, node8,
 									node9, node10;
 		WeightedEdge<Integer, Integer> edge0, edge1, edge2, edge3, edge4, edge5, edge6, edge7,
@@ -106,11 +107,21 @@ public class GraphPathSet<E extends Comparable<E>> {
 		g.addEdge(edge13);
 		g.addEdge(edge14);
 
-		DualLinkList<WeightedEdge<Integer, Integer>> path = gpath.shortestPath(
-				node0, node5);
+		/**/
+		
+		GraphPathSet<Integer> gpath = new GraphPathSet<Integer>(g);
+		//gpath.printPaths();
+		
+		/**/
+		
+		DualLinkList<WeightedEdge<Integer, Integer>> path = gpath.shortestPath(node1,node10);
 		for (WeightedEdge<Integer, Integer> t : path) {
 			System.out.printf("([%s] to [%s]) \n", t.getFirst(), t.getSecond());
 		}
+		
+		/**/
+		
+		System.out.println("TEST");
 	}
 	
 	/**
@@ -152,23 +163,32 @@ public class GraphPathSet<E extends Comparable<E>> {
 		return null;
 	}
 
+
+	public void printPaths(){
+		for(VertexPair<E,Integer> e: VPPathsSet.keySet() ) {
+			System.out.printf("%s : %s\n\n", e, VPPathsSet.get(e));
+		}
+	}
 	/**
 	 * Generates paths creates a hashmap containing all shortests paths for a
 	 * given graph
 	 */
 	private void generatePaths() {
-		for (Vertex<E, Integer> v : graph.vertexList()) {
-			for (Vertex<E, Integer> u : graph.vertexList()) {
-				if (v.equals(u))
+		DualLinkList<Vertex<E, Integer>> vertices = graph.vertexList();
+		
+		for (Vertex<E, Integer> v : vertices) {
+			for (Vertex<E, Integer> u : vertices) {
+				if ( v.equals(u) || getPath(u, v) != null) {
 					continue;
-				VertexPair<E, Integer> current = new VertexPair<E, Integer>(v,
-						u);
-				if (!VPPathsSet.containsKey(current)) {
-					VPPathsSet.put(current, shortestPath(u, v));
 				}
+				
+				VertexPair<E, Integer> current = new VertexPair<E, Integer>(v, u);
+				DualLinkList<WeightedEdge<E, Integer>> path = shortestPath(u, v);
+				System.out.printf("%s : %s\n", current, path);
+				
+				VPPathsSet.put(current, path);
 			}
 		}
-
 	}
 	
 	/**
@@ -194,8 +214,6 @@ public class GraphPathSet<E extends Comparable<E>> {
 			int iniWeight = (v == start) ? 0 : Integer.MAX_VALUE;
 			vertexData.put(v, new ExtraData(0, iniWeight, remaining.insert(iniWeight, v), null));
 		}
-
-		//System.out.println(remaining.toString(1));
 		
 		/* Continually remove the vertex with the smallest distance value and update all the vertices
 		 * adjacent to it based on distance of the vertex and the edge connecting it to a adjacent
@@ -215,9 +233,9 @@ public class GraphPathSet<E extends Comparable<E>> {
 			// Check the distances of adjacent vertices
 			for (WeightedEdge<E, Integer> e : incEdges) {
 				Vertex<E, Integer> opposite = e.getOpposite(least);
-				
+
 				// Disregard self-loops
-				if (opposite != least) {
+				if (opposite.equals(least)) {
 					ExtraData oppData = vertexData.get(opposite);
 					
 					// Only check unvisited vertices (i.e. still contained in the queue)
@@ -305,6 +323,10 @@ public class GraphPathSet<E extends Comparable<E>> {
 			weight = w;
 			entryRef = entry;
 			backEdge = bEdge;
+		}
+		
+		public String toString() {
+			return String.format("[%s]", entryRef);
 		}
 	}
 }
