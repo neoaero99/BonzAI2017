@@ -68,4 +68,8 @@ public class Building extends RallyPoint {
 	public RallyPoint copy(){
 		return new Building(super.getPosition().getX(),super.getPosition().getY(),defenseValue,captureValue,super.getName(),myTeam);
 	}
+	
+	public Team getTeam(){
+		return myTeam;
+	}
 }
