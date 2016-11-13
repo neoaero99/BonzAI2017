@@ -116,12 +116,14 @@ public class GraphPathSet<E extends Comparable<E>> {
 		
 		DualLinkList<WeightedEdge<Integer, Integer>> path = gpath.shortestPath(node1,node10);
 		for (WeightedEdge<Integer, Integer> t : path) {
-			System.out.printf("([%s] to [%s]) \n", t.getFirst(), t.getSecond());
+		//	System.out.printf("([%s] to [%s]) \n", t.getFirst(), t.getSecond());
 		}
 		
 		/**/
 		
-		System.out.println("TEST");
+		//System.out.println("TEST");
+		
+		
 	}
 	
 	/**
@@ -174,10 +176,9 @@ public class GraphPathSet<E extends Comparable<E>> {
 	 * given graph
 	 */
 	private void generatePaths() {
-		DualLinkList<Vertex<E, Integer>> vertices = graph.vertexList();
 		
-		for (Vertex<E, Integer> v : vertices) {
-			for (Vertex<E, Integer> u : vertices) {
+		for (Vertex<E, Integer> v : graph.vertexList()) {
+			for (Vertex<E, Integer> u : graph.vertexList()) {
 				if ( v.equals(u) || getPath(u, v) != null) {
 					continue;
 				}
@@ -185,10 +186,11 @@ public class GraphPathSet<E extends Comparable<E>> {
 				VertexPair<E, Integer> current = new VertexPair<E, Integer>(v, u);
 				DualLinkList<WeightedEdge<E, Integer>> path = shortestPath(u, v);
 				System.out.printf("%s : %s\n", current, path);
-				
 				VPPathsSet.put(current, path);
+
 			}
 		}
+		//printPaths();
 	}
 	
 	/**
@@ -235,7 +237,7 @@ public class GraphPathSet<E extends Comparable<E>> {
 				Vertex<E, Integer> opposite = e.getOpposite(least);
 
 				// Disregard self-loops
-				if (opposite.equals(least)) {
+				if (!opposite.equals(least)) {
 					ExtraData oppData = vertexData.get(opposite);
 					
 					// Only check unvisited vertices (i.e. still contained in the queue)
