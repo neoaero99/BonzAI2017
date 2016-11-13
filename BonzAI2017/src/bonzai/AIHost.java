@@ -83,12 +83,15 @@ public class AIHost {
 	private String expects(String pattern) {
 		try { 
 			String response = in.nextLine(); 
+			System.out.println("Pattern = " + pattern);
+			System.out.println("Response = " + response);
 			if (!response.matches(pattern)) { throw new IOException("Inappropriate response given.  Expected pattern " + pattern + " but got " + response); }
 			return response;
 			
 		} catch(Exception e) {
 			e.printStackTrace(); 
-			
+//			String error=err.nextLine();
+//			System.out.println(error);
 			isAlive = false;
 			process.destroy();
 			System.err.print("Expected pattern: " + pattern + ". The process has been nuked!");
@@ -138,7 +141,7 @@ public class AIHost {
 		for(bonzai.Jar choice : jars) { 
 			command.add(choice == null ? "null" : choice.file().getAbsolutePath()); 
 		}
-		
+		System.out.println(command.toString());
 		return new AIHost(new ProcessBuilder(command).start(), id);
 	}
 }
