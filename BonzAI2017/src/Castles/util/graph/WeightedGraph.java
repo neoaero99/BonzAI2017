@@ -15,7 +15,7 @@ public class WeightedGraph<E, W extends Comparable<W>> {
 	/**
 	 * The graphs lists of nodes and edges.
 	 */
-	private DualLinkList<Vertex<E, W>> vertices;
+	public DualLinkList<Vertex<E, W>> vertices;
 	private DualLinkList<WeightedEdge<E, W>> edges;
 	
 	public WeightedGraph() {

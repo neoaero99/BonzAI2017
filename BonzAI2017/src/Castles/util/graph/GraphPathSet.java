@@ -114,12 +114,7 @@ public class GraphPathSet<E extends Comparable<E>> {
 		
 		/**/
 		
-		DualLinkList<WeightedEdge<Integer, Integer>> path = gpath.shortestPath(node1,node10);
-		for (WeightedEdge<Integer, Integer> t : path) {
-			System.out.printf("([%s] to [%s]) \n", t.getFirst(), t.getSecond());
-		}
-		
-		/**/
+		System.out.printf("%s\n", gpath.shortestPath(node0, node3));
 		
 		System.out.println("TEST");
 	}
@@ -170,15 +165,18 @@ public class GraphPathSet<E extends Comparable<E>> {
 		}
 	}
 	/**
-	 * Generates paths creates a hashmap containing all shortests paths for a
+	 * Generates paths creates a hash map containing all shortest paths for a
 	 * given graph
 	 */
 	private void generatePaths() {
 		DualLinkList<Vertex<E, Integer>> vertices = graph.vertexList();
 		
-		for (Vertex<E, Integer> v : vertices) {
-			for (Vertex<E, Integer> u : vertices) {
-				if ( v.equals(u) || getPath(u, v) != null) {
+		for (Vertex<E, Integer> v : graph.vertices) {
+			for (Vertex<E, Integer> u : graph.vertices) {
+				boolean areEqual = v.equals(u);
+				boolean pathExists = getPath(u, v) != null;
+				
+				if (areEqual || pathExists) {
 					continue;
 				}
 				
@@ -222,7 +220,7 @@ public class GraphPathSet<E extends Comparable<E>> {
 			Vertex<E, Integer> least = remaining.removeMax();
 			ExtraData ltData = vertexData.get(least);
 			ltData.flag = 1;
-
+			
 			if (least == end) {
 				// The destination vertex has been found
 				break;
@@ -235,11 +233,12 @@ public class GraphPathSet<E extends Comparable<E>> {
 				Vertex<E, Integer> opposite = e.getOpposite(least);
 
 				// Disregard self-loops
-				if (opposite.equals(least)) {
+				if (!opposite.equals(least)) {
 					ExtraData oppData = vertexData.get(opposite);
 					
 					// Only check unvisited vertices (i.e. still contained in the queue)
 					if (oppData.flag == 0) {
+						//System.out.printf("%s\n", opposite);
 						Integer newWeight = e.getElement() + ltData.weight;
 						
 						/* Is the new distance less than the current distance associated
