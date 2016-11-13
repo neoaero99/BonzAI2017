@@ -51,7 +51,7 @@ public class AdaptablePQ<K extends Comparable<K>, V> {
 	public AdaptablePQ(int iniSize) {
 		heap = (PQEntry<K, V>[]) new PQEntry[ Math.max(1, iniSize) ];
 		size = 0;
-		mediator = new MinComparator<PQEntry<K, V>>();
+		mediator = new MaxComparator<PQEntry<K, V>>();
 	}
 	
 	/**

@@ -2,7 +2,6 @@ package Castles;
 
 import java.awt.*;
 import java.util.List;
-import java.awt.Color;
 import java.awt.geom.*;
 import java.awt.image.BufferedImage;
 import java.io.File;
@@ -37,17 +36,7 @@ public class CastlesRenderer extends bonzai.Renderer {
 	//TODO 2017: Set up your art assets by setting them up here
 	//These data structures hold the art assets for each game object.
 //**************************************************************************************************
-//	static File backgroundFile = new File("art/maps/desert_small.png");
-//
-//	static File[] targetFiles = {new File("art/sprites/target_cropcircle1.png"),
-//			new File("art/sprites/target_cropcircle2.png"),
-//			new File("art/sprites/target_henge.png"),
-//			new File("art/sprites/target_nazca1.png"),
-//			new File("art/sprites/target_nazca2.png"),
-//			new File("art/sprites/target_lake.png"),
-//			new File("art/sprites/target_pyramid.png"),
-//			new File("art/sprites/target_mountain.png")};
-//
+
 	static File[] selectorFiles = {new File("art/sprites/turn_red.png"),
 			new File("art/sprites/turn_yellow.png"),
 			new File("art/sprites/turn_blue.png"),
@@ -55,17 +44,10 @@ public class CastlesRenderer extends bonzai.Renderer {
 			new File("art/sprites/turn_orange.png"),
 			new File("art/sprites/turn_purple.png")};
 	
-	
-//TODO castles are defined here
+	static File villageFile = new File("art/sprites/landmark_mountain.png");
+	static File rallyPointFile = new File("art/sprites/target_lake.png");
+	static File soldierFile = new File("art/sprites/fox_base.png");
 	static File castleFile = new File("art/sprites/repeater.png");
-//
-//	static File[] lazerFiles = {new File("art/sprites/Castles_red.png"),
-//			new File("art/sprites/Castles_yellow.png"), 
-//			new File("art/sprites/Castles_blue.png"),
-//			new File("art/sprites/Castles_green.png"),
-//			new File("art/sprites/Castles_orange.png"),
-//			new File("art/sprites/Castles_purple.png")};
-//TODO captured castles files
 	static File[] playerFiles = {  new File("art/sprites/fox_red.png"), 
 			new File("art/sprites/fox_yellow.png"), 
 			new File("art/sprites/fox_blue.png"),
@@ -82,11 +64,10 @@ public class CastlesRenderer extends bonzai.Renderer {
 	//These data structures hold the actual images that get pulled from the above files
 	private static final Map<Castles.api.Color, Color> colors = new HashMap<>();
 	private static Map<Castles.api.Color, BufferedImage> emitterImages = new HashMap<>();
-	private static Map<Castles.api.Color, BufferedImage> lazerImages = new HashMap<>();
 	private static Map<Castles.api.Color, BufferedImage> selectorImages = new HashMap<>();
 //	private static Map<Castles.api.Color, BufferedImage> castleImages = new HashMap<>();
 //	private static BufferedImage[] targetImages = new BufferedImage[targetFiles.length];
-	private static BufferedImage wallImage,repeaterImage,castleImage;
+	private static BufferedImage soldierImage,rallyPointImage,villageImage,castleImage;
 	private static boolean imagesLoaded = false;
 
 	public CastlesRenderer(){
@@ -107,13 +88,14 @@ public class CastlesRenderer extends bonzai.Renderer {
 			getBackgroundImages();
 			try { 
 				//Read the images into the data structures, given the file names defined above.
-				repeaterImage = ImageIO.read(new File("art/sprites/repeater.png"));
-				//TODO load out sprites here
+				//TODO load our sprites here
 //				//load our png's
 				emitterImages = loadIntoMap(playerFiles);
 				selectorImages = loadIntoMap(selectorFiles);
 				castleImage = ImageIO.read(castleFile);
-				wallImage = ImageIO.read(wallFile);
+				soldierImage = ImageIO.read(soldierFile);
+				rallyPointImage = ImageIO.read(rallyPointFile);
+				villageImage = ImageIO.read(villageFile);
 //				discoveryImage = ImageIO.read(discoveryFile);
 //				cloudImage = ImageIO.read(cloudFile);
 
@@ -141,7 +123,6 @@ public class CastlesRenderer extends bonzai.Renderer {
 		File temp = new File(path);//opens the map directory
 		String[] files = temp.list(); //gets all files in the directory
 		for(int i = 0; i < files.length; i++){
-			System.out.println(files[i]);
 			
 				String name = files[i].replace(".png", "");
 				
@@ -230,23 +211,30 @@ public class CastlesRenderer extends bonzai.Renderer {
 
 		//TODO 2017: This is where you call your custom render methods. Our versions
 		//of these methods have been left for you at the bottom of this file.
+		if(turn.getMap().getGraph().vertexList().size() == 0) throw new NullPointerException();
 		renderBackground(g,turn.getMap());
-//		renderRepeaterCircles(g, turn, nextTurn, bellTween, smoothTween);
-//		renderLazers(g, turn, nextTurn, smoothTween, getSmoothCurve(part2Tween));
-//		renderEmitters(g, turn, nextTurn, bellTween, smoothTween);
-//		renderWalls(g, turn, nextTurn);
-//		renderRepeaters(g, turn, nextTurn, bellTween,smoothTween);
-//		renderTargets(g, turn, nextTurn,getBellCurve(part3Tween),getSmoothCurve(part3Tween));
+		renderBuildings(g,turn.getMap());
+		renderSoldiers(g,turn.getMap());
 		renderShoutActions(g, turn, nextTurn, smoothTween);
-		//renderNodes(g, turn);
-		//renderRallyPoints(g,turn);
-		//renderBuildings(g,turn);
-		//renderCastles(g,turn);
-		
-
 		g.setTransform(oldTransform);
-		//TODO: Figure out how this is done. It is literally mystifying
 		//renderAction();(g, turn, turn.actor(), nextTurn.current(turn.actor()), action, tweenPercent);
+	}
+
+	private static void renderSoldiers(Graphics2D g, CastlesMap map) {
+		
+	}
+
+	private static void renderBuildings(Graphics2D g, CastlesMap map) {
+		DualLinkList<RallyPoint> nodes = map.getAllNodes();
+		for(RallyPoint r : nodes){
+			if(r instanceof Village){
+				drawToScale(g,villageImage,r.getPosition().getX(),r.getPosition().getY(),0,1,0);
+			}else if(r instanceof Castle){
+				drawToScale(g,castleImage,r.getPosition().getX(),r.getPosition().getY(),0,1,0);
+			}else{
+				drawToScale(g,rallyPointImage,r.getPosition().getX(),r.getPosition().getY(),0,1,0);
+			}
+		}
 	}
 
 	private static void renderShoutActions(Graphics2D g, Turn turn, Turn nextTurn, float smoothTween) {
@@ -408,53 +396,6 @@ public class CastlesRenderer extends bonzai.Renderer {
 		}
 		
 		return h;
-	}
-
-	
-	//TODO 2017: Replace these methods with your methods to render your game objects.
-	/**
-	 * Renders the elements of each vertex on the graph at their positions on the screen.
-	 * 
-	 * @param g		The graphics object
-	 * @param turn	The state of the game for the current turn
-	 */
-	private static void renderNodes(Graphics2D g, Turn turn) {
-		DualLinkList<RallyPoint> nodes = turn.getAllNodes();
-		
-		for (RallyPoint node : nodes) {
-			Position pos = node.getPosition();
-			
-			// Draw an image based on the type of the node
-			if (node instanceof Building) {
-				Castles.api.Color c = ((Building)node).getColor();
-				
-				if (node instanceof Village) {
-					drawToScale(g, emitterImages.get(c), pos.getX(), pos.getY(), 0, 1, 1);
-					
-				} else if (node instanceof Castle) {
-					drawToScale(g, castleImage, pos.getX(), pos.getY(), 0, 1, 1);
-				}
-				
-			} else {
-				drawToScale(g, wallImage, pos.getX(), pos.getY(), 0, 1, 1);
-			}
-		}
-	}
-	
-	private static void renderRallyPoints(Graphics2D g, Turn turn){
-		for(Position p:turn.getRallyPointsPositions()){
-			drawToScale(g,wallImage,p.getX(),p.getY(),0,1,1);
-		}
-	}
-	private static void renderBuildings(Graphics2D g, Turn turn){
-		for(Building p:turn.getDefaults()){
-			drawToScale(g,castleImage,p.getPosition().getX(),p.getPosition().getY(),0,1,1);
-		}
-	}
-	private static void renderCastles(Graphics2D g, Turn turn){
-		for(Building p:turn.getCastles()){
-			drawToScale(g,emitterImages.get(p.getColor()),p.getPosition().getX(),p.getPosition().getY(),0,1,1);
-		}
 	}
 //	private static void renderPaths
 	

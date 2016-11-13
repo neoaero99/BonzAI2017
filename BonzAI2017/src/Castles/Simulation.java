@@ -159,6 +159,10 @@ public class Simulation extends Thread {
 				winner = team;
 			}
 		}
-		this.winningTeam = winner.getColor();
+		if(winner == null){
+			this.winningTeam = Castles.api.Color.BLUE;
+		}else{
+			this.winningTeam = winner.getColor();
+		}
 	}
 }
