@@ -121,7 +121,12 @@ public class CastlesScenario implements bonzai.Scenario {
 		//String turns = map.getField("turns");
 		Game game = new Game(teamID, CastlesScenario.NUM_TURNS, map, colors);
 		for (Team t : game.turn(0).getAllTeams()) {
-			t.setName(jars.get(i++).name());
+			if(jars.size() == 0) break;
+			if(t == null) break;
+			if(jars.get(i) == null) break;
+			if(jars.get(i).name() == null) break;
+			t.setName(jars.get(i).name());
+			i++;
 		}
 		return game;
 	}

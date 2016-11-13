@@ -211,7 +211,7 @@ public class CastlesRenderer extends bonzai.Renderer {
 
 		//TODO 2017: This is where you call your custom render methods. Our versions
 		//of these methods have been left for you at the bottom of this file.
-		if(turn.getMap().getGraph().vertexList().size() == 0) throw new NullPointerException();
+		if(turn.getMap().getGraph().vertexList().size() == 0) throw new NullPointerException("Graph empty");
 		renderBackground(g,turn.getMap());
 		renderBuildings(g,turn.getMap());
 		renderSoldiers(g,turn.getMap());
@@ -347,11 +347,13 @@ public class CastlesRenderer extends bonzai.Renderer {
 	private static void drawToScale(Graphics2D g, BufferedImage img, float x, float y, float rotation, float scaleFactor, float alpha) {
 		AffineTransform original = g.getTransform();
 		Composite originalComposite = g.getComposite();
-
+		//need to get x and y on the grid
+		x = x * 50;
+		y = y * 50;
 		//Invert y
 		y = -y;
 
-		//Create a scale to make sure that the image is 1x1 pixels
+		//Create a scale to make sure that the image is 1x1 grid
 		double scale = 1.0f / img.getWidth();
 
 		scale *= scaleFactor;

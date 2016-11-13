@@ -8,4 +8,5 @@ public class CompetitorAI extends AI {
 		
 		return new ShoutAction("I am shouting!");
 	}
+	
 }
