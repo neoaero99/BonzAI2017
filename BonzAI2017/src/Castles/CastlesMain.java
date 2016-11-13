@@ -119,7 +119,7 @@ public class CastlesMain extends JPanel implements GameWrapper, Runnable, KeyLis
 		}
 		catch(Exception e) {
 			System.err.println("Oops, something must have went wrong");
-			System.err.println(e);
+			e.printStackTrace();
 		}
 	}
 	
