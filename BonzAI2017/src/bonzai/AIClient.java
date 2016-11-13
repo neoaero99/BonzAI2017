@@ -96,7 +96,7 @@ public class AIClient implements Runnable {
 		try {
 			// process arguments as a queue, obviously
 			Queue<String> arguments = new LinkedList<>(Arrays.asList(args));
-		
+
 			// the first argument should always be the output id for the 
 			// client, representing the match and client name
 			String id = arguments.poll();
@@ -112,16 +112,15 @@ public class AIClient implements Runnable {
 			// the path to the AI I should be running
 			CastlesScenario scenario = new CastlesScenario(new File(arguments.poll()),teamID);
 			AIJar me = new AIJar(new File(arguments.poll()));
-	
 			// there should be exactly six remaining arguments, corresponding
 			// to the six jars which have been chosen or omitted for the match
 			List<AIJar> jars = new ArrayList<>();
 			for(String arg : arguments) {
 				jars.add(arg.equals("null") ? null : new AIJar(new File(arg)));
 			}
-		
+
 			// Initiate the client
-			client = new AIClient(scenario, me, jars);		
+			client = new AIClient(scenario, me, jars);	
 		}
 		catch(Exception e) {
 			// if anything happened in our initialization, that would be bad,
