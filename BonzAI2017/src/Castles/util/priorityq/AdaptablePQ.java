@@ -74,22 +74,27 @@ public class AdaptablePQ<K extends Comparable<K>, V> {
 	 * @param args	Unused
 	 */
 	public static void main(String[] args) {
-		AdaptablePQ<Integer, Boolean> PQ = new AdaptablePQ<Integer, Boolean>();
+		AdaptablePQ<Integer, Boolean> PQ = new AdaptablePQ<Integer, Boolean>(
+			new MinComparator<PQEntry<Integer, Boolean>>());
+		
 		PQ.insert(3, true);
-		PQ.insert(5, true);
+		
+		PQEntry<Integer, Boolean> entry = PQ.insert(8, true);
+		
 		PQ.insert(1, true);
-		PQ.insert(8, true);
-		PQEntry<Integer, Boolean> entry = PQ.insert(2, true);
+		PQ.insert(5, true);
+		PQ.insert(2, true);
 		
 		System.out.printf("%s\nSize: %d\n", PQ.toString(1), PQ.size());
 		
-		System.out.printf("Min: %s\n", PQ.removeMax());
+		//System.out.printf("%s\nSize: %d\n", PQ.toString(1), PQ.size());
+		
+		PQ.replaceKey(entry.getIndex(), 7);
 		
 		System.out.printf("%s\nSize: %d\n", PQ.toString(1), PQ.size());
 		
-		PQ.replaceKey(entry.getIndex(), 0);
-		
-		System.out.printf("%s\nSize: %d\n", PQ.toString(1), PQ.size());
+		PQ.removeMax();
+		System.out.printf("%s\n", entry);
 	}
 	
 	/**
@@ -227,6 +232,7 @@ public class AdaptablePQ<K extends Comparable<K>, V> {
 		while (idx > 0 && mediator.compare(heap[idx], heap[parentIdx]) > 0) {
 			swapEntries(idx, parentIdx);
 			idx = parentIdx;
+			parentIdx = parent(idx);
 		}
 	}
 	

@@ -51,6 +51,15 @@ public class CastlesMap {
 		numTeams=0;
 	}
 
+	/**
+	 * Copy constructor
+	 * 
+	 * I WANT A WAY AROUND THIS
+	 * Moves on to the next turn
+	 * 
+	 * @param previousTurn - the map of the previous turn to clone
+	 * @return 
+	 */
 	public CastlesMap(CastlesMap previousTurn) {
 		if(previousTurn == null){
 			graph=new WeightedGraph<>();
@@ -100,19 +109,6 @@ public class CastlesMap {
 		soldiers=previousTurn.getSoldiers();
 	}
 
-	/**
-	 * Copy constructor
-	 * 
-	 * I WANT A WAY AROUND THIS
-	 * Moves on to the next turn
-	 * 
-	 * @param previousTurn - the map of the previous turn to clone
-	 * @param decCooldown - whether or not to decrement Repeater cooldowns
-	 * @return 
-	 */
-	protected CastlesMap(CastlesMap previousTurn, boolean decCooldown) {
-		
-	}
 //github.com/neoaero99/BonzAI2017
 	
 	

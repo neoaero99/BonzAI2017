@@ -110,11 +110,9 @@ public class GraphPathSet<E extends Comparable<E>> {
 		/**/
 		
 		GraphPathSet<Integer> gpath = new GraphPathSet<Integer>(g);
-		//gpath.printPaths();
+		gpath.printPaths();
 		
 		/**/
-		
-		System.out.printf("%s\n", gpath.shortestPath(node0, node3));
 		
 		System.out.println("TEST");
 	}
@@ -161,8 +159,10 @@ public class GraphPathSet<E extends Comparable<E>> {
 
 	public void printPaths(){
 		for(VertexPair<E,Integer> e: VPPathsSet.keySet() ) {
-			System.out.printf("%s : %s\n\n", e, VPPathsSet.get(e));
+			System.out.printf("%s : %s\n", e, VPPathsSet.get(e));
 		}
+		
+		System.out.println();
 	}
 	/**
 	 * Generates paths creates a hash map containing all shortest paths for a
@@ -181,9 +181,7 @@ public class GraphPathSet<E extends Comparable<E>> {
 				}
 				
 				VertexPair<E, Integer> current = new VertexPair<E, Integer>(v, u);
-				System.out.printf("Path for: %s\n", current);
 				DualLinkList<WeightedEdge<E, Integer>> path = shortestPath(u, v);
-				System.out.printf("%s\n\n", path);
 				
 				VPPathsSet.put(current, path);
 			}
@@ -214,8 +212,6 @@ public class GraphPathSet<E extends Comparable<E>> {
 			vertexData.put(v, new ExtraData(0, iniWeight, remaining.insert(iniWeight, v), null));
 		}
 		
-		System.out.printf("%s\n", remaining);
-		
 		/* Continually remove the vertex with the smallest distance value and update all the vertices
 		 * adjacent to it based on distance of the vertex and the edge connecting it to a adjacent
 		 * vertex. */
@@ -245,10 +241,6 @@ public class GraphPathSet<E extends Comparable<E>> {
 					// Only check unvisited vertices (i.e. still contained in the queue)
 					if (oppData.flag == 0) {
 						Integer newWeight = e.getElement() + ltData.weight;
-						
-						if (newWeight < 0) {
-							System.out.printf("\n%s (%d) : %s (%d)\n%s\n", least, ltData.weight, opposite, oppData.weight, remaining);
-						}
 						
 						/* Is the new distance less than the current distance associated
 						 * with the adjacent vertex? */
