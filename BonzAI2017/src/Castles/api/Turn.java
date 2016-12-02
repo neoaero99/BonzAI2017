@@ -256,7 +256,7 @@ public class Turn {
 		int oldID = this.currentTeam;
 
 		//Clone the map. All actions are applied to this new clone.
-		CastlesMap map = new CastlesMap(this.map, false);
+		CastlesMap map = new CastlesMap(this.map);
 
 		//This is used to store the RotateActions.
 		//Maps ID's of targeted Entities (Repeaters or Emitters)

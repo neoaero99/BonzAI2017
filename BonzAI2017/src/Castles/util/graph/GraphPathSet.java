@@ -110,14 +110,7 @@ public class GraphPathSet<E extends Comparable<E>> {
 		/**/
 		
 		GraphPathSet<Integer> gpath = new GraphPathSet<Integer>(g);
-		//gpath.printPaths();
-		
-		/**/
-		
-		DualLinkList<WeightedEdge<Integer, Integer>> path = gpath.shortestPath(node1,node10);
-		for (WeightedEdge<Integer, Integer> t : path) {
-			System.out.printf("([%s] to [%s]) \n", t.getFirst(), t.getSecond());
-		}
+		gpath.printPaths();
 		
 		/**/
 		
@@ -166,25 +159,29 @@ public class GraphPathSet<E extends Comparable<E>> {
 
 	public void printPaths(){
 		for(VertexPair<E,Integer> e: VPPathsSet.keySet() ) {
-			System.out.printf("%s : %s\n\n", e, VPPathsSet.get(e));
+			System.out.printf("%s : %s\n", e, VPPathsSet.get(e));
 		}
+		
+		System.out.println();
 	}
 	/**
-	 * Generates paths creates a hashmap containing all shortests paths for a
+	 * Generates paths creates a hash map containing all shortest paths for a
 	 * given graph
 	 */
 	private void generatePaths() {
 		DualLinkList<Vertex<E, Integer>> vertices = graph.vertexList();
 		
-		for (Vertex<E, Integer> v : vertices) {
-			for (Vertex<E, Integer> u : vertices) {
-				if ( v.equals(u) || getPath(u, v) != null) {
+		for (Vertex<E, Integer> v : graph.vertices) {
+			for (Vertex<E, Integer> u : graph.vertices) {
+				boolean areEqual = v.equals(u);
+				boolean pathExists = getPath(u, v) != null;
+				
+				if (areEqual || pathExists) {
 					continue;
 				}
 				
 				VertexPair<E, Integer> current = new VertexPair<E, Integer>(v, u);
 				DualLinkList<WeightedEdge<E, Integer>> path = shortestPath(u, v);
-				System.out.printf("%s : %s\n", current, path);
 				
 				VPPathsSet.put(current, path);
 			}
@@ -211,7 +208,7 @@ public class GraphPathSet<E extends Comparable<E>> {
 		
 		// Initialize the data associated with every vertex and add them to the queue
 		for (Vertex<E, Integer> v : vertices) {
-			int iniWeight = (v == start) ? 0 : Integer.MAX_VALUE;
+			int iniWeight = (v.equals(start)) ? 0 : Integer.MAX_VALUE;
 			vertexData.put(v, new ExtraData(0, iniWeight, remaining.insert(iniWeight, v), null));
 		}
 		
@@ -222,7 +219,9 @@ public class GraphPathSet<E extends Comparable<E>> {
 			Vertex<E, Integer> least = remaining.removeMax();
 			ExtraData ltData = vertexData.get(least);
 			ltData.flag = 1;
-
+			
+			//System.out.printf("%s\n%s\n\n", least, remaining);
+			
 			if (least == end) {
 				// The destination vertex has been found
 				break;
@@ -235,7 +234,8 @@ public class GraphPathSet<E extends Comparable<E>> {
 				Vertex<E, Integer> opposite = e.getOpposite(least);
 
 				// Disregard self-loops
-				if (opposite.equals(least)) {
+				if (!opposite.equals(least)) {
+					//System.out.printf("%s\n%s\n%s\n\n", opposite, vertexData, remaining);
 					ExtraData oppData = vertexData.get(opposite);
 					
 					// Only check unvisited vertices (i.e. still contained in the queue)

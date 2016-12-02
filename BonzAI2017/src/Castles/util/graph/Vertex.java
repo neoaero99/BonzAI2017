@@ -133,14 +133,17 @@ public class Vertex<E, W extends Comparable<W>> implements Node<E>{
 	public boolean equals(Object obj) {
 		if (obj instanceof Vertex) {
 			Vertex node = (Vertex)obj;
-			// Compare elements
-			if ((element == null && node.element == null) ||
-					element.equals(node.element)) {
-				
-				return true;
-			}
 			
-			return node.getElement().equals(element);
+			// Compare elements
+			if (element == null && node.element == null) {	
+				return true;
+				
+			} else if (element == null || node.element == null) {
+				return false;
+				
+			} else {
+				return node.getElement().equals(element);
+			}
 		}
 		
 		return false;
