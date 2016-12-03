@@ -72,11 +72,8 @@ public class CastlesMap {
 			numTeams=0;
 			//copy the list of teams
 			teams=(ArrayList<Team>) previousTurn.getTeams();
-			//check if the previous turn is returning a null map
-			if(previousTurn.getGraph() == null) throw new NullPointerException("Graph Null");
 			//copy vertices
 			DualLinkList<Vertex<RallyPoint, Integer>> list=previousTurn.getGraph().vertexList();
-			if(list.size() == 0) throw new NullPointerException("Graph Empty");
 			for(Vertex<RallyPoint, Integer> v:list){
 				Vertex<RallyPoint,Integer> newVert=new Vertex<RallyPoint, Integer>(v.getElement().copy());
 				graph.addNode(newVert);
@@ -84,12 +81,7 @@ public class CastlesMap {
 			
 			//copy edges
 			DualLinkList<WeightedEdge<RallyPoint,Integer>> list2=previousTurn.getGraph().edgeList();
-			if(list2.size() == 0) throw new NullPointerException("Graph Empty");
 			for(WeightedEdge<RallyPoint,Integer> w:list2){
-				if(w == null || w.getFirst() == null || w.getElement() == null){
-					System.err.println("Null edge");
-					break;
-				}
 				int weight=w.getElement();
 				WeightedEdge<RallyPoint,Integer> nw = new WeightedEdge<>(weight);
 				nw.setFirst(new Vertex<RallyPoint,Integer>(copy(w.getFirst().getElement())));
