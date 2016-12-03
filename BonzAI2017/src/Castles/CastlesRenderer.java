@@ -18,6 +18,7 @@ import Castles.Objects.*;
 import Castles.api.CastlesMap;
 //import Castles.api.Color;
 import Castles.api.Turn;
+import Castles.util.graph.WeightedEdge;
 import Castles.util.linkedlist.DualLinkList;
 import bonzai.Action;
 import bonzai.Position;
@@ -63,12 +64,13 @@ public class CastlesRenderer extends bonzai.Renderer {
 
 	//These data structures hold the actual images that get pulled from the above files
 	private static final Map<Castles.api.Color, Color> colors = new HashMap<>();
-	private static Map<Castles.api.Color, BufferedImage> emitterImages = new HashMap<>();
+	private static Map<Castles.api.Color, BufferedImage> playerImages = new HashMap<>();
 	private static Map<Castles.api.Color, BufferedImage> selectorImages = new HashMap<>();
 //	private static Map<Castles.api.Color, BufferedImage> castleImages = new HashMap<>();
 //	private static BufferedImage[] targetImages = new BufferedImage[targetFiles.length];
 	private static BufferedImage soldierImage,rallyPointImage,villageImage,castleImage;
 	private static boolean imagesLoaded = false;
+	private static int gridWidth, gridHeight;
 
 	public CastlesRenderer(){
 		loadImages();
@@ -90,7 +92,7 @@ public class CastlesRenderer extends bonzai.Renderer {
 				//Read the images into the data structures, given the file names defined above.
 				//TODO load our sprites here
 //				//load our png's
-				emitterImages = loadIntoMap(playerFiles);
+				playerImages = loadIntoMap(playerFiles);
 				selectorImages = loadIntoMap(selectorFiles);
 				castleImage = ImageIO.read(castleFile);
 				soldierImage = ImageIO.read(soldierFile);
@@ -112,6 +114,8 @@ public class CastlesRenderer extends bonzai.Renderer {
 	 * Render a preview of the map, for displaying inside of the launcher.
 	 **/
 	public static void render(Graphics2D g, CastlesMap map) {
+		gridHeight = map.getHeight();
+		gridWidth = map.getWidth();
 		List<Castles.api.Color> colors = new LinkedList<Castles.api.Color>(getColors().keySet());
 		Game game = new Game(0, 2, map, colors);
 		render(g, game.turn(0), game.turn(0), null, 1);
@@ -213,11 +217,54 @@ public class CastlesRenderer extends bonzai.Renderer {
 		//of these methods have been left for you at the bottom of this file.
 		if(turn.getMap().getGraph().vertexList().size() == 0) throw new NullPointerException("Graph empty");
 		renderBackground(g,turn.getMap());
+		renderPaths(g, turn.getMap());
 		renderBuildings(g,turn.getMap());
 		renderSoldiers(g,turn.getMap());
 		renderShoutActions(g, turn, nextTurn, smoothTween);
 		g.setTransform(oldTransform);
 		//renderAction();(g, turn, turn.actor(), nextTurn.current(turn.actor()), action, tweenPercent);
+	}
+
+	private static void renderPaths(Graphics2D g, CastlesMap map) {
+		DualLinkList<WeightedEdge<RallyPoint, Integer>> paths = map.getGraph().edgeList();
+		//iterate over all the paths
+		for(WeightedEdge<RallyPoint, Integer> p: paths){
+			//get the rally points on the edge
+			RallyPoint r1 = p.getFirst().getElement();
+			RallyPoint r2 = p.getSecond().getElement();
+			
+			//get the x,y coords of the two rally points
+			int x1 = r1.getPosition().getX();
+			int y1 = r1.getPosition().getY();
+			int x2 = r2.getPosition().getX();
+			int y2 = r2.getPosition().getY();
+			
+			g.setColor(Color.PINK);
+			
+			//use the coords' locations to make the line between the two points
+			if(x1 != x2){
+				if(x2 < x1){
+					int temp = x2;
+					x2 = x1;
+					x1 = temp;
+					temp = y2;
+					y2 = y1;
+					y1 = y2;
+				}
+				g.drawRect(x1, y1 - gridHeight, x2 - x1, 1);
+			}else{
+				if(x2 < x1){
+					int temp = x2;
+					x2 = x1;
+					x1 = temp;
+					temp = y2;
+					y2 = y1;
+					y1 = y2;
+				}
+				g.drawRect(x1, y1 - gridHeight, 1, y2-y1);
+			}
+		}
+		
 	}
 
 	private static void renderSoldiers(Graphics2D g, CastlesMap map) {
@@ -227,12 +274,22 @@ public class CastlesRenderer extends bonzai.Renderer {
 	private static void renderBuildings(Graphics2D g, CastlesMap map) {
 		DualLinkList<RallyPoint> nodes = map.getAllNodes();
 		for(RallyPoint r : nodes){
-			if(r instanceof Village){
+			String name = r.getName();
+			char c = name.charAt(0);
+			switch(c){
+			case 'V':
 				drawToScale(g,villageImage,r.getPosition().getX(),r.getPosition().getY(),0,1,0);
-			}else if(r instanceof Castle){
+				break;
+			case 'C':
 				drawToScale(g,castleImage,r.getPosition().getX(),r.getPosition().getY(),0,1,0);
-			}else{
+				break;
+			case 'P':
+				int i = r.getName().charAt(1) - 48;
+				drawToScale(g,playerImages.get(Castles.api.Color.values()[i]),r.getPosition().getX(),r.getPosition().getY(),0,1,0);
+				break;
+			default:
 				drawToScale(g,rallyPointImage,r.getPosition().getX(),r.getPosition().getY(),0,1,0);
+				break;
 			}
 		}
 	}
@@ -344,33 +401,23 @@ public class CastlesRenderer extends bonzai.Renderer {
 	 * @param y - y position in grid to draw
 	 * @param rotation - rotation of object
 	 */
-	private static void drawToScale(Graphics2D g, BufferedImage img, float x, float y, float rotation, float scaleFactor, float alpha) {
-		AffineTransform original = g.getTransform();
-		Composite originalComposite = g.getComposite();
-		//need to get x and y on the grid
-		x = x * 50;
-		y = y * 50;
-		//Invert y
-		y = -y;
+	private static void drawToScale(Graphics2D g, BufferedImage img, int x, int y, float rotation, float scaleFactor, float alpha) {
+		//get the dimentions of the background
+		int bx = backgroundImage.getWidth();
+		int by = backgroundImage.getHeight();
 
-		//Create a scale to make sure that the image is 1x1 grid
-		double scale = 1.0f / img.getWidth();
-
-		scale *= scaleFactor;
-
-		//Remember that you should think about transforms as happening in reverse order!
-		AffineTransform at = new AffineTransform();
-
-		at.translate(x-(0.5*scaleFactor), y-(0.5*scaleFactor));
-		at.rotate(-rotation, (0.5*scaleFactor), (0.5*scaleFactor));
-		at.scale(scale,scale);
-
-		g.transform(at);
-
-		g.setComposite(AlphaComposite.SrcOver.derive(alpha));
-		g.drawImage(img, 0, 0, null);
-		g.setTransform(original);
-		g.setComposite(originalComposite);
+		//get the dimentions of the image to be rendered
+		int dx = img.getWidth();
+		int dy = img.getHeight();
+		
+		//get the dimentions of a grid space
+		/*int gx = bx/gridWidth;
+		int gy = by/gridHeight;*/
+		int gx = 1;
+		int gy = 1;
+		
+		g.drawImage((Image)img, (int)(gx * x), (int)(gy * y) -gridHeight, (int)gx, (int)gy, null);
+		
 	}
 
 	// TODO Tweak transformation (possibly add in custom transform functions?)
