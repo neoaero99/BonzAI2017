@@ -29,6 +29,7 @@ import bonzai.ShoutAction;
 /**
  * Handle rendering the actual game objects on the screen. 
  */
+@SuppressWarnings("unused")
 public class CastlesRenderer extends bonzai.Renderer {
 
 	static HashMap<String,BufferedImage> backgroundImages = new HashMap<String,BufferedImage>();
@@ -268,6 +269,8 @@ public class CastlesRenderer extends bonzai.Renderer {
 	}
 
 	private static void renderSoldiers(Graphics2D g, CastlesMap map) {
+		//get soldiers
+		
 		
 	}
 
@@ -300,7 +303,9 @@ public class CastlesRenderer extends bonzai.Renderer {
 
 		int i = 0;
 		for (ShoutAction s : turn.getShoutActions()) {
+			
 			if (s != null) {
+				System.out.println("Shout not null");
 				Position pos = turn.getMap().getEntity(i).getPosition();
 				String message = s.getMessage();
 	
@@ -319,7 +324,7 @@ public class CastlesRenderer extends bonzai.Renderer {
 				bubble.arcwidth = .4f;
 	
 				bubble.x = pos.getX() - offsetX;
-				bubble.y = -pos.getY();
+				bubble.y = pos.getY() - gridHeight;
 	
 				g.setColor(new Color(245, 245, 245, 200));
 				g.fill(bubble);
@@ -385,8 +390,8 @@ public class CastlesRenderer extends bonzai.Renderer {
 		//the grid square. If the grid square is 100x100, then these
 		//constants should never be larger than (100-textHeight) or
 		//(100-textWidth)
-		//int pixelConstantHorizontal = 25;
-		//int pixelConstantVertical = 25;
+		int pixelConstantHorizontal = 25;
+		int pixelConstantVertical = 25;
 
 		drawText(g, text, p.getX(), -p.getY(), textColor, new Color(0, 0, 0, 0), size);
 	}

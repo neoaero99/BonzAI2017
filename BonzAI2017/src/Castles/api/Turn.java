@@ -263,12 +263,6 @@ public class Turn {
 		//to the team ID that wants to perform them
 		HashMap<Integer, Team> rotationsToPerform = new HashMap<>();
 
-		//Store the desired rotation at [teamNum] of this array.
-		//Thus, if team 3 wanted to rotate something, their chosen rotation
-		//will be at rotationsDesired[3]. If they didn't choose to rotate
-		//something, then the array will contain null at that index.
-		Float [] rotationsDesired = new Float [teams.size()];
-
 		// Store the teams whose action failed
 		LinkedList<Team> failedTeams = new LinkedList<>();
 		
@@ -279,28 +273,11 @@ public class Turn {
 		for (Action action : actions) {
 			//TODO Actions are Handled here
 			if (isValid(action)) {
-				/*if (action instanceof RotateAction) {
-					RotateAction r = (RotateAction)action;
-
-					rotationsDesired[currentTeam] = r.getRotation();
-
-					//Revert the rotation if two AIs attempt to move the same repeater
-					if (rotationsToPerform.containsKey(r.getRotatedObjectId())) {
-						failedTeams.add(rotationsToPerform.get(r.getRotatedObjectId()));
-						failedTeams.add(teams.get(currentTeam));
-						
-						rotationsToPerform.put(r.getRotatedObjectId(), null);
-						
-					} else {
-						//Otherwise put the move in the list (in case of later conflicts)
-						//Indicate that the currentTeam performed the move.
-						rotationsToPerform.put(r.getRotatedObjectId(), teams.get(currentTeam));
-					}
-					
-					shoutActions.add(null);
-				} else {
+				if (action instanceof ShoutAction) {
 					shoutActions.add((ShoutAction)action);
-				}*/
+				} else {
+					shoutActions.add(null);
+				}
 			} else {
 				//TODO Write code for an invalid action
 				shoutActions.add(null);

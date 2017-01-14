@@ -151,6 +151,11 @@ public class CastlesMap {
 		return height;
 	}
 
+	/**
+	 * returns a player object with the corresponding number
+	 * @param i the player number to get
+	 * @return a player
+	 */
 	public Position getEntity(int i) {
 		if(!players[i]){
 			return null;

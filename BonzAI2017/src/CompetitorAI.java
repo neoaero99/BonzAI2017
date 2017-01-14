@@ -1,7 +1,7 @@
 import bonzai.*;
 import Castles.api.*;
 
-@Agent(name = "SimpleAI")
+@Agent(name = "MeanAI")
 public class CompetitorAI extends AI {
 	public Action action(Turn turn) {
 		//This is where
