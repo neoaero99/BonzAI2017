@@ -171,8 +171,8 @@ public class GraphPathSet<E extends Comparable<E>> {
 	private void generatePaths() {
 		DualLinkList<Vertex<E, Integer>> vertices = graph.vertexList();
 		
-		for (Vertex<E, Integer> v : graph.vertices) {
-			for (Vertex<E, Integer> u : graph.vertices) {
+		for (Vertex<E, Integer> v : vertices) {
+			for (Vertex<E, Integer> u : vertices) {
 				boolean areEqual = v.equals(u);
 				boolean pathExists = getPath(u, v) != null;
 				

@@ -1,5 +1,8 @@
 package Castles.util.graph;
 
+import java.util.HashMap;
+
+import Castles.Objects.RallyPoint;
 import Castles.util.linkedlist.*;
 
 /**
@@ -15,12 +18,17 @@ public class WeightedGraph<E, W extends Comparable<W>> {
 	/**
 	 * The graphs lists of nodes and edges.
 	 */
-	public DualLinkList<Vertex<E, W>> vertices;
+	private DualLinkList<Vertex<E, W>> vertices;
 	private DualLinkList<WeightedEdge<E, W>> edges;
 	
 	public WeightedGraph() {
 		vertices = new DualLinkList<Vertex<E, W>>();
 		edges = new DualLinkList<WeightedEdge<E, W>>();
+	}
+	
+	public WeightedGraph(DualLinkList<Vertex<E, W>> V, DualLinkList<WeightedEdge<E, W>> E) {
+		vertices = V;
+		edges = E;
 	}
 	
 	/**
@@ -177,7 +185,7 @@ public class WeightedGraph<E, W extends Comparable<W>> {
 	 * @throws 			InvalidNodeException- if the node does not exists in
 	 * 						the graph or is null
 	 */
-	public E removeNode(Vertex<E, W> target) throws InvalidNodeException {
+	protected E removeNode(Vertex<E, W> target) throws InvalidNodeException {
 		if (target == null) {
 			throw new InvalidNodeException("target cannot be null!");
 			
@@ -219,7 +227,7 @@ public class WeightedGraph<E, W extends Comparable<W>> {
 	 * @throws 			InvalidEdgeException- If the edge does not belong to
 	 * 						the graph or it is null
 	 */
-	public W removeEdge(WeightedEdge<E, W> target) throws InvalidEdgeException {
+	protected W removeEdge(WeightedEdge<E, W> target) throws InvalidEdgeException {
 		if (target == null) {
 			throw new InvalidEdgeException("target cannot be null!");
 			
@@ -324,7 +332,40 @@ public class WeightedGraph<E, W extends Comparable<W>> {
 		return false;
 	}
 	
-	
+	@SuppressWarnings("unchecked")
+	public WeightedGraph<E, W> clone() {
+		DualLinkList<Vertex<E, W>> vertexCopies = new DualLinkList<Vertex<E, W>>();
+		DualLinkList<WeightedEdge<E, W>> edgeCopies = new DualLinkList<WeightedEdge<E, W>>();
+		
+		HashMap<Integer, Vertex<E, W>> OldToNewVertex = new HashMap<Integer, Vertex<E, W>>();
+		HashMap<Integer, WeightedEdge<E, W>> NewToOldEdge = new HashMap<Integer, WeightedEdge<E, W>>();
+		
+		for (Vertex<E, W> v : vertices) {
+			E element = v.getElement();
+			Vertex<E, W> vertexCopy;
+			
+			if (element instanceof RallyPoint) {
+				// Copy the element if it is a RallyPoint object
+				vertexCopy = new Vertex<E, W>( (E) ((RallyPoint)(v.getElement())).copy() );
+				
+			} else {
+				vertexCopy = new Vertex<E, W>(v.getElement());
+			}
+			
+			vertexCopies.addToBack(vertexCopy);
+			OldToNewVertex.put(v.hashCode(), vertexCopy);
+		}
+		
+		for (WeightedEdge<E, W> e : edges) {
+			WeightedEdge<E, W> edgeCopy = new WeightedEdge<E, W>(e.getElement());
+			edgeCopies.addToBack(edgeCopy);
+			//NewToOldEdge.put(edgeCopy.hashCode(), e);
+			
+			// TODO use OldToNewVertex to connect the vertex copies with the edge copies
+		}
+		
+		return new WeightedGraph<E, W>(vertexCopies, edgeCopies);
+	}
 	
 	@Override
 	public String toString() {
