@@ -75,26 +75,6 @@ public class CastlesMap {
 			numTeams=0;
 			//copy the list of teams
 			teams=(ArrayList<Team>) previousTurn.getTeams();
-<<<<<<< HEAD
-=======
-			//copy vertices
-			DualLinkList<Vertex<RallyPoint, Integer>> list=previousTurn.getGraph().vertexList();
-			for(Vertex<RallyPoint, Integer> v:list){
-				Vertex<RallyPoint,Integer> newVert=new Vertex<RallyPoint, Integer>(v.getElement().copy());
-				graph.addNode(newVert);
-			}
-			
-			//copy edges
-			DualLinkList<WeightedEdge<RallyPoint,Integer>> list2=previousTurn.getGraph().edgeList();
-			for(WeightedEdge<RallyPoint,Integer> w:list2){
-				int weight=w.getElement();
-				WeightedEdge<RallyPoint,Integer> nw = new WeightedEdge<>(weight);
-				nw.setFirst(new Vertex<RallyPoint,Integer>(copy(w.getFirst().getElement())));
-				nw.setSecond(new Vertex<RallyPoint, Integer>(copy(w.getSecond().getElement())));
-				graph.addEdge(nw);
-				
-			}
->>>>>>> master
 			
 			//set fields
 			fields = previousTurn.getFields();
