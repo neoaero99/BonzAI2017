@@ -69,10 +69,23 @@ public class VertexPair<E extends Comparable<E>, W extends Comparable<W>>
 	}
 	
 	@Override
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings("rawtypes")
 	public boolean equals(Object obj) {
 		if (obj instanceof VertexPair) {
-			return compareTo( (VertexPair)obj ) == 0;
+			VertexPair vp = (VertexPair)obj;
+			
+			if (start == null && vp.start == null && end == null && vp.end == null) {
+				// All are null
+				return true;
+				
+			} else if (start == null || vp.start == null || end == null ||
+					vp.end == null) {
+				// Only one of them are null
+				return false;
+			}
+			
+			return (start.equals(vp.start) && end.equals(vp.end)) ||
+					(start.equals(vp.end) && end.equals(vp.start));
 		}
 		
 		return false;

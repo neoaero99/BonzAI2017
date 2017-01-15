@@ -1,5 +1,0 @@
-Exception in thread "main" java.util.NoSuchElementException
-	at java.util.Scanner.throwFor(Unknown Source)
-	at java.util.Scanner.next(Unknown Source)
-	at bonzai.AIClient.run(AIClient.java:43)
-	at bonzai.AIClient.main(AIClient.java:136)

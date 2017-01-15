@@ -13,6 +13,9 @@ BonzAI2016/*
 BonzAI2017/BonzAI2017/*.jar
 BonzAI2017/BonzAI2017/*
 bonzai-2016
+#we will eventually have some AI's, we may need to change this
+*.jar
+scenarios/Thumbs.db
 
 # Mac .DS_STORE
 .DS_STORE
