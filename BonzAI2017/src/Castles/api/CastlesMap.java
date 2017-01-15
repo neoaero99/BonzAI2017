@@ -75,6 +75,26 @@ public class CastlesMap {
 			numTeams=0;
 			//copy the list of teams
 			teams=(ArrayList<Team>) previousTurn.getTeams();
+<<<<<<< HEAD
+=======
+			//copy vertices
+			DualLinkList<Vertex<RallyPoint, Integer>> list=previousTurn.getGraph().vertexList();
+			for(Vertex<RallyPoint, Integer> v:list){
+				Vertex<RallyPoint,Integer> newVert=new Vertex<RallyPoint, Integer>(v.getElement().copy());
+				graph.addNode(newVert);
+			}
+			
+			//copy edges
+			DualLinkList<WeightedEdge<RallyPoint,Integer>> list2=previousTurn.getGraph().edgeList();
+			for(WeightedEdge<RallyPoint,Integer> w:list2){
+				int weight=w.getElement();
+				WeightedEdge<RallyPoint,Integer> nw = new WeightedEdge<>(weight);
+				nw.setFirst(new Vertex<RallyPoint,Integer>(copy(w.getFirst().getElement())));
+				nw.setSecond(new Vertex<RallyPoint, Integer>(copy(w.getSecond().getElement())));
+				graph.addEdge(nw);
+				
+			}
+>>>>>>> master
 			
 			//set fields
 			fields = previousTurn.getFields();
@@ -233,18 +253,34 @@ public class CastlesMap {
 		numTeams++;
 		teams.add(newTeam);
 	}
-	
+	/**
+	 * Adds a new castle to the map
+	 * @param x x position on the map
+	 * @param y y position on the map
+	 * @param name the name of the castle
+	 */
 	public void addCastle(int x, int y, String name){
 		Castle temp=new Castle(x,y,name,null);
 		Vertex <RallyPoint,Integer> temp2=new Vertex<RallyPoint, Integer>(temp);
 		graph.addNode(temp2);
 	}
+	/**
+	 * Adds a new village to the map
+	 * @param x x position on the map
+	 * @param y y position on the map
+	 * @param name the name of the village
+	 */
 	public void addVillage(int x, int y, String name){
 		Village temp=new Village(x,y,name,null);
 		Vertex <RallyPoint,Integer> temp2=new Vertex<RallyPoint, Integer>(temp);
 		graph.addNode(temp2);
 	}
-	
+	/**
+	 * Adds a new  rallypoint to the map
+	 * @param x x position on the map
+	 * @param y y position on the map
+	 * @param name the name of the village
+	 */
 	public void addRally(int x, int y, String name){
 		RallyPoint temp=new RallyPoint(x,y,name);
 		Vertex <RallyPoint,Integer> temp2=new Vertex<RallyPoint, Integer>(temp);
@@ -253,9 +289,9 @@ public class CastlesMap {
 	/**
 	 * POTENTIAL ISSUE:
 	 *     ALL points must be loaded in prior to calling this method
-	 * @param n1
-	 * @param n2
-	 * @param weight
+	 * @param n1 node 1
+	 * @param n2 node 2
+	 * @param weight the weight of the edge
 	 */
 	public void connect(String n1, String n2, int weight){
 		Vertex<RallyPoint, Integer> one= getNode(n1);
@@ -278,6 +314,10 @@ public class CastlesMap {
 		if(graph == null) throw new NullPointerException("I lost my map");
 		return graph;
 	}
+	/**
+	 * 
+	 * @return the players
+	 */
 	public boolean[] getPlayers(){
 		return players;
 	}
@@ -319,7 +359,7 @@ public class CastlesMap {
 	 * @return true if o1 and o2 are in the graph and have an edge
 	 * 			connecting them
 	 */
-	public boolean isAdjecent(String o1, String o2){
+	public boolean isAdjacent(String o1, String o2){
 		Vertex<RallyPoint, Integer> p1 = getNode(o1);
 		Vertex<RallyPoint, Integer> p2 = getNode(o2);
 		if(p1 == null || p2 == null){
@@ -368,19 +408,32 @@ public class CastlesMap {
 	protected ArrayList<Soldier>[] getSoldiers(){
 		return soldiers;
 	}
+	/**
+	 * Spawn a new soldier to the map
+	 * @param s the soldier to add
+	 */
 	public void addSoldiers(Soldier s){
 		soldiers[s.leader.getID()].add(s);
 	}
+	/**
+	 * Splits the passed soldiers into two groups
+	 * @param s the first solder
+	 * @param num the number of soldier being split
+	 * @param path the path the split is going on
+	 * @return the second soldier
+	 */
 	public Soldier splitSoliders(Soldier s, int num,DualLinkList<WeightedEdge<RallyPoint, Integer>> path){
-		Soldier split=new Soldier(s.position);
-		split.leader=s.leader;
-		split.state=SoldierState.MOVING;
-		split.given_path=path;
-		split.value=num;
-		s.value=s.value-num;
-		addSoldiers(split);
+		if(num<s.value){
+			Soldier split=new Soldier(s.position);
+			split.leader=s.leader;
+			split.state=SoldierState.MOVING;
+			split.given_path=path;
+			split.value=num;
+			s.value=s.value-num;
+			addSoldiers(split);
 		return split;
-		
+		}
+		return null;
 	}
 	/**
 	 * Handles merging of Soldiers, as well as battling
