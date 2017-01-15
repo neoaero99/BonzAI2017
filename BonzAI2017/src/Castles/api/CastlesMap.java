@@ -67,36 +67,14 @@ public class CastlesMap {
 			numTeams=0;
 		}else{
 			//define new variables
-			graph=new WeightedGraph<>();
+			graph= cloneGraph( previousTurn.getGraph() );
+			//check if the graph is null
+			if(graph == null) throw new NullPointerException("Graph Null");
+			
 			paths= new GraphPathSet<>(graph);
 			numTeams=0;
 			//copy the list of teams
 			teams=(ArrayList<Team>) previousTurn.getTeams();
-			//check if the previous turn is returning a null map
-			if(previousTurn.getGraph() == null) throw new NullPointerException("Graph Null");
-			//copy vertices
-			DualLinkList<Vertex<RallyPoint, Integer>> list=previousTurn.getGraph().vertexList();
-			if(list.size() == 0) throw new NullPointerException("Graph Empty");
-			for(Vertex<RallyPoint, Integer> v:list){
-				Vertex<RallyPoint,Integer> newVert=new Vertex<RallyPoint, Integer>(v.getElement().copy());
-				graph.addNode(newVert);
-			}
-			
-			//copy edges
-			DualLinkList<WeightedEdge<RallyPoint,Integer>> list2=previousTurn.getGraph().edgeList();
-			if(list2.size() == 0) throw new NullPointerException("Graph Empty");
-			for(WeightedEdge<RallyPoint,Integer> w:list2){
-				if(w == null || w.getFirst() == null || w.getElement() == null){
-					System.err.println("Null edge");
-					break;
-				}
-				int weight=w.getElement();
-				WeightedEdge<RallyPoint,Integer> nw = new WeightedEdge<>(weight);
-				nw.setFirst(new Vertex<RallyPoint,Integer>(copy(w.getFirst().getElement())));
-				nw.setSecond(new Vertex<RallyPoint, Integer>(copy(w.getSecond().getElement())));
-				graph.addEdge(nw);
-				
-			}
 			
 			//set fields
 			fields = previousTurn.getFields();
@@ -107,6 +85,48 @@ public class CastlesMap {
 		}
 		paths=previousTurn.getPaths();
 		soldiers=previousTurn.getSoldiers();
+	}
+	
+	/**
+	 * Duplicates all the vertices and edges, the elements of each, and the connections between nodes
+	 * and vertices.
+	 * 
+	 * @param g	A graph object
+	 * @return	A copy of the given graph
+	 */
+	public static WeightedGraph<RallyPoint, Integer> cloneGraph(WeightedGraph<RallyPoint, Integer> g) {
+		
+		if (g == null) {
+			return null;
+		}
+		
+		DualLinkList<Vertex<RallyPoint, Integer>> vertexCopies = new DualLinkList<Vertex<RallyPoint, Integer>>();
+		DualLinkList<WeightedEdge<RallyPoint, Integer>> edgeCopies = new DualLinkList<WeightedEdge<RallyPoint, Integer>>();
+		
+		HashMap<Integer, Vertex<RallyPoint, Integer>> OldToNewVertex = new HashMap<Integer, Vertex<RallyPoint, Integer>>();
+		
+		// Copy the vertices and add them to a map
+		DualLinkList<Vertex<RallyPoint, Integer>> vertices = g.vertexList();
+		for (Vertex<RallyPoint, Integer> v : vertices) {
+			Vertex<RallyPoint, Integer> vertexCopy = new Vertex<RallyPoint, Integer>(v.getElement().copy());
+			// TODO update Soldier path references
+			vertexCopies.addToBack(vertexCopy);
+			OldToNewVertex.put(v.hashCode(), vertexCopy);
+		}
+		
+		// Copy the edges and the connections between edges and vertices
+		DualLinkList<WeightedEdge<RallyPoint, Integer>> edges = g.edgeList();
+		for (WeightedEdge<RallyPoint, Integer> e : edges) {
+			WeightedEdge<RallyPoint, Integer> edgeCopy = new WeightedEdge<RallyPoint, Integer>(e.getElement().intValue());
+			edgeCopies.addToBack(edgeCopy);
+			
+			// Connect the new vertices with the new edge
+			Vertex<RallyPoint, Integer> first = OldToNewVertex.get( e.getFirst().hashCode() );
+			Vertex<RallyPoint, Integer> second = OldToNewVertex.get( e.getSecond().hashCode() );
+			WeightedGraph.connect(first, second, edgeCopy);
+		}
+		
+		return new WeightedGraph<RallyPoint, Integer>(vertexCopies, edgeCopies);
 	}
 
 //github.com/neoaero99/BonzAI2017

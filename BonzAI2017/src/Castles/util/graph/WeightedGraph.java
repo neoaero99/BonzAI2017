@@ -319,55 +319,6 @@ public class WeightedGraph<E, W extends Comparable<W>> {
 	}
 	
 	@Override
-	@SuppressWarnings("rawtypes")
-	public boolean equals(Object obj) {
-		if (obj instanceof WeightedGraph) {
-			WeightedGraph g = (WeightedGraph)obj;
-			/* Check if each graph has equivalent nodes and edges */
-			return vertices.equals(g.vertices) && edges.equals(g.edges);
-			
-			/* TODO trace graphs to check all connections */
-		}
-		
-		return false;
-	}
-	
-	@SuppressWarnings("unchecked")
-	public WeightedGraph<E, W> clone() {
-		DualLinkList<Vertex<E, W>> vertexCopies = new DualLinkList<Vertex<E, W>>();
-		DualLinkList<WeightedEdge<E, W>> edgeCopies = new DualLinkList<WeightedEdge<E, W>>();
-		
-		HashMap<Integer, Vertex<E, W>> OldToNewVertex = new HashMap<Integer, Vertex<E, W>>();
-		HashMap<Integer, WeightedEdge<E, W>> NewToOldEdge = new HashMap<Integer, WeightedEdge<E, W>>();
-		
-		for (Vertex<E, W> v : vertices) {
-			E element = v.getElement();
-			Vertex<E, W> vertexCopy;
-			
-			if (element instanceof RallyPoint) {
-				// Copy the element if it is a RallyPoint object
-				vertexCopy = new Vertex<E, W>( (E) ((RallyPoint)(v.getElement())).copy() );
-				
-			} else {
-				vertexCopy = new Vertex<E, W>(v.getElement());
-			}
-			
-			vertexCopies.addToBack(vertexCopy);
-			OldToNewVertex.put(v.hashCode(), vertexCopy);
-		}
-		
-		for (WeightedEdge<E, W> e : edges) {
-			WeightedEdge<E, W> edgeCopy = new WeightedEdge<E, W>(e.getElement());
-			edgeCopies.addToBack(edgeCopy);
-			//NewToOldEdge.put(edgeCopy.hashCode(), e);
-			
-			// TODO use OldToNewVertex to connect the vertex copies with the edge copies
-		}
-		
-		return new WeightedGraph<E, W>(vertexCopies, edgeCopies);
-	}
-	
-	@Override
 	public String toString() {
 		/* List nodes followed by edges, each on separate lines */
 		return String.format("N: %s\nE: %s", vertices, edges);
