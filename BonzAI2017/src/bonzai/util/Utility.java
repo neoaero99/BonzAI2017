@@ -27,7 +27,6 @@ public class Utility {
 	 * @param rest Any Collections to intersect with the first collection
 	 * @return the intersection of the two specified collections
 	 **/
-	@SafeVarargs
 	public static final <E> Set<E> intersect(Collection<E> first, Collection<E>... rest) {
 		Set<E> result = new HashSet<>(first);
 		for(Collection<E> c : rest) { result.retainAll(c); }
@@ -41,7 +40,6 @@ public class Utility {
 	 * @param rest Any Collections to intersect with the first collection
 	 * @return the union of the two specified collections
 	 **/
-	@SafeVarargs
 	public static final <E> Set<E> union(Collection<E> first, Collection<E>... rest) {
 		Set<E> result = new HashSet<>(first);
 		for(Collection<E> c : rest) { result.addAll(c); }
