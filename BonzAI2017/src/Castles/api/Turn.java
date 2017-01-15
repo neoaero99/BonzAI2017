@@ -7,9 +7,14 @@ import java.util.LinkedList;
 import java.util.List;
 
 
+
+
+
+
 import Castles.Objects.*;
 import Castles.util.graph.Vertex;
 import Castles.util.graph.WeightedEdge;
+import Castles.util.graph.WeightedGraph;
 import Castles.util.linkedlist.DualLinkList;
 import bonzai.Action;
 import bonzai.Identifiable;
@@ -308,7 +313,6 @@ public class Turn {
 
 			currentTeam++;
 		}
-
 		//Apply all valid RotateActions to the game state.
 		for (int id : rotationsToPerform.keySet()) {
 
@@ -340,6 +344,13 @@ public class Turn {
 		//map.calculateParentsTargetsAndOwners();
 
 		//Generate the new Turn object. We apply any earned points onto this new Turn.
+		//ArrayList<Soilder>
+		//for()
+		DualLinkList<Vertex<RallyPoint, Integer>> g=map.getGraph().vertexList();
+		for(Vertex<RallyPoint, Integer> v: g){
+			RallyPoint r=v.getElement();
+			
+		}
 		Turn newTurn = new Turn(this, oldID, map, failedTeams);
 		
 		

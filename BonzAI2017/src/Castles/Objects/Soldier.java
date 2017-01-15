@@ -1,9 +1,10 @@
 package Castles.Objects;
 
 import java.awt.image.BufferedImage;
-import java.util.ArrayList;
+import java.util.*;
 
 import javax.swing.JComponent;
+
 import Castles.util.VectorND;
 import Castles.util.graph.Node;
 import Castles.util.graph.WeightedEdge;
@@ -91,5 +92,34 @@ public class Soldier extends JComponent {
 		position = base_position;
 		state = SoldierState.STANDBY;
 	}
-
+	public static void quickSort(List<Soldier> s){
+		if(s.size()<=1){
+			return;
+		}
+		int part=0;
+		int value=s.get(0).value;
+		for(int i=1;i<s.size();i++){
+			if(s.get(i).value>value){
+				part++;
+				Soldier temp=s.get(i);
+				s.remove(i);
+				s.add(0, temp);
+			}
+		}
+		quickSort(s.subList(0, part));
+		quickSort(s.subList(part+1, s.size()));
+	}
+	public static void main(String[] args){
+		ArrayList<Soldier> test=new ArrayList<Soldier>();
+		for(int i=0;i<10;i++){
+			int temp=(int) (Math.random()*10);
+			Soldier x=new Soldier(null);
+			x.value=temp;
+			test.add(x);
+		}
+		Soldier.quickSort(test);
+		for(int i=0;i<10;i++){
+			System.out.println(test.get(i).value);
+		}
+	}
 }

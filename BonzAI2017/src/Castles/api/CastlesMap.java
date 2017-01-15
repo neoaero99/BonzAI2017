@@ -21,6 +21,7 @@ import Castles.util.linkedlist.DualLinkList;
 import bonzai.Position;
 import bonzai.Team;
 
+
 public class CastlesMap {
 	
 	// TODO 2017: Read in map files here. 
@@ -33,7 +34,7 @@ public class CastlesMap {
 	private HashMap<Integer, Traversable> entities = new HashMap<>();
 	
 	private WeightedGraph<RallyPoint,Integer> graph = new WeightedGraph<>();
-	private GraphPathSet<RallyPoint> paths = new GraphPathSet<>(graph);
+	private GraphPathSet<RallyPoint> paths;
 	
 	private boolean players[]={true,true,true,true,true,true};
 	
@@ -44,7 +45,6 @@ public class CastlesMap {
 	
 	public CastlesMap(){
 		graph=new WeightedGraph<>();
-		paths= new GraphPathSet<>(graph);
 		for(int i=0;i<6;i++){
 			soldiers[i]=new ArrayList<Soldier>();
 		}
@@ -59,7 +59,6 @@ public class CastlesMap {
 		}else{
 			//define new variables
 			graph=new WeightedGraph<>();
-			paths= new GraphPathSet<>(graph);
 			numTeams=0;
 			//copy the list of teams
 			teams=(ArrayList<Team>) previousTurn.getTeams();
@@ -378,7 +377,7 @@ public class CastlesMap {
 	 * 			 3:s2 has defeated the the number of soldiers in s1, s2 has been deleted
 	 * 			 4:s1 and s2 have both been deleted
 	 */
-	public int mergeSoldiers(Soldier s1, Soldier s2){
+	private int mergeSoldiers(Soldier s1, Soldier s2){
 		if(!s1.position.equals(s2.position)){
 			return -1;
 		}
@@ -415,4 +414,61 @@ public class CastlesMap {
 		}
 		
 	}
+	public int mergeSoldiers(ArrayList<Soldier> onPoint){
+		if(onPoint.size()<=1){
+			return -1;
+		}
+		if(onPoint.size()==2){
+			int temp =mergeSoldiers(onPoint.get(0),onPoint.get(1));
+			for(int i =0;i<2;i++){
+				if(onPoint.get(i)==null){
+					onPoint.remove(i);
+				}
+			}
+			return temp;
+		}
+		int num[]=new int[6];
+		int total[]=new int[6];
+		for(Soldier s: onPoint){
+			num[s.leader.getID()]++;
+			total[s.leader.getID()]+=s.value;
+		}
+		int max=0;
+		int maxid=-1;
+		for(int i=0;i<6;i++){
+			if(total[i]>max){
+				maxid=i;
+				max=total[i];
+			}
+		}
+		if(maxid==-1){
+			return -2;
+		}
+		for(Soldier s: onPoint){
+			if(s.leader.getID()!=maxid){
+				onPoint.remove(s);
+				soldiers[s.leader.getID()].remove(s);
+				s=null;
+			}
+		}
+		max=0;
+		for(int i=0;i<6;i++){
+			if(i!=maxid){
+				max+=total[i];
+			}
+		}
+		Soldier.quickSort(onPoint);
+		while(max>0){
+			max-=onPoint.get(0).value;
+			if(max>0){
+				Soldier temp=onPoint.remove(0);
+				soldiers[temp.leader.getID()].remove(temp);
+			}
+		}
+		return 0;
+	}
+	public void calculatePaths(){
+		paths= new GraphPathSet<>(graph);
+	}
+
 }
