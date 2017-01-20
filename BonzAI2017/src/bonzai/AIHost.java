@@ -107,9 +107,9 @@ public class AIHost {
 			/*case "ROTATE":
 				int id = arguments.nextInt();
 				float rotation = arguments.nextFloat();
-				return new RotateAction(id, rotation);
+				return new RotateAction(id, rotation);*/
 			case "SHOUT":
-				return new ShoutAction(arguments.nextLine());*/
+				return new ShoutAction(arguments.nextLine());
 			default:
 				return null;
 		}

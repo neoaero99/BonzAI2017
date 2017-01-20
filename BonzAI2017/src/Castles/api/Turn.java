@@ -224,7 +224,11 @@ public class Turn {
 	 * 			 false otherwise
 	 */
 	public boolean isValid(Action action) {
-		//TODO 2017: This is important for us and competitors. 
+		//TODO 2017: This is important for us and competitors.
+		if (action instanceof ShoutAction) {
+			return true;
+		}
+		
 		return false;
 	}
 
@@ -279,28 +283,11 @@ public class Turn {
 		for (Action action : actions) {
 			//TODO Actions are Handled here
 			if (isValid(action)) {
-				/*if (action instanceof RotateAction) {
-					RotateAction r = (RotateAction)action;
-
-					rotationsDesired[currentTeam] = r.getRotation();
-
-					//Revert the rotation if two AIs attempt to move the same repeater
-					if (rotationsToPerform.containsKey(r.getRotatedObjectId())) {
-						failedTeams.add(rotationsToPerform.get(r.getRotatedObjectId()));
-						failedTeams.add(teams.get(currentTeam));
-						
-						rotationsToPerform.put(r.getRotatedObjectId(), null);
-						
-					} else {
-						//Otherwise put the move in the list (in case of later conflicts)
-						//Indicate that the currentTeam performed the move.
-						rotationsToPerform.put(r.getRotatedObjectId(), teams.get(currentTeam));
-					}
-					
-					shoutActions.add(null);
-				} else {
+				
+				if (action instanceof ShoutAction) {
 					shoutActions.add((ShoutAction)action);
-				}*/
+				}
+				
 			} else {
 				//TODO Write code for an invalid action
 				shoutActions.add(null);
