@@ -41,7 +41,7 @@ public class CastlesMap {
 	private int numTeams;
 	
 	private ArrayList<Team> teams= new ArrayList<Team>();
-	private ArrayList<Soldier> soldiers[]=(ArrayList<Soldier>[])new ArrayList[6];
+	public ArrayList<Soldier> soldiers[]=(ArrayList<Soldier>[])new ArrayList[6];
 	
 	public CastlesMap(){
 		graph=new WeightedGraph<>();
@@ -96,7 +96,6 @@ public class CastlesMap {
 			width=previousTurn.getWidth();
 			paths=previousTurn.getPaths();
 		}
-		paths=previousTurn.getPaths();
 		soldiers=previousTurn.getSoldiers();
 	}
 
@@ -346,18 +345,44 @@ public class CastlesMap {
 		if(r instanceof Castle){
 			Castle c = (Castle)r;
 			Castle temp = new Castle(r.getPosition().getX(), r.getPosition().getY(), r.getName(),  c.getTeam());
+			temp.onPoint.clear();
+			for(Soldier s:r.onPoint){
+				temp.onPoint.add(s.copy());
+			}
 			return temp;
 		}
 		if(r instanceof Village){
 			Village temp = new Village(r.getPosition().getX(), r.getPosition().getY(), r.getName(), ((Village) r).getTeam());
+			temp.onPoint.clear();
+			for(Soldier s:r.onPoint){
+				temp.onPoint.add(s.copy());
+			}
+			return temp;
+		}
+		if(r instanceof Building){
+			Building temp= (Building) ((Building)r).copy();
+			temp.onPoint.clear();
+			for(Soldier s:r.onPoint){
+				temp.onPoint.add(s.copy());
+			}
 			return temp;
 		}
 		RallyPoint temp = new RallyPoint(r.getPosition().getX(), r.getPosition().getY(), r.getName());
+		temp.onPoint.clear();
+		for(Soldier s:r.onPoint){
+			temp.onPoint.add(s.copy());
+		}
 		return temp;
 	}
 	
 	protected ArrayList<Soldier>[] getSoldiers(){
-		return soldiers;
+		ArrayList<Soldier> NewList[]=(ArrayList<Soldier>[])new ArrayList[6];
+		for(int i=0;i<6;i++){
+			for(Soldier s: soldiers[i]){
+				NewList[i].add(s.copy());
+			}
+		}
+		return NewList;
 	}
 	/**
 	 * Spawn a new soldier to the map
@@ -373,7 +398,7 @@ public class CastlesMap {
 	 * @param path the path the split is going on
 	 * @return the second soldier
 	 */
-	public Soldier splitSoliders(Soldier s, int num,DualLinkList<WeightedEdge<RallyPoint, Integer>> path){
+	public Soldier splitSoliders(Soldier s, int num,DualLinkList<String> path){
 		if(num<s.value){
 			Soldier split=new Soldier(s.position);
 			split.leader=s.leader;
@@ -387,7 +412,7 @@ public class CastlesMap {
 		return null;
 	}
 	/**
-	 * Handles merging of Soldiers, as well as battling
+	 * Handles merging of Soldiers, as well as battling for 2 entities, called by the other mergeSoldiers
 	 * @param s1 Soldier 1, any team
 	 * @param s2 Soldier 2, any team
 	 * @return a value depending on the result:
@@ -435,9 +460,22 @@ public class CastlesMap {
 		}
 		
 	}
+	/**
+	 * Deals with merging soldiers on the same point
+	 * @param onPoint the onpoint array for each node
+	 * @return   a value depending on the result:
+	 * 			-2:Error
+	 * 			-1:s1 and s2 are not on the same position
+	 * 			0 :no merge necessary
+	 * 			1 :s1 and s2 have merged, s2 has been destroyed
+	 * 			2 :s1 has defeated the the number of soldiers in s2, s2 has been deleted
+	 * 			3 :s2 has defeated the the number of soldiers in s1, s2 has been deleted
+	 * 			4 :s1 and s2 have both been deleted
+	 * 			5 : Soldiers have merged successfully
+	 */
 	public int mergeSoldiers(ArrayList<Soldier> onPoint){
 		if(onPoint.size()<=1){
-			return -1;
+			return 0;
 		}
 		if(onPoint.size()==2){
 			int temp =mergeSoldiers(onPoint.get(0),onPoint.get(1));
@@ -486,8 +524,11 @@ public class CastlesMap {
 				soldiers[temp.leader.getID()].remove(temp);
 			}
 		}
-		return 0;
+		return 5;
 	}
+	/**
+	 * Will calculate all possible paths
+	 */
 	public void calculatePaths(){
 		paths= new GraphPathSet<>(graph);
 	}

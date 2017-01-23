@@ -7,7 +7,9 @@ import javax.swing.JComponent;
 
 import Castles.util.VectorND;
 import Castles.util.graph.Node;
+import Castles.util.graph.SegEdge;
 import Castles.util.graph.WeightedEdge;
+import Castles.util.graph.WeightedGraph;
 import Castles.util.linkedlist.DualLinkList;
 import bonzai.*;
 
@@ -70,7 +72,10 @@ public class Soldier extends JComponent {
 	// The position of the soldier on the map (on screen)
 	public Node<RallyPoint> position;
 	// An array list that is the current path (in nodes on the graph)
-	public DualLinkList<WeightedEdge<RallyPoint, Integer>> given_path;
+	// First element is the starting point, last element is the end point
+	public DualLinkList<String> given_path;
+	// the position in give_path
+	private int pathPosition;
 	// The current status of the soldier (always defaults to standby)
 	public SoldierState state;
 	
@@ -91,6 +96,13 @@ public class Soldier extends JComponent {
 	public Soldier(Node<RallyPoint> base_position) {
 		position = base_position;
 		state = SoldierState.STANDBY;
+		pathPosition=0;
+	}
+	public void gotoNext(WeightedGraph<RallyPoint,Integer> graph){
+		pathPosition++;
+		String ID=given_path.atIndex(pathPosition).getElement();
+		//for()
+		
 	}
 	public static void quickSort(List<Soldier> s){
 		if(s.size()<=1){
@@ -121,5 +133,17 @@ public class Soldier extends JComponent {
 		for(int i=0;i<10;i++){
 			System.out.println(test.get(i).value);
 		}
+	}
+	public Soldier copy(){
+		Soldier temp =new Soldier(position);
+		temp.given_path=given_path;
+		temp.leader=leader;
+		temp.pathPosition=pathPosition;
+		temp.value=value;
+		temp.sprite=sprite;
+		temp.radius=radius;
+		temp.state=state;
+		return temp;
+		
 	}
 }

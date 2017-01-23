@@ -344,12 +344,21 @@ public class Turn {
 		//map.calculateParentsTargetsAndOwners();
 
 		//Generate the new Turn object. We apply any earned points onto this new Turn.
-		//ArrayList<Soilder>
-		//for()
+		for(int i=0;i<6;i++){
+			for(Soldier s:map.soldiers[i]){
+				s.gotoNext(map.getGraph());
+			}
+		}
 		DualLinkList<Vertex<RallyPoint, Integer>> g=map.getGraph().vertexList();
-		for(Vertex<RallyPoint, Integer> v: g){
-			RallyPoint r=v.getElement();
-			
+		for(Vertex<RallyPoint, Integer> V: g){
+			RallyPoint r=V.getElement();
+			map.mergeSoldiers(r.onPoint);
+			if(r instanceof Building){
+				Soldier sol= r.onPoint.get(0);
+				if(!sol.leader.equals(((Building) r).getTeam())){
+					((Building)r).setTeam(sol.leader);
+				}
+			}
 		}
 		Turn newTurn = new Turn(this, oldID, map, failedTeams);
 		

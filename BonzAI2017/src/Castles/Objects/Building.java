@@ -72,4 +72,7 @@ public class Building extends RallyPoint {
 	public Team getTeam(){
 		return myTeam;
 	}
+	public void setTeam(Team t){
+		myTeam=t;
+	}
 }
