@@ -25,30 +25,34 @@ public class CastlesMap {
 	
 	// TODO 2017: Read in map files here. 
 
-	private int max_repeat_id = 0, max_target_id = 0, max_source_id = 0;
-	private int min, mid;
-	int width,height;
+	int width, height;
 	
-	private HashMap<String, String> fields = new HashMap<String, String>();
-	private HashMap<Integer, Traversable> entities = new HashMap<>();
+	private HashMap<String, String> fields;
 	
-	private WeightedGraph<RallyPoint,Integer> graph = new WeightedGraph<>();
-	private GraphPathSet<RallyPoint> paths = new GraphPathSet<>(graph);
+	private WeightedGraph<RallyPoint,Integer> graph;
+	private GraphPathSet<RallyPoint> paths;
 	
-	private boolean players[]={true,true,true,true,true,true};
+	private boolean[] players;
 	
-	private int numTeams;
+	private ArrayList<Team> teams;
+	private ArrayList<Soldier>[] soldiers;
 	
-	private ArrayList<Team> teams= new ArrayList<Team>();
-	private ArrayList<Soldier> soldiers[]=(ArrayList<Soldier>[])new ArrayList[6];
-	
-	public CastlesMap(){
-		graph=new WeightedGraph<>();
-		paths= new GraphPathSet<>(graph);
+	public CastlesMap(HashMap<String, String> f, WeightedGraph<RallyPoint, Integer> g, ArrayList<Team> t, int w, int h) {
+		width = w;
+		height = h;
+		
+		fields = f;
+		
+		graph = g;
+		paths = new GraphPathSet<RallyPoint>(g);
+		
+		players = new boolean[] { true,true,true,true,true,true };
+		teams = t;
+		
+		soldiers = (ArrayList<Soldier>[])new ArrayList[6];
 		for(int i=0;i<6;i++){
 			soldiers[i]=new ArrayList<Soldier>();
 		}
-		numTeams=0;
 	}
 
 	/**
@@ -61,30 +65,22 @@ public class CastlesMap {
 	 * @return 
 	 */
 	public CastlesMap(CastlesMap previousTurn) {
-		if(previousTurn == null){
-			graph=new WeightedGraph<>();
-			paths= new GraphPathSet<>(graph);
-			numTeams=0;
-		}else{
-			//define new variables
-			graph= cloneGraph( previousTurn.getGraph() );
-			//check if the graph is null
-			if(graph == null) throw new NullPointerException("Graph Null");
-			
-			paths= new GraphPathSet<>(graph);
-			numTeams=0;
-			//copy the list of teams
-			teams=(ArrayList<Team>) previousTurn.getTeams();
-			
-			//set fields
-			fields = previousTurn.getFields();
-			players=previousTurn.getPlayers();
-			height=previousTurn.getHeight();
-			width=previousTurn.getWidth();
-			paths=previousTurn.getPaths();
-		}
-		paths=previousTurn.getPaths();
-		soldiers=previousTurn.getSoldiers();
+		
+		height = previousTurn.getHeight();
+		width = previousTurn.getWidth();
+		
+		//set fields
+		fields = previousTurn.getFields();
+	
+		//define new variables
+		graph = cloneGraph( previousTurn.getGraph() );
+		paths = new GraphPathSet<RallyPoint>(graph);
+		
+		//copy the list of teams
+		players = previousTurn.getPlayers();
+		teams = (ArrayList<Team>) previousTurn.getTeams();
+		
+		soldiers = previousTurn.getSoldiers();
 	}
 	
 	/**
@@ -145,28 +141,7 @@ public class CastlesMap {
 		}
 		return fields.get(input);
 	}
-
-	public void addTarget(Target target) {
-		
-	}
-
-	public void addWall(Wall wall) {
-		
-	}
-
-	public void setField(String string, String string2) {
-		if(!string.equals("size")){
-			fields.put(string, string2);
-			System.out.println(string  + " set to " + fields.get(string));
-		} else {
-			String[] parts = string2.split(", ");
-			width = Integer.parseInt(parts[0]);
-			height = Integer.parseInt(parts[1]);
-		}
-	}
-
 	
-
 	public void removePlayer(int i) {
 		players[i]=false;
 	}
@@ -209,80 +184,6 @@ public class CastlesMap {
 		return null;
 	}
 	
-	/**
-	 * returns the vertex containing an entity based on a unique id
-	 * the I param is useless, so set it to whatever you want
-	 * @param s the unique id of the entitiy
-	 * @param i useless
-	 * @return
-	 */
-	private Vertex<RallyPoint, Integer> getNode(String s){
-		for(Vertex<RallyPoint, Integer> v : graph.vertexList()){
-			if(v.getElement().getName().equals(s)){
-				return v;
-			}
-		}
-		return null;
-	}
-	
-	public void addPlayer(int x, int y, String name){
-		Team newTeam=new Team(Castles.api.Color.values()[numTeams],numTeams);
-		Castle temp=new Castle(x,y,name,newTeam);
-		Vertex <RallyPoint,Integer> temp2=new Vertex<RallyPoint, Integer>(temp);
-		graph.addNode(temp2);
-		numTeams++;
-		teams.add(newTeam);
-	}
-	/**
-	 * Adds a new castle to the map
-	 * @param x x position on the map
-	 * @param y y position on the map
-	 * @param name the name of the castle
-	 */
-	public void addCastle(int x, int y, String name){
-		Castle temp=new Castle(x,y,name,null);
-		Vertex <RallyPoint,Integer> temp2=new Vertex<RallyPoint, Integer>(temp);
-		graph.addNode(temp2);
-	}
-	/**
-	 * Adds a new village to the map
-	 * @param x x position on the map
-	 * @param y y position on the map
-	 * @param name the name of the village
-	 */
-	public void addVillage(int x, int y, String name){
-		Village temp=new Village(x,y,name,null);
-		Vertex <RallyPoint,Integer> temp2=new Vertex<RallyPoint, Integer>(temp);
-		graph.addNode(temp2);
-	}
-	/**
-	 * Adds a new  rallypoint to the map
-	 * @param x x position on the map
-	 * @param y y position on the map
-	 * @param name the name of the village
-	 */
-	public void addRally(int x, int y, String name){
-		RallyPoint temp=new RallyPoint(x,y,name);
-		Vertex <RallyPoint,Integer> temp2=new Vertex<RallyPoint, Integer>(temp);
-		graph.addNode(temp2);
-	}
-	/**
-	 * POTENTIAL ISSUE:
-	 *     ALL points must be loaded in prior to calling this method
-	 * @param n1 node 1
-	 * @param n2 node 2
-	 * @param weight the weight of the edge
-	 */
-	public void connect(String n1, String n2, int weight){
-		Vertex<RallyPoint, Integer> one= getNode(n1);
-		Vertex<RallyPoint, Integer> two= getNode(n2);
-		WeightedEdge<RallyPoint, Integer> temp=new WeightedEdge<RallyPoint, Integer>(weight);
-		temp.setFirst(one);
-		temp.setSecond(two);
-		graph.addEdge(temp);
-
-	}
-	
 	/*
 	 * change to canPassThroug(), makes a list
 	 * of nodes and edges that troops CAN pass through
@@ -300,52 +201,6 @@ public class CastlesMap {
 	 */
 	public boolean[] getPlayers(){
 		return players;
-	}
-	
-	public DualLinkList<Position> getRallyPointsPositions(){
-		DualLinkList<Position> pos= new DualLinkList<Position>();
-		for(Vertex<RallyPoint, Integer> r: getGraph().vertexList()){
-			if(!(r.getElement()instanceof Building)){
-				pos.addToFront(r.getElement().getPosition());
-			}
-		}
-		return pos;
-	}
-	public DualLinkList<Building> getDefaultss(){
-		DualLinkList<Building> pos= new DualLinkList<Building>();
-		for(Vertex<RallyPoint, Integer> r: getGraph().vertexList()){
-			if(r.getElement()instanceof Building&&!(r.getElement()instanceof Castle)){
-				pos.addToFront((Building)r.getElement());
-			}
-		}
-		return pos;
-	}
-	public DualLinkList<Building> getCastles(){
-		DualLinkList<Building> pos= new DualLinkList<Building>();
-		for(Vertex<RallyPoint, Integer> r: getGraph().vertexList()){
-			if(r.getElement()instanceof Castle){
-				pos.addToFront((Building)r.getElement());
-			}
-		}
-		return pos;
-	}
-	
-	/**
-	 * Takes in 2 object unique identifiers and checks if they are in the
-	 * graph and are adjacent
-	 * 
-	 * @param o1 an object
-	 * @param o2 an object
-	 * @return true if o1 and o2 are in the graph and have an edge
-	 * 			connecting them
-	 */
-	public boolean isAdjacent(String o1, String o2){
-		Vertex<RallyPoint, Integer> p1 = getNode(o1);
-		Vertex<RallyPoint, Integer> p2 = getNode(o2);
-		if(p1 == null || p2 == null){
-			return false;
-		}
-		return p1.isAdjacent(p2);
 	}
 	
 	public List<Team> getTeams(){
@@ -366,23 +221,6 @@ public class CastlesMap {
 		}
 		
 		return nodes;
-	}
-	
-	/**
-	 * prints out a copy of the given rally point
-	 */
-	private RallyPoint copy(RallyPoint r){
-		if(r instanceof Castle){
-			Castle c = (Castle)r;
-			Castle temp = new Castle(r.getPosition().getX(), r.getPosition().getY(), r.getName(),  c.getTeam());
-			return temp;
-		}
-		if(r instanceof Village){
-			Village temp = new Village(r.getPosition().getX(), r.getPosition().getY(), r.getName(), ((Village) r).getTeam());
-			return temp;
-		}
-		RallyPoint temp = new RallyPoint(r.getPosition().getX(), r.getPosition().getY(), r.getName());
-		return temp;
 	}
 	
 	protected ArrayList<Soldier>[] getSoldiers(){

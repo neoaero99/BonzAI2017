@@ -29,7 +29,8 @@ public class CastlesScenario implements bonzai.Scenario {
 		//TODO 2017: This is what we used to parse and use the map files for our game. This is an example.
 		this.file = file;
 		this.teamID = teamID;
-		CastlesMap map = new CastlesMap();
+		CastlesMap map = null;
+		
 		try {
 			//Get the map object we need to instantiate the game.
 			map = Parser.parseFile(file);
@@ -60,6 +61,7 @@ public class CastlesScenario implements bonzai.Scenario {
 			if(map.getGraph().vertexList().size() == 0 || map.getGraph().edgeList().size() == 0){
 				throw new IllegalStateException(map.getField("name") + "  " + map.getGraph().vertexList().size() + "  " + map.getGraph().edgeList().size());
 			}
+			
 			CastlesRenderer.render(g, map);
 			
 			this.image = buffer;

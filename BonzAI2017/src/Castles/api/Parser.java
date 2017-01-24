@@ -2,8 +2,16 @@ package Castles.api;
 
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Scanner;
 import Castles.Objects.*;
+import Castles.util.graph.Node;
+import Castles.util.graph.SegEdge;
+import Castles.util.graph.Vertex;
+import Castles.util.graph.WeightedEdge;
+import Castles.util.graph.WeightedGraph;
+import Castles.util.linkedlist.DualLinkList;
 import bonzai.Position;
 import bonzai.Team;
 
@@ -23,12 +31,19 @@ public class Parser {
 		System.out.println("" + file.getPath());
 		//return new CastlesMap();
 		Scanner in = new Scanner(file);
-
-		CastlesMap map = new CastlesMap();
+		
+		int width = 0, height = 0;
+		HashMap<String, String> fields = new HashMap<String, String>();
+		
+		DualLinkList<Vertex<RallyPoint, Integer>> vertices = new DualLinkList<Vertex<RallyPoint, Integer>>();
+		DualLinkList<WeightedEdge<RallyPoint, Integer>> edges = new DualLinkList<WeightedEdge<RallyPoint, Integer>>();
+		
+		ArrayList<Team> teams = new ArrayList<Team>();
 		
 		while (in.hasNextLine()) {
 			String line = in.nextLine().trim();
-
+			RallyPoint r = null;
+			
 			if (!line.isEmpty() && !line.matches("#.*")) {			// Ignore comments
 				String[] ls = line.trim().split(": ?");				// Split into "header" and "data"
 				String[] row = null;
@@ -45,27 +60,48 @@ public class Parser {
 				}
 
 				switch(parse_mode) {
-				case PARSE_PLAYER:								
-					map.addPlayer(Integer.parseInt(row[0]), Integer.parseInt(row[1]), row[2]);
+				case PARSE_PLAYER:
+					Team newTeam = new Team(Castles.api.Color.values()[teams.size()], teams.size());
+					teams.add(newTeam);
+					r = new Castle(Integer.parseInt(row[0]), Integer.parseInt(row[1]), row[2], newTeam);
+					vertices.addToBack(new Vertex<RallyPoint, Integer>(r));
 					break;
 
-				case PARSE_CASTLE:								// walls
-					map.addCastle(Integer.parseInt(row[0]), Integer.parseInt(row[1]), row[2]);
+				case PARSE_CASTLE:
+					r = new Castle(Integer.parseInt(row[0]), Integer.parseInt(row[1]), row[2], null);
+					vertices.addToBack(new Vertex<RallyPoint, Integer>(r));
 					break;
+					
 				case PARSE_RALLY:
-					map.addRally(Integer.parseInt(row[0]), Integer.parseInt(row[1]), row[2]);
+					r = new RallyPoint(Integer.parseInt(row[0]), Integer.parseInt(row[1]), row[2]);
+					vertices.addToBack(new Vertex<RallyPoint, Integer>(r));
 					break;
 					
 				case PARSE_PATH:
-					map.connect(row[0], row[1], Integer.parseInt(row[2]));
+					Vertex<RallyPoint, Integer> v1 = getNode(vertices, row[0]);
+					Vertex<RallyPoint, Integer> v2 = getNode(vertices, row[1]);
+					WeightedEdge<RallyPoint, Integer> edge = new SegEdge(Integer.parseInt(row[2]));
+					
+					edge.setFirst(v1);
+					edge.setSecond(v2);
+					edges.addToBack(edge);
 					break;
 					
 				case PARSE_VILLAGE:
-					map.addVillage(Integer.parseInt(row[0]), Integer.parseInt(row[1]), row[2]);
+					r = new Village(Integer.parseInt(row[0]), Integer.parseInt(row[1]), row[2], null);
+					vertices.addToBack(new Vertex<RallyPoint, Integer>(r));
 					break;
 					
 				case PARSE_FIELD:
-					map.setField(ls[0], ls[1]);
+					if(!ls[0].equals("size")){
+						fields.put(ls[0], ls[1]);
+						System.out.println(ls[0]  + " set to " + fields.get(ls[0]));
+					} else {
+						String[] parts = ls[1].split(", ");
+						width = Integer.parseInt(parts[0]);
+						height = Integer.parseInt(parts[1]);
+					}
+					
 					break;
 
 				default: // parse mode/general
@@ -100,15 +136,21 @@ public class Parser {
 
 			}
 		}
-		
 
 		if(in != null) {
-			in.close();                                    // RAII semantics are really useful
-		};
+			in.close(); // RAII semantics are really useful
+		}
 		
-//		map.calculatePaths();
+		return new CastlesMap(fields, new WeightedGraph<RallyPoint, Integer>(vertices, edges), teams, width, height);
+	}
+	
+	private static Vertex<RallyPoint, Integer> getNode(DualLinkList<Vertex<RallyPoint, Integer>> list, String s){
+		for (Vertex<RallyPoint, Integer> v : list){
+			if (v.getElement().getName().equals(s)){
+				return v;
+			}
+		}
 		
-
-		return map;
+		return null;
 	}
 }
