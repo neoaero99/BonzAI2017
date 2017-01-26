@@ -1,8 +1,10 @@
 package Castles.util.graph;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Set;
 
+import Castles.Objects.RallyPoint;
 import Castles.util.linkedlist.DualLinkList;
 import Castles.util.priorityq.*;
 
@@ -14,18 +16,7 @@ import Castles.util.priorityq.*;
  *
  * @param <E> The type of element stored in the vertices
  */
-public class GraphPathSet<E extends Comparable<E>> {
-	boolean debug =true;
-	/**
-	 * The set of shortest paths between any two vertices in the graph.
-	 * The Vertex Pair is the starting and end vertices of the graph;
-	 * The DualLinkedList of edges it the path.
-	 */
-	private final HashMap<VertexPair<E, Integer>, DualLinkList<WeightedEdge<E, Integer>>> VPPathsSet;
-	/**
-	 * The graph associated with the VPPathsSet
-	 */
-	private final WeightedGraph<E, Integer> graph;
+public abstract class GraphPathSet {
 
 	public static void main(String[] args) {
 		/**
@@ -34,7 +25,7 @@ public class GraphPathSet<E extends Comparable<E>> {
 		
 		Vertex<Integer, Integer> node0, node1, node2, node3, node4, node5, node6, node7, node8,
 									node9, node10;
-		WeightedEdge<Integer, Integer> edge0, edge1, edge2, edge3, edge4, edge5, edge6, edge7,
+		SegEdge<Integer, Integer> edge0, edge1, edge2, edge3, edge4, edge5, edge6, edge7,
 										edge8, edge9, edge10, edge11, edge12, edge13, edge14;
 
 		node0 = new Vertex<Integer, Integer>(0);
@@ -49,21 +40,21 @@ public class GraphPathSet<E extends Comparable<E>> {
 		node9 = new Vertex<Integer, Integer>(9);
 		node10 = new Vertex<Integer, Integer>(10);
 
-		edge0 = new WeightedEdge<Integer, Integer>(2);
-		edge1 = new WeightedEdge<Integer, Integer>(1);
-		edge2 = new WeightedEdge<Integer, Integer>(2);
-		edge3 = new WeightedEdge<Integer, Integer>(2);
-		edge4 = new WeightedEdge<Integer, Integer>(1);
-		edge5 = new WeightedEdge<Integer, Integer>(2);
-		edge6 = new WeightedEdge<Integer, Integer>(1);
-		edge7 = new WeightedEdge<Integer, Integer>(2);
-		edge8 = new WeightedEdge<Integer, Integer>(1);
-		edge9 = new WeightedEdge<Integer, Integer>(2);
-		edge10 = new WeightedEdge<Integer, Integer>(1);
-		edge11 = new WeightedEdge<Integer, Integer>(11);
-		edge12 = new WeightedEdge<Integer, Integer>(7);
-		edge13 = new WeightedEdge<Integer, Integer>(5);
-		edge14 = new WeightedEdge<Integer, Integer>(9);
+		edge0 = new SegEdge<Integer, Integer>(2);
+		edge1 = new SegEdge<Integer, Integer>(1);
+		edge2 = new SegEdge<Integer, Integer>(2);
+		edge3 = new SegEdge<Integer, Integer>(2);
+		edge4 = new SegEdge<Integer, Integer>(1);
+		edge5 = new SegEdge<Integer, Integer>(2);
+		edge6 = new SegEdge<Integer, Integer>(1);
+		edge7 = new SegEdge<Integer, Integer>(2);
+		edge8 = new SegEdge<Integer, Integer>(1);
+		edge9 = new SegEdge<Integer, Integer>(2);
+		edge10 = new SegEdge<Integer, Integer>(1);
+		edge11 = new SegEdge<Integer, Integer>(11);
+		edge12 = new SegEdge<Integer, Integer>(7);
+		edge13 = new SegEdge<Integer, Integer>(5);
+		edge14 = new SegEdge<Integer, Integer>(9);
 
 		WeightedGraph.connect(node0, node1, edge0);
 		WeightedGraph.connect(node1, node2, edge1);
@@ -112,26 +103,19 @@ public class GraphPathSet<E extends Comparable<E>> {
 		/**
 		
 		GraphPathSet<Integer> gpath = new GraphPathSet<Integer>(g);
-		gpath.printPaths();
+		
+		Set<IDPair> endpoints = PathIDsMap.keySet();
+		
+		for(IDPair e: endpoints ) {
+			System.out.printf("%s : %s\n", e, PathIDsMap.get(e));
+		}
+		
+		System.out.println();
 		
 		/**/
 		
 		System.out.println("TEST");
 	}
-	
-	/**
-	 * Generates the shortest paths associated with the given graph. It is assumed that the given
-	 * graph has all its vertices, edges, and connections.
-	 * 
-	 * @param g	A fully initialized graph
-	 */
-	public GraphPathSet(WeightedGraph<E, Integer> g) {
-		VPPathsSet = new HashMap<VertexPair<E, Integer>, DualLinkList<WeightedEdge<E, Integer>>>();
-		graph = g;
-		// Initial the VPPathSet based on g
-		generatePaths();
-	}
-
 	/**
 	 * Returns the path connecting the given two vertices, or null if no such path
 	 * exists. It is assumed that v0 != v1.
@@ -140,17 +124,17 @@ public class GraphPathSet<E extends Comparable<E>> {
 	 * @param v1	Another vertex in the graph
 	 * @return		A path connecting v0 and v1, in the graph
 	 */
-	public DualLinkList<WeightedEdge<E, Integer>> getPath(Vertex<E, Integer> v0,
-			Vertex<E, Integer> v1) {
+	public static ArrayList<String> getPath(HashMap<IDPair, ArrayList<String>> pathsMap,
+			Vertex v0, Vertex v1) {
 		
-		Set<VertexPair<E, Integer>> endpoints = VPPathsSet.keySet();
+		Set<IDPair> endpoints = pathsMap.keySet();
 		
-		for (VertexPair<E, Integer> vp : endpoints) {
+		for (IDPair idp : endpoints) {
 			// Check either direction for a vertex pair
-			if ( (vp.getStart().equals(v0) && vp.getEnd().equals(v1)) ||
-					(vp.getStart().equals(v1) && vp.getEnd().equals(v0)) ) {
+			if ( (idp.first.equals(v0.ID) && idp.second.equals(v1.ID)) ||
+					(idp.first.equals(v1.ID) && idp.second.equals(v0.ID)) ) {
 				
-				return VPPathsSet.get(vp);
+				return pathsMap.get(idp);
 			}
 		}
 		
@@ -158,36 +142,39 @@ public class GraphPathSet<E extends Comparable<E>> {
 		return null;
 	}
 
-
-	public void printPaths(){
-		for(VertexPair<E,Integer> e: VPPathsSet.keySet() ) {
-			System.out.printf("%s : %s\n", e, VPPathsSet.get(e));
-		}
-		
-		System.out.println();
-	}
 	/**
 	 * Generates paths creates a hash map containing all shortest paths for a
 	 * given graph
 	 */
-	private void generatePaths() {
-		DualLinkList<Vertex<E, Integer>> vertices = graph.vertexList();
+	public static HashMap<IDPair, ArrayList<String>> generatePaths(WeightedGraph g) {
+		HashMap<IDPair, ArrayList<String>> pathIDsMap = new HashMap<IDPair, ArrayList<String>>();
+		ArrayList<Vertex> vertices = g.vertexList();
 		
-		for (Vertex<E, Integer> v : vertices) {
-			for (Vertex<E, Integer> u : vertices) {
+		for (Vertex v : vertices) {
+			for (Vertex u : vertices) {
 				boolean areEqual = v.equals(u);
-				boolean pathExists = getPath(u, v) != null;
+				boolean pathExists = getPath(pathIDsMap, u, v) != null;
 				
 				if (areEqual || pathExists) {
 					continue;
 				}
 				
-				VertexPair<E, Integer> current = new VertexPair<E, Integer>(v, u);
-				DualLinkList<WeightedEdge<E, Integer>> path = shortestPath(u, v);
+				IDPair endpoints = new IDPair(v.ID, u.ID);
+				ArrayList<Node> path = shortestPath(g, u, v);
 				
-				VPPathsSet.put(current, path);
+				/* Convert the path into a list of IDs of vertices and edges in
+				 * the path and put the list into the map */
+				ArrayList<String> pathIDs = new ArrayList<String>();
+				
+				for (Node n : path) {
+					pathIDs.add(n.ID);
+				}
+				
+				pathIDsMap.put(endpoints, pathIDs);
 			}
 		}
+		
+		return pathIDsMap;
 	}
 	
 	/**
@@ -198,18 +185,18 @@ public class GraphPathSet<E extends Comparable<E>> {
 	 * @param end	The final vertex of the path, in graph associated with this
 	 * @return		A dual-link list, with all the edges, which connect start to end, in the path
 	 */
-	public DualLinkList<WeightedEdge<E, Integer>> shortestPath(Vertex<E, Integer> start, Vertex<E, Integer> end) {
+	public static ArrayList<Node> shortestPath(WeightedGraph g, Vertex start, Vertex end) {
 		
 		// The list of vertices in the graph
-		DualLinkList<Vertex<E, Integer>> vertices = graph.vertexList();
+		ArrayList<Vertex> vertices = g.vertexList();
 		// Associates data used in the shortest path calculation with each vertex
-		HashMap<Vertex<E, Integer>, ExtraData> vertexData = new HashMap<Vertex<E, Integer>, ExtraData>();
+		HashMap<Vertex, ExtraData> vertexData = new HashMap<Vertex, ExtraData>();
 		// The queue initially containing all the vertices, ordered by the vertex's distance
-		AdaptablePQ<Integer, Vertex<E, Integer>> remaining = new AdaptablePQ<Integer, Vertex<E, Integer>>(
-				vertices.size(), new MinComparator<PQEntry<Integer, Vertex<E, Integer>>>());
+		AdaptablePQ<Integer, Vertex> remaining = new AdaptablePQ<Integer, Vertex>(
+				vertices.size(), new MinComparator<PQEntry<Integer, Vertex>>());
 		
 		// Initialize the data associated with every vertex and add them to the queue
-		for (Vertex<E, Integer> v : vertices) {
+		for (Vertex v : vertices) {
 			int iniWeight = (v.equals(start)) ? 0 : Integer.MAX_VALUE;
 			vertexData.put(v, new ExtraData(0, iniWeight, remaining.insert(iniWeight, v), null));
 		}
@@ -218,7 +205,7 @@ public class GraphPathSet<E extends Comparable<E>> {
 		 * adjacent to it based on distance of the vertex and the edge connecting it to a adjacent
 		 * vertex. */
 		while (!remaining.isEmpty()) {
-			Vertex<E, Integer> least = remaining.removeMax();
+			Vertex least = remaining.removeMax();
 			ExtraData ltData = vertexData.get(least);
 			ltData.flag = 1;
 			
@@ -229,11 +216,11 @@ public class GraphPathSet<E extends Comparable<E>> {
 				break;
 			}
 
-			DualLinkList<WeightedEdge<E, Integer>> incEdges = least.incidentEdges();
+			ArrayList<SegEdge> incEdges = least.incidentEdges();
 			
 			// Check the distances of adjacent vertices
-			for (WeightedEdge<E, Integer> e : incEdges) {
-				Vertex<E, Integer> opposite = e.getOpposite(least);
+			for (SegEdge e : incEdges) {
+				Vertex opposite = e.getOpposite(least);
 
 				// Disregard self-loops
 				if (!opposite.equals(least)) {
@@ -242,7 +229,7 @@ public class GraphPathSet<E extends Comparable<E>> {
 					
 					// Only check unvisited vertices (i.e. still contained in the queue)
 					if (oppData.flag == 0) {
-						Integer newWeight = e.getElement() + ltData.weight;
+						Integer newWeight = e.getWeight() + ltData.weight;
 						
 						/* Is the new distance less than the current distance associated
 						 * with the adjacent vertex? */
@@ -258,9 +245,9 @@ public class GraphPathSet<E extends Comparable<E>> {
 			}
 		}
 
-		DualLinkList<WeightedEdge<E, Integer>> path = new DualLinkList<WeightedEdge<E, Integer>>();
-		Vertex<E, Integer> limbo = end;
-		ExtraData data = vertexData.get(limbo);
+		ArrayList<Node> path = new ArrayList<Node>();
+		Node limbo = end;
+		Vertex lastVertex = null;
 
 		/**
 		System.out.println("PATH CALCULATED!");
@@ -276,59 +263,20 @@ public class GraphPathSet<E extends Comparable<E>> {
 		System.out.println(limbo);
 		/**/
 
-		while (limbo != null && limbo != start && data.backEdge != null) {
-			path.addToFront(data.backEdge);
-			limbo = data.backEdge.getOpposite(limbo);
-			data = vertexData.get(limbo);
+		while (limbo != null && limbo != start) {
+			path.add(limbo);
+			
+			if (limbo instanceof Vertex) {
+				lastVertex = (Vertex)limbo;
+				limbo = vertexData.get(limbo).backEdge;
+				
+			} else if (limbo instanceof SegEdge) {
+				limbo = ((SegEdge)limbo).getOpposite(lastVertex);
+			}
 		}
 
 		//System.out.println("FINISHED!");
 
 		return path;
-	}
-
-	// graph getter method
-	public WeightedGraph<E, Integer> getGraph() {
-		return graph;
-	}
-	
-	/**
-	 * Contains the data associated with a vertex for Dijkstra's Algorithm.
-	 * 
-	 * @author Joshua Hooker
-	 */
-	private class ExtraData {
-		/**
-		 * Is this vertex visited?
-		 * 0 -> no,
-		 * 1 -> yes
-		 */
-		private int flag;
-		
-		// The current distance associated with this vertex
-		private int weight;
-		
-		// The reference to the vertex's entry in the queue
-		private PQEntry<Integer, Vertex<E, Integer>> entryRef;
-		
-		/**
-		 * The reference to the edge that connects this vertex to the vertex
-		 * prior to this one in the shortest path, which is used to build the
-		 * path at the end of the algorithm
-		 */
-		private WeightedEdge<E, Integer> backEdge;
-
-		public ExtraData(int f, int w, PQEntry<Integer, Vertex<E, Integer>> entry,
-				WeightedEdge<E, Integer> bEdge) {
-
-			flag = f;
-			weight = w;
-			entryRef = entry;
-			backEdge = bEdge;
-		}
-		
-		public String toString() {
-			return String.format("[%s]", entryRef);
-		}
 	}
 }

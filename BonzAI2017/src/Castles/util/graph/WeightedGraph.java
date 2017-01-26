@@ -1,34 +1,33 @@
 package Castles.util.graph;
 
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 
-import Castles.Objects.RallyPoint;
-import Castles.util.linkedlist.*;
-
 /**
- * A generic graph with weighted edges.
+ * 
  * 
  * @author Joshua Hooker
- *
- * @param <E>	The type of object stored in the vertices
- * @param <W>	The type of element contained in the edges
  */
-public class WeightedGraph<E, W extends Comparable<W>> {
+public class WeightedGraph {
 	
 	/**
 	 * The graphs lists of nodes and edges.
 	 */
-	private DualLinkList<Vertex<E, W>> vertices;
-	private DualLinkList<WeightedEdge<E, W>> edges;
+	private final HashMap<String, Vertex> vertices;
+	private final HashMap<String, SegEdge> edges;
 	
-	public WeightedGraph() {
-		vertices = new DualLinkList<Vertex<E, W>>();
-		edges = new DualLinkList<WeightedEdge<E, W>>();
-	}
-	
-	public WeightedGraph(DualLinkList<Vertex<E, W>> V, DualLinkList<WeightedEdge<E, W>> E) {
-		vertices = V;
-		edges = E;
+	public WeightedGraph(ArrayList<Vertex> V, ArrayList<SegEdge> E) {
+		vertices = new HashMap<String, Vertex>();
+		edges = new HashMap<String, SegEdge>();
+		// Add all vertices and edges to the graph
+		for (Vertex v : V) {
+			vertices.put(v.ID, v);
+		}
+		
+		for (SegEdge e : E) {
+			edges.put(e.ID, e);
+		}
 	}
 	
 	/**
@@ -103,207 +102,32 @@ public class WeightedGraph<E, W extends Comparable<W>> {
 	}
 	
 	/**
-	 * Form the connection fNode <--> edge <--> sNode.
 	 * 
-	 * @param fNode	A non-null graph node
-	 * @param sNode	A non-null graph node
-	 * @param edge	A non-null graph edge
-	 * @throws 		InvalidNodeException- if either fNode or sNode are null
-	 * @throws 		InvalidEdgeException- if edge is null
+	 * @param vID
+	 * @return
 	 */
-	public static <E, W extends Comparable<W>> void connect(Vertex<E, W> fNode,
-			Vertex<E, W> sNode, WeightedEdge<E, W> edge) throws InvalidNodeException,
-			InvalidEdgeException {
-		
-		if (fNode == null || sNode == null) {
-			throw new InvalidNodeException("nodes cannot be null!");
-			
-		} else if (edge == null) {
-			throw new InvalidEdgeException("edge cannot be null!");
-		}
-		
-		edge.setFirst(fNode);
-		edge.setSecond(sNode);
-		fNode.addConnection(edge);
-		sNode.addConnection(edge);
+	public Vertex getVertex(String vID) {
+		return vertices.get(vID);
 	}
 	
 	/**
-	 * Disconnect the given node from the given edge.
 	 * 
-	 * @param node	A non-null graph node
-	 * @param edge	A non-null graph edge
-	 * @throws 		InvalidNodeException- if node is null
-	 * @throws 		InvalidEdgeException- if edge is null
+	 * @param eID
+	 * @return
 	 */
-	public static <E, W extends Comparable<W>> void disconnect(Vertex<E, W> node,
-			WeightedEdge<E, W> edge) throws InvalidNodeException, InvalidEdgeException  {
-		
-		if (node == null) {
-			throw new InvalidNodeException("node cannot be null!");
-			
-		} else if (edge == null) {
-			throw new InvalidEdgeException("edge cannot be null");	
-		}
-		
-		/* Remove the node references from the edge */
-		
-		if (edge.getFirst() == node) {
-			edge.setFirst(null);
-		}
-		
-		if (edge.getSecond() == node) {
-			edge.setSecond(null);
-		}
-		
-		/* Remove the edge references from the node */
-		node.removeConnection(edge);
-	}
-	
-	/**
-	 * Adds the given node to the graph unless the node already belongs to the
-	 * graph.
-	 * 
-	 * @param newNode	The node to add to the graph
-	 * @throws 			InvalidNodeException-  If the give node is null or
-	 * 						already belongs to the graph
-	 */
-	public void addNode(Vertex<E, W> newNode) throws InvalidNodeException {
-		if (newNode == null) {
-			throw new InvalidNodeException("newNode cannot be null!");
-			
-		} else if (vertices.findNextRef(vertices.Head, newNode) != null) {
-			throw new InvalidNodeException("newNode already exists in the graph!");
-		}
-		
-		vertices.addToBack(newNode);
-	}
-	
-	/**
-	 * Removes the given node from the graph, if it belongs to in the graph.
-	 * The node is invalidated, when successfully removed from the graph.
-	 * 
-	 * @param target	The node to remove from the graph
-	 * @return			The value stored in the node, or null if the node is
-	 * 					not removed
-	 * @throws 			InvalidNodeException- if the node does not exists in
-	 * 						the graph or is null
-	 */
-	protected E removeNode(Vertex<E, W> target) throws InvalidNodeException {
-		if (target == null) {
-			throw new InvalidNodeException("target cannot be null!");
-			
-		}
-		
-		if (vertices.removeRef(target)) {
-			return invalidateNode(target);
-		}
-		// Does not exist in the graph
-		return null;
-	}
-	
-	/**
-	 * Adds the given edge to the graph unless the edge already belongs to the
-	 * graph.
-	 * 
-	 * @param newEdge	The edge to add to the graph
-	 * @throws 			InvalidEdgeException- if the edge is null or already
-	 * 						belongs to the graph
-	 */
-	public void addEdge(WeightedEdge<E, W> newEdge) throws InvalidEdgeException {
-		if (newEdge == null) {
-			throw new InvalidEdgeException("newEdge cannot be null!");
-			
-		} else if (edges.findNextRef(edges.Head, newEdge) != null) {
-			throw new InvalidEdgeException("newEdge already exists in the graph!");
-		}
-		
-		edges.addToBack(newEdge);
-	}
-	
-	/**
-	 * If the given edge belongs to the graph, then it is removed and
-	 * invalidated. An exception is thrown otherwise.
-	 * 
-	 * @param target	The edge to remove from the graph
-	 * @return			The weight of the edge, or null if the edge is not
-	 * 					removed
-	 * @throws 			InvalidEdgeException- If the edge does not belong to
-	 * 						the graph or it is null
-	 */
-	protected W removeEdge(WeightedEdge<E, W> target) throws InvalidEdgeException {
-		if (target == null) {
-			throw new InvalidEdgeException("target cannot be null!");
-			
-		}
-		
-		if (edges.removeRef(target)) {
-			return invalidateEdge(target);
-		}
-		// Does not exists in the graph
-		return null;
-	}
-	
-	/**
-	 * Removes all adjacent edges from the node and removes its element reference.
-	 * 
-	 * @param node	A non-null node
-	 * @return		The element stored in the node
-	 * @throws		InvalidNodeException- if the node is null
-	 */
-	private static <E, W extends Comparable<W>> E invalidateNode(Vertex<E, W> node)
-			throws InvalidNodeException {
-		
-		if (node == null) {
-			throw new InvalidNodeException("node cannot be null!");	
-		}
-		
-		/* Remove node connections */
-		DualLinkList<WeightedEdge<E, W>> adjEdges = node.incidentEdges();
-		for (WeightedEdge<E, W> edge : adjEdges) {
-			disconnect(node, edge);
-		}
-		
-		E val = node.getElement();
-		node.setElement(null);
-		return val;
-	}
-	
-	/**
-	 * Removes the edge's node references as well as its weight reference.
-	 * 
-	 * @param edge	A non-null edge
-	 * @return		The weight of the edge
-	 * @throws		InvalidEdgeException- if the edge is null
-	 */
-	private static <E, W extends Comparable<W>> W invalidateEdge(WeightedEdge<E, W> edge)
-			throws InvalidEdgeException {
-		
-		if (edge == null) {
-			throw new InvalidEdgeException("edge cannot be null!");	
-		}
-		
-		/* Remove node connections */
-		if (edge.getFirst() != null) {
-			disconnect(edge.getFirst(), edge);
-		}
-		
-		if (edge.getSecond() != null) {
-			disconnect(edge.getSecond(), edge);
-		}
-		
-		W val = edge.getElement();
-		edge.setElement(null);
-		return val;
+	public SegEdge getEdge(String eID) {
+		return edges.get(eID);
 	}
 	
 	/**
 	 * @return	A copy of the list of nodes in the graph
 	 */
-	public DualLinkList<Vertex<E, W>> vertexList() {
-		DualLinkList<Vertex<E, W>> copy = new DualLinkList<Vertex<E, W>>();
-		for (Vertex<E, W> v : vertices) {
-			copy.addToBack(v);
+	public ArrayList<Vertex> vertexList() {
+		ArrayList<Vertex> copy = new ArrayList<Vertex>();
+		Collection<Vertex> vertexList = vertices.values();
+		
+		for (Vertex v : vertexList) {
+			copy.add(v);
 		}
 		
 		return copy;
@@ -312,11 +136,12 @@ public class WeightedGraph<E, W extends Comparable<W>> {
 	/**
 	 * @return	A copy of the list of edges in the graph
 	 */
-	public DualLinkList<WeightedEdge<E, W>> edgeList() {
-		DualLinkList<WeightedEdge<E, W>> copy =
-				new DualLinkList<WeightedEdge<E, W>>();
-		for (WeightedEdge<E, W> v : edges) {
-			copy.addToBack(v);
+	public ArrayList<SegEdge> edgeList() {
+		ArrayList<SegEdge> copy = new ArrayList<SegEdge>();
+		Collection<SegEdge> edgeList = edges.values();
+		
+		for (SegEdge v : edgeList) {
+			copy.add(v);
 		}
 		
 		return copy;

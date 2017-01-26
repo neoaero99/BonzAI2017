@@ -14,8 +14,9 @@ import Castles.Objects.Traversable;
 import Castles.Objects.Village;
 import Castles.Objects.Wall;
 import Castles.util.graph.GraphPathSet;
+import Castles.util.graph.IDPair;
 import Castles.util.graph.Vertex;
-import Castles.util.graph.WeightedEdge;
+import Castles.util.graph.SegEdge;
 import Castles.util.graph.WeightedGraph;
 import Castles.util.linkedlist.DualLinkList;
 import bonzai.Position;
@@ -29,22 +30,26 @@ public class CastlesMap {
 	
 	private HashMap<String, String> fields;
 	
-	private WeightedGraph<RallyPoint,Integer> graph;
-	private GraphPathSet<RallyPoint> paths;
+	private WeightedGraph graph;
+	private static HashMap<IDPair, ArrayList<String>> pathIDsMap;
 	
 	private boolean[] players;
 	
 	private ArrayList<Team> teams;
 	private ArrayList<Soldier>[] soldiers;
 	
-	public CastlesMap(HashMap<String, String> f, WeightedGraph<RallyPoint, Integer> g, ArrayList<Team> t, int w, int h) {
+	static {
+		pathIDsMap = null;
+	}
+	
+	public CastlesMap(HashMap<String, String> f, WeightedGraph g, ArrayList<Team> t, int w, int h) {
 		width = w;
 		height = h;
 		
 		fields = f;
 		
 		graph = g;
-		paths = new GraphPathSet<RallyPoint>(g);
+		pathIDsMap = GraphPathSet.generatePaths(g);
 		
 		players = new boolean[] { true,true,true,true,true,true };
 		teams = t;
@@ -74,7 +79,6 @@ public class CastlesMap {
 	
 		//define new variables
 		graph = cloneGraph( previousTurn.getGraph() );
-		paths = new GraphPathSet<RallyPoint>(graph);
 		
 		//copy the list of teams
 		players = previousTurn.getPlayers();
@@ -90,40 +94,39 @@ public class CastlesMap {
 	 * @param g	A graph object
 	 * @return	A copy of the given graph
 	 */
-	public static WeightedGraph<RallyPoint, Integer> cloneGraph(WeightedGraph<RallyPoint, Integer> g) {
+	public static WeightedGraph cloneGraph(WeightedGraph g) {
 		
 		if (g == null) {
 			return null;
 		}
 		
-		DualLinkList<Vertex<RallyPoint, Integer>> vertexCopies = new DualLinkList<Vertex<RallyPoint, Integer>>();
-		DualLinkList<WeightedEdge<RallyPoint, Integer>> edgeCopies = new DualLinkList<WeightedEdge<RallyPoint, Integer>>();
+		ArrayList<Vertex> vertexCopies = new ArrayList<Vertex>();
+		ArrayList<SegEdge> edgeCopies = new ArrayList<SegEdge>();
 		
-		HashMap<Integer, Vertex<RallyPoint, Integer>> OldToNewVertex = new HashMap<Integer, Vertex<RallyPoint, Integer>>();
+		HashMap<Integer, Vertex> OldToNewVertex = new HashMap<Integer, Vertex>();
 		
 		// Copy the vertices and add them to a map
-		DualLinkList<Vertex<RallyPoint, Integer>> vertices = g.vertexList();
-		for (Vertex<RallyPoint, Integer> v : vertices) {
+		ArrayList<Vertex> vertices = g.vertexList();
+		for (Vertex v : vertices) {
 			RallyPoint r = v.getElement();
-			Vertex<RallyPoint, Integer> vertexCopy = new Vertex<RallyPoint, Integer>(r.ID, r.copy());
+			Vertex vertexCopy = new Vertex(r.copy());
 			// TODO update Soldier path references
-			vertexCopies.addToBack(vertexCopy);
+			vertexCopies.add(vertexCopy);
 			OldToNewVertex.put(v.hashCode(), vertexCopy);
 		}
 		
 		// Copy the edges and the connections between edges and vertices
-		DualLinkList<WeightedEdge<RallyPoint, Integer>> edges = g.edgeList();
-		for (WeightedEdge<RallyPoint, Integer> e : edges) {
-			WeightedEdge<RallyPoint, Integer> edgeCopy = new WeightedEdge<RallyPoint, Integer>(e.ID, e.getElement().intValue());
-			edgeCopies.addToBack(edgeCopy);
-			
+		ArrayList<SegEdge> edges = g.edgeList();
+		for (SegEdge e : edges) {
 			// Connect the new vertices with the new edge
-			Vertex<RallyPoint, Integer> first = OldToNewVertex.get( e.getFirst().hashCode() );
-			Vertex<RallyPoint, Integer> second = OldToNewVertex.get( e.getSecond().hashCode() );
-			WeightedGraph.connect(first, second, edgeCopy);
+			Vertex first = OldToNewVertex.get( e.first.hashCode() );
+			Vertex second = OldToNewVertex.get( e.second.hashCode() );
+			
+			SegEdge edgeCopy = new SegEdge(e.getWeight(), first, second);
+			edgeCopies.add(edgeCopy);
 		}
 		
-		return new WeightedGraph<RallyPoint, Integer>(vertexCopies, edgeCopies);
+		return new WeightedGraph(vertexCopies, edgeCopies);
 	}
 
 //github.com/neoaero99/BonzAI2017
@@ -160,8 +163,8 @@ public class CastlesMap {
 			return null;
 		}
 		Castles.api.Color c=Castles.api.Color.values()[i];
-		DualLinkList<Vertex<RallyPoint, Integer>> list=graph.vertexList();
-		for(Vertex<RallyPoint, Integer> v:list){
+		ArrayList<Vertex> list = graph.vertexList();
+		for(Vertex v:list){
 			if(v.getElement() instanceof Building ){
 				if(((Building)v.getElement()).getColor()==c){
 					return v.getElement().getPosition();
@@ -177,7 +180,7 @@ public class CastlesMap {
 	 * @return
 	 */
 	public RallyPoint getEntity(String s){
-		for(Vertex<RallyPoint, Integer> v : graph.vertexList()){
+		for (Vertex v : graph.vertexList()){
 			if(v.getElement().ID.equals(s)){
 				return v.getElement();
 			}
@@ -185,15 +188,7 @@ public class CastlesMap {
 		return null;
 	}
 	
-	/*
-	 * change to canPassThroug(), makes a list
-	 * of nodes and edges that troops CAN pass through
-	 */
-	public GraphPathSet<RallyPoint> getPaths(){
-		return paths;
-	}
-	public WeightedGraph<RallyPoint,Integer> getGraph(){
-		if(graph == null) throw new NullPointerException("I lost my map");
+	public WeightedGraph getGraph() {
 		return graph;
 	}
 	/**
@@ -214,9 +209,9 @@ public class CastlesMap {
 	
 	public DualLinkList<RallyPoint> getAllNodes() {
 		DualLinkList<RallyPoint> nodes = new DualLinkList<RallyPoint>();
-		DualLinkList<Vertex<RallyPoint, Integer>> vertexList = graph.vertexList();
+		ArrayList<Vertex> vertexList = graph.vertexList();
 		
-		for (Vertex<RallyPoint, Integer> v : vertexList) {
+		for (Vertex v : vertexList) {
 			// Pull all the elements from all the vertices in the graph
 			nodes.addToBack(v.getElement());
 		}
@@ -241,7 +236,7 @@ public class CastlesMap {
 	 * @param path the path the split is going on
 	 * @return the second soldier
 	 */
-	public Soldier splitSoliders(Soldier s, int num,DualLinkList<WeightedEdge<RallyPoint, Integer>> path){
+	public Soldier splitSoliders(Soldier s, int num, DualLinkList<SegEdge> path){
 		if(num<s.value){
 			Soldier split=new Soldier(s.position);
 			split.leader=s.leader;
