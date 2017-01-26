@@ -7,14 +7,8 @@ import java.util.LinkedList;
 import java.util.List;
 
 
-
-
-
-
 import Castles.Objects.*;
 import Castles.util.graph.Vertex;
-import Castles.util.graph.WeightedEdge;
-import Castles.util.graph.WeightedGraph;
 import Castles.util.linkedlist.DualLinkList;
 import bonzai.Action;
 import bonzai.Identifiable;
@@ -229,7 +223,11 @@ public class Turn {
 	 * 			 false otherwise
 	 */
 	public boolean isValid(Action action) {
-		//TODO 2017: This is important for us and competitors. 
+		//TODO 2017: This is important for us and competitors.
+		if (action instanceof ShoutAction) {
+			return true;
+		}
+		
 		return false;
 	}
 
@@ -284,28 +282,11 @@ public class Turn {
 		for (Action action : actions) {
 			//TODO Actions are Handled here
 			if (isValid(action)) {
-				/*if (action instanceof RotateAction) {
-					RotateAction r = (RotateAction)action;
-
-					rotationsDesired[currentTeam] = r.getRotation();
-
-					//Revert the rotation if two AIs attempt to move the same repeater
-					if (rotationsToPerform.containsKey(r.getRotatedObjectId())) {
-						failedTeams.add(rotationsToPerform.get(r.getRotatedObjectId()));
-						failedTeams.add(teams.get(currentTeam));
-						
-						rotationsToPerform.put(r.getRotatedObjectId(), null);
-						
-					} else {
-						//Otherwise put the move in the list (in case of later conflicts)
-						//Indicate that the currentTeam performed the move.
-						rotationsToPerform.put(r.getRotatedObjectId(), teams.get(currentTeam));
-					}
-					
-					shoutActions.add(null);
-				} else {
+				
+				if (action instanceof ShoutAction) {
 					shoutActions.add((ShoutAction)action);
-				}*/
+				}
+				
 			} else {
 				//TODO Write code for an invalid action
 				shoutActions.add(null);
@@ -313,6 +294,7 @@ public class Turn {
 
 			currentTeam++;
 		}
+
 		//Apply all valid RotateActions to the game state.
 		for (int id : rotationsToPerform.keySet()) {
 
@@ -344,22 +326,6 @@ public class Turn {
 		//map.calculateParentsTargetsAndOwners();
 
 		//Generate the new Turn object. We apply any earned points onto this new Turn.
-		for(int i=0;i<6;i++){
-			for(Soldier s:map.soldiers[i]){
-				s.gotoNext(map.getGraph());
-			}
-		}
-		DualLinkList<Vertex<RallyPoint, Integer>> g=map.getGraph().vertexList();
-		for(Vertex<RallyPoint, Integer> V: g){
-			RallyPoint r=V.getElement();
-			map.mergeSoldiers(r.onPoint);
-			if(r instanceof Building){
-				Soldier sol= r.onPoint.get(0);
-				if(!sol.leader.equals(((Building) r).getTeam())){
-					((Building)r).setTeam(sol.leader);
-				}
-			}
-		}
 		Turn newTurn = new Turn(this, oldID, map, failedTeams);
 		
 		
@@ -438,100 +404,21 @@ public class Turn {
 		return null;
 	}
 
-	/*
-	void addPoints(int teamID, int points) {
-		Team old = teams.get(teamID);
-		teams.set(teamID, new Team(old, old.getScore() + points));
-		((Emitter) map.getEntity(teamID)).setTeam(teams.get(teamID));			// Update the team's emitter to have the correct reference
-	}
-	*/
 	/**
 	 * Returns all rally points, buildings (i.e. castles, villages) in
 	 * the map.
 	 * 
 	 * @return	A list of all rally points, buildings in the map
 	 */
-	public DualLinkList<RallyPoint> getAllNodes() {
-		DualLinkList<RallyPoint> nodes = new DualLinkList<RallyPoint>();
-		DualLinkList<Vertex<RallyPoint, Integer>> vertexList =
-				map.getGraph().vertexList();
+	public ArrayList<RallyPoint> getAllNodes() {
+		ArrayList<RallyPoint> nodes = new ArrayList<RallyPoint>();
+		ArrayList<Vertex> vertexList = map.getGraph().vertexList();
 		
-		for (Vertex<RallyPoint, Integer> v : vertexList) {
+		for (Vertex v : vertexList) {
 			// Pull all the elements from all the vertices in the graph
-			nodes.addToBack(v.getElement());
+			nodes.add(v.getElement());
 		}
 		
 		return nodes;
-	}
-	
-/**
-	 * Gets all rally points positions within the map, not including buildings
-	 * @return a dual linked list of the positions of each rally point
-	 */
-	public DualLinkList<Position> getRallyPointsPositions(){
-		DualLinkList<Position> pos= new DualLinkList<Position>();
-		for(Vertex<RallyPoint, Integer> r:map.getGraph().vertexList()){
-			if(!(r.getElement()instanceof Building)){
-				pos.addToFront(r.getElement().getPosition());
-			}
-		}
-		return pos;
-	}
-	/**
-	 * Gets all buldings, but none of the children classes. This will not be needed outside of having
-	 *  a default render method method.
-	 * @return a dual linked list of the buildings only
-	 */
-	public DualLinkList<Building> getDefaults(){
-		DualLinkList<Building> pos= new DualLinkList<Building>();
-		for(Vertex<RallyPoint, Integer> r:map.getGraph().vertexList()){
-			if(r.getElement()instanceof Building&&!(r.getElement()instanceof Castle)&&!(r.getElement() instanceof Village)){
-				pos.addToFront((Building)r.getElement());
-			}
-		}
-		return pos;
-	}
-	/**
-	 * gets all Castles within the map
-	 * @return a dual linked list of the catles
-	 */
-	public DualLinkList<Building> getCastles(){
-		DualLinkList<Building> pos= new DualLinkList<Building>();
-		for(Vertex<RallyPoint, Integer> r:map.getGraph().vertexList()){
-			if(r.getElement()instanceof Castle){
-				pos.addToFront((Building)r.getElement());
-			}
-		}
-		return pos;
-	}
-	/**
-	 * Gets all buildings, Including anything that would extend it.
-	 * @return a dual linked list of anything that is a building
-	 */
-	public DualLinkList<Building> getBuildings(){
-		DualLinkList<Building> pos= new DualLinkList<Building>();
-		for(Vertex<RallyPoint, Integer> r:map.getGraph().vertexList()){
-			if(r.getElement()instanceof Building){
-				pos.addToFront((Building)r.getElement());
-			}
-		}
-		return pos;
-	}
-	/**
-	 * Gets all Villages
-	 * @return a dual linked list of all villages
-	 */
-	public DualLinkList<Building> getVillages(){
-		DualLinkList<Building> pos= new DualLinkList<Building>();
-		for(Vertex<RallyPoint, Integer> r:map.getGraph().vertexList()){
-			if(r.getElement()instanceof Village){
-				pos.addToFront((Building)r.getElement());
-			}
-		}
-		return pos;
-	}
-	
-	public DualLinkList<WeightedEdge<RallyPoint, Integer>> getEdges(){
-		return map.getGraph().edgeList();
 	}
 }
