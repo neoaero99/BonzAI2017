@@ -5,19 +5,14 @@ import java.util.HashMap;
 import java.util.List;
 
 import Castles.Objects.Building;
-import Castles.Objects.Castle;
 import Castles.Objects.RallyPoint;
 import Castles.Objects.Soldier;
 import Castles.Objects.SoldierState;
-import Castles.Objects.Target;
-import Castles.Objects.Traversable;
-import Castles.Objects.Village;
-import Castles.Objects.Wall;
 import Castles.util.graph.GraphPathSet;
 import Castles.util.graph.IDPair;
 import Castles.util.graph.Vertex;
 import Castles.util.graph.SegEdge;
-import Castles.util.graph.WeightedGraph;
+import Castles.util.graph.CastlesMapGraph;
 import Castles.util.linkedlist.DualLinkList;
 import bonzai.Position;
 import bonzai.Team;
@@ -30,7 +25,7 @@ public class CastlesMap {
 	
 	private HashMap<String, String> fields;
 	
-	private WeightedGraph graph;
+	private CastlesMapGraph graph;
 	private static HashMap<IDPair, ArrayList<String>> pathIDsMap;
 	
 	private boolean[] players;
@@ -42,14 +37,14 @@ public class CastlesMap {
 		pathIDsMap = null;
 	}
 	
-	public CastlesMap(HashMap<String, String> f, WeightedGraph g, ArrayList<Team> t, int w, int h) {
+	public CastlesMap(HashMap<String, String> f, CastlesMapGraph g, ArrayList<Team> t, int w, int h) {
 		width = w;
 		height = h;
 		
 		fields = f;
 		
 		graph = g;
-		pathIDsMap = GraphPathSet.generatePaths(g);
+		pathIDsMap = g.generatePaths();
 		
 		players = new boolean[] { true,true,true,true,true,true };
 		teams = t;
@@ -94,7 +89,7 @@ public class CastlesMap {
 	 * @param g	A graph object
 	 * @return	A copy of the given graph
 	 */
-	public static WeightedGraph cloneGraph(WeightedGraph g) {
+	public static CastlesMapGraph cloneGraph(CastlesMapGraph g) {
 		
 		if (g == null) {
 			return null;
@@ -126,7 +121,7 @@ public class CastlesMap {
 			edgeCopies.add(edgeCopy);
 		}
 		
-		return new WeightedGraph(vertexCopies, edgeCopies);
+		return new CastlesMapGraph(vertexCopies, edgeCopies);
 	}
 
 //github.com/neoaero99/BonzAI2017
@@ -188,7 +183,7 @@ public class CastlesMap {
 		return null;
 	}
 	
-	public WeightedGraph getGraph() {
+	public CastlesMapGraph getGraph() {
 		return graph;
 	}
 	/**
@@ -236,7 +231,7 @@ public class CastlesMap {
 	 * @param path the path the split is going on
 	 * @return the second soldier
 	 */
-	public Soldier splitSoliders(Soldier s, int num, DualLinkList<SegEdge> path){
+	public Soldier splitSoliders(Soldier s, int num, ArrayList<String> path){
 		if(num<s.value){
 			Soldier split=new Soldier(s.position);
 			split.leader=s.leader;
@@ -266,7 +261,10 @@ public class CastlesMap {
 			return -1;
 		}
 		if(s1.leader.equals(s2.leader)){
-			if(s1.state==SoldierState.STANDBY||s1.given_path.Tail.getPrevious().equals(s2.given_path.Tail.getPrevious())){ //We need to figure out when the soldiers should merge
+			String s1LastID = s1.given_path.get( s1.given_path.size() - 1 );
+			String s2LastID = s2.given_path.get( s2.given_path.size() - 1 );
+			
+			if(s1.state==SoldierState.STANDBY||s1LastID.equals(s2LastID)){ //We need to figure out when the soldiers should merge
 				s1.value=s1.value+s2.value;
 				soldiers[s2.leader.getID()].remove(s2);
 				s2=null;

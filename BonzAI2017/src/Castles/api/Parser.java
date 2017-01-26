@@ -8,7 +8,7 @@ import java.util.Scanner;
 import Castles.Objects.*;
 import Castles.util.graph.SegEdge;
 import Castles.util.graph.Vertex;
-import Castles.util.graph.WeightedGraph;
+import Castles.util.graph.CastlesMapGraph;
 import Castles.util.linkedlist.DualLinkList;
 import bonzai.Team;
 
@@ -136,7 +136,7 @@ public class Parser {
 			in.close(); // RAII semantics are really useful
 		}
 		
-		return new CastlesMap(fields, new WeightedGraph(vertices, edges), teams, width, height);
+		return new CastlesMap(fields, new CastlesMapGraph(vertices, edges), teams, width, height);
 	}
 	
 	private static Vertex getVertex(ArrayList<Vertex> list, String s){

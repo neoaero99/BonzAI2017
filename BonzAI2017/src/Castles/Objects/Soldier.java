@@ -4,10 +4,7 @@ import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 
 import javax.swing.JComponent;
-import Castles.util.VectorND;
 import Castles.util.graph.Node;
-import Castles.util.graph.WeightedEdge;
-import Castles.util.linkedlist.DualLinkList;
 import bonzai.*;
 
 /**
@@ -51,12 +48,13 @@ import bonzai.*;
 
 public class Soldier extends JComponent {
 	
+	private static final long serialVersionUID = 3166707557130028703L;
 	// The shared sprite for the soldier
 	public static BufferedImage sprite;
 	// The combat value this unit has
-	public int value = 1;
+	public int value;
 	// The radius used in collision
-	public float radius = 0f;
+	public float radius;
 	
 	/**
 	 * So, I replaced your position reference to a node (which can be either
@@ -67,9 +65,9 @@ public class Soldier extends JComponent {
 	 */
 	
 	// The position of the soldier on the map (on screen)
-	public Node<RallyPoint> position;
-	// An array list that is the current path (in nodes on the graph)
-	public DualLinkList<WeightedEdge<RallyPoint, Integer>> given_path;
+	public Node position;
+	// An array list that holds the IDs of all nodes in the solider's current
+	public ArrayList<String> given_path;
 	// The current status of the soldier (always defaults to standby)
 	public SoldierState state;
 	
@@ -87,8 +85,12 @@ public class Soldier extends JComponent {
 	 * 
 	 * @author David Mohrhardt
 	 */
-	public Soldier(Node<RallyPoint> base_position) {
+	public Soldier(Node base_position) {
+		value = 1;
+		radius = 0f;
 		position = base_position;
+		given_path = null;
+		
 		state = SoldierState.STANDBY;
 	}
 

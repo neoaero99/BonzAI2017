@@ -8,7 +8,6 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.Map;
 
@@ -18,11 +17,10 @@ import Castles.Objects.*;
 import Castles.api.CastlesMap;
 //import Castles.api.Color;
 import Castles.api.Turn;
-import Castles.util.graph.WeightedEdge;
+import Castles.util.graph.SegEdge;
 import Castles.util.linkedlist.DualLinkList;
 import bonzai.Action;
 import bonzai.Position;
-import bonzai.Positionable;
 import bonzai.Team;
 import bonzai.ShoutAction;
 
@@ -226,12 +224,12 @@ public class CastlesRenderer extends bonzai.Renderer {
 	}
 
 	private static void renderPaths(Graphics2D g, CastlesMap map) {
-		DualLinkList<WeightedEdge<RallyPoint, Integer>> paths = map.getGraph().edgeList();
+		ArrayList<SegEdge> paths = map.getGraph().edgeList();
 		//iterate over all the paths
-		for(WeightedEdge<RallyPoint, Integer> p: paths){
+		for(SegEdge p: paths){
 			//get the rally points on the edge
-			RallyPoint r1 = p.getFirst().getElement();
-			RallyPoint r2 = p.getSecond().getElement();
+			RallyPoint r1 = p.first.getElement();
+			RallyPoint r2 = p.second.getElement();
 			
 			//get the x,y coords of the two rally points
 			int x1 = r1.getPosition().getX();
