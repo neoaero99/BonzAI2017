@@ -8,10 +8,6 @@ import Castles.Objects.Building;
 import Castles.Objects.RallyPoint;
 import Castles.Objects.Soldier;
 import Castles.Objects.SoldierState;
-<<<<<<< HEAD
-import Castles.util.graph.GraphPathSet;
-=======
->>>>>>> Dan-Branch
 import Castles.util.graph.IDPair;
 import Castles.util.graph.Vertex;
 import Castles.util.graph.SegEdge;
