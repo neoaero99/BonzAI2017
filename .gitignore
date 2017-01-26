@@ -9,8 +9,9 @@ local.properties
 .settings/
 .loadpath
 .recommenders
-bonzai2017/
-#we will eventually have some AI's, we may need to change this
+
+BonzAI2017/bonzai2017/
+
 scenarios/Thumbs.db
 
 # Mac .DS_STORE
