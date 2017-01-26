@@ -274,7 +274,7 @@ public class CastlesRenderer extends bonzai.Renderer {
 	private static void renderBuildings(Graphics2D g, CastlesMap map) {
 		DualLinkList<RallyPoint> nodes = map.getAllNodes();
 		for(RallyPoint r : nodes){
-			String name = r.getName();
+			String name = r.ID;
 			char c = name.charAt(0);
 			switch(c){
 			case 'V':
@@ -284,7 +284,7 @@ public class CastlesRenderer extends bonzai.Renderer {
 				drawToScale(g,castleImage,r.getPosition().getX(),r.getPosition().getY(),0,1,0);
 				break;
 			case 'P':
-				int i = r.getName().charAt(1) - 48;
+				int i = r.ID.charAt(1) - 48;
 				drawToScale(g,playerImages.get(Castles.api.Color.values()[i]),r.getPosition().getX(),r.getPosition().getY(),0,1,0);
 				break;
 			default:

@@ -64,23 +64,23 @@ public class Parser {
 					Team newTeam = new Team(Castles.api.Color.values()[teams.size()], teams.size());
 					teams.add(newTeam);
 					r = new Castle(Integer.parseInt(row[0]), Integer.parseInt(row[1]), row[2], newTeam);
-					vertices.addToBack(new Vertex<RallyPoint, Integer>(r));
+					vertices.addToBack(new Vertex<RallyPoint, Integer>(r.ID, r));
 					break;
 
 				case PARSE_CASTLE:
 					r = new Castle(Integer.parseInt(row[0]), Integer.parseInt(row[1]), row[2], null);
-					vertices.addToBack(new Vertex<RallyPoint, Integer>(r));
+					vertices.addToBack(new Vertex<RallyPoint, Integer>(r.ID, r));
 					break;
 					
 				case PARSE_RALLY:
 					r = new RallyPoint(Integer.parseInt(row[0]), Integer.parseInt(row[1]), row[2]);
-					vertices.addToBack(new Vertex<RallyPoint, Integer>(r));
+					vertices.addToBack(new Vertex<RallyPoint, Integer>(r.ID, r));
 					break;
 					
 				case PARSE_PATH:
 					Vertex<RallyPoint, Integer> v1 = getNode(vertices, row[0]);
 					Vertex<RallyPoint, Integer> v2 = getNode(vertices, row[1]);
-					WeightedEdge<RallyPoint, Integer> edge = new SegEdge(Integer.parseInt(row[2]));
+					WeightedEdge<RallyPoint, Integer> edge = new SegEdge(v1.ID + "-" + v2.ID, Integer.parseInt(row[2]));
 					
 					edge.setFirst(v1);
 					edge.setSecond(v2);
@@ -89,7 +89,7 @@ public class Parser {
 					
 				case PARSE_VILLAGE:
 					r = new Village(Integer.parseInt(row[0]), Integer.parseInt(row[1]), row[2], null);
-					vertices.addToBack(new Vertex<RallyPoint, Integer>(r));
+					vertices.addToBack(new Vertex<RallyPoint, Integer>(r.ID, r));
 					break;
 					
 				case PARSE_FIELD:
@@ -146,7 +146,7 @@ public class Parser {
 	
 	private static Vertex<RallyPoint, Integer> getNode(DualLinkList<Vertex<RallyPoint, Integer>> list, String s){
 		for (Vertex<RallyPoint, Integer> v : list){
-			if (v.getElement().getName().equals(s)){
+			if (v.getElement().ID.equals(s)){
 				return v;
 			}
 		}

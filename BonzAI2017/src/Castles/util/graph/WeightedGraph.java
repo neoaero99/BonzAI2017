@@ -37,6 +37,8 @@ public class WeightedGraph<E, W extends Comparable<W>> {
 	 * @param args	Unused
 	 */
 	public static void main(String[] args) {
+		/**
+		
 		WeightedGraph<Integer, Double> g = new WeightedGraph<Integer, Double>();
 		Vertex<Integer, Double> node1, node2, node3, node4, node5;
 		WeightedEdge<Integer, Double> edge1, edge2, edge3, edge4;
@@ -96,6 +98,8 @@ public class WeightedGraph<E, W extends Comparable<W>> {
 		System.out.printf("%d: %s\n", node1.getElement(), node1.adjacentVertices());
 		
 		System.out.printf("%s\n", edge2);
+		
+		/**/
 	}
 	
 	/**

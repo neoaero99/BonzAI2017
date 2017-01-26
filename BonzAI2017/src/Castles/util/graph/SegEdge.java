@@ -13,10 +13,11 @@ import bonzai.Position;
  *
  */
 public class SegEdge extends WeightedEdge<RallyPoint, Integer> {
+	
 	private RallyPoint[] waypoints;
 	
-	public SegEdge(int weight) {
-		super(weight);
+	public SegEdge(String id, int weight) {
+		super(id, weight);
 		waypoints = new RallyPoint[weight];
 	}
 	
@@ -66,7 +67,7 @@ public class SegEdge extends WeightedEdge<RallyPoint, Integer> {
 				int posY = start.getY() + (int)(idx * dir.get(1));
 				
 				if (waypoints[idx - 1] == null) {
-					waypoints[idx - 1] = new RallyPoint(posX, posY,null);
+					waypoints[idx - 1] = new RallyPoint(posX, posY, null);
 					
 				} else {
 					waypoints[idx - 1].setPosition( new Position(posX, posY) );

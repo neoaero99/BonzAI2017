@@ -13,13 +13,15 @@ import Castles.util.linkedlist.*;
  * @param <E>	The type of object stored in the vertices
  * @param <W>	The type of element contained in the edges
  */
-public class Vertex<E, W extends Comparable<W>> implements Node<E>{
+public class Vertex<E, W extends Comparable<W>> extends Node<E>{
 	
 	// The vertex's adjacency hashmap or set of all adjacent edges
 	private HashMap<WeightedEdge<E, W>, Integer> incEdges;
 	private E element;
 	
-	public Vertex(E e) {
+	public Vertex(String id, E e) {
+		super(id);
+		
 		incEdges = new HashMap<WeightedEdge<E, W>, Integer>();
 		element = e;
 	}

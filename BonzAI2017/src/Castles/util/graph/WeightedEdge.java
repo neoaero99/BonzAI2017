@@ -10,21 +10,17 @@ import Castles.util.linkedlist.*;
  * @param <E>	The type of element contained in the vertices
  * @param <W>	The type of element contained in the edges
  */
-public class WeightedEdge<E, W extends Comparable<W>> implements
-			Comparable<WeightedEdge<E, W>>, Node<W> {
+public class WeightedEdge<E, W extends Comparable<W>> extends Node<W>
+	implements Comparable<WeightedEdge<E, W>> {
 	
 	// The nodes, which this edge connects
 	private Vertex<E, W> first, second;
 	// The weight value associated with this edge
 	private W weight;
 	
-	public WeightedEdge() {
-		first = null;
-		second = null;
-		weight = null;
-	}
-	
-	public WeightedEdge(W iniWeight) {
+	public WeightedEdge(String id, W iniWeight) {
+		super(id);
+		
 		first = null;
 		second = null;
 		weight = iniWeight;

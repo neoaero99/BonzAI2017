@@ -7,7 +7,13 @@ package Castles.util.graph;
  *
  * @param <E>	The type of element to store in the node
  */
-public interface Node<E> {
+public abstract class Node<E> {
+	
+	public final String ID;
+	
+	public Node(String id) {
+		ID = id;
+	}
 	
 	/**
 	 * Sets the value of this node's element.

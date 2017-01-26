@@ -104,7 +104,8 @@ public class CastlesMap {
 		// Copy the vertices and add them to a map
 		DualLinkList<Vertex<RallyPoint, Integer>> vertices = g.vertexList();
 		for (Vertex<RallyPoint, Integer> v : vertices) {
-			Vertex<RallyPoint, Integer> vertexCopy = new Vertex<RallyPoint, Integer>(v.getElement().copy());
+			RallyPoint r = v.getElement();
+			Vertex<RallyPoint, Integer> vertexCopy = new Vertex<RallyPoint, Integer>(r.ID, r.copy());
 			// TODO update Soldier path references
 			vertexCopies.addToBack(vertexCopy);
 			OldToNewVertex.put(v.hashCode(), vertexCopy);
@@ -113,7 +114,7 @@ public class CastlesMap {
 		// Copy the edges and the connections between edges and vertices
 		DualLinkList<WeightedEdge<RallyPoint, Integer>> edges = g.edgeList();
 		for (WeightedEdge<RallyPoint, Integer> e : edges) {
-			WeightedEdge<RallyPoint, Integer> edgeCopy = new WeightedEdge<RallyPoint, Integer>(e.getElement().intValue());
+			WeightedEdge<RallyPoint, Integer> edgeCopy = new WeightedEdge<RallyPoint, Integer>(e.ID, e.getElement().intValue());
 			edgeCopies.addToBack(edgeCopy);
 			
 			// Connect the new vertices with the new edge
@@ -177,7 +178,7 @@ public class CastlesMap {
 	 */
 	public RallyPoint getEntity(String s){
 		for(Vertex<RallyPoint, Integer> v : graph.vertexList()){
-			if(v.getElement().getName().equals(s)){
+			if(v.getElement().ID.equals(s)){
 				return v.getElement();
 			}
 		}
