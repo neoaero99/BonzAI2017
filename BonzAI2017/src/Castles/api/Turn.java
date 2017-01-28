@@ -225,6 +225,7 @@ public class Turn {
 	 */
 	public boolean isValid(Action action) {
 		//TODO 2017: This is important for us and competitors. 
+		if(action instanceof ShoutAction) return true;
 		return false;
 	}
 
@@ -287,7 +288,7 @@ public class Turn {
 		}
 
 		//Apply all valid RotateActions to the game state.
-		for (int id : rotationsToPerform.keySet()) {
+		//for (int id : rotationsToPerform.keySet()) {
 
 			/*Rotatable r = (Rotatable)map.getEntity(id);
 
@@ -312,7 +313,7 @@ public class Turn {
 					map.replace(id, new Repeater((Repeater)r, rotationsDesired[teamRotating.getID()], teamRotating, cooldownAmount + 1, map));
 				}
 			}*/
-		}
+		//}
 		
 		//map.calculateParentsTargetsAndOwners();
 

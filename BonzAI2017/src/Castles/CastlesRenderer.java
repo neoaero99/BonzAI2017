@@ -305,7 +305,6 @@ public class CastlesRenderer extends bonzai.Renderer {
 		for (ShoutAction s : turn.getShoutActions()) {
 			
 			if (s != null) {
-				System.out.println("Shout not null");
 				Position pos = turn.getMap().getEntity(i).getPosition();
 				String message = s.getMessage();
 	
