@@ -38,6 +38,7 @@ public class CastlesMap {
 		pathIDsMap = null;
 	}
 	
+	@SuppressWarnings("unchecked")
 	public CastlesMap(HashMap<String, String> f, HashMap<String, RallyPoint> ge,
 			CastlesMapGraph g, ArrayList<Team> t, int w, int h) {
 		
@@ -168,7 +169,7 @@ public class CastlesMap {
 		return new ArrayList<RallyPoint>( graphElements.values() );
 	}
 	
-	protected ArrayList<Soldier>[] getSoldiers(){
+	public ArrayList<Soldier>[] getSoldiers(){
 		return soldiers;
 	}
 	
@@ -184,15 +185,14 @@ public class CastlesMap {
 	 * Splits the passed soldiers into two groups
 	 * @param s the first solder
 	 * @param num the number of soldier being split
-	 * @param path the path the split is going on
+	 * @param path the path the split is going on, with 0 the starting point
 	 * @return the second soldier
 	 */
 	public Soldier splitSoliders(Soldier s, int num,ArrayList<String> path){
 		if(num<s.getValue()){
 			Soldier split = new Soldier(s.getLeader(), num, s.getPosition());
 			split.setState(SoldierState.MOVING);
-			split.setPath(path);
-			split.setValue(num);
+			split.setRallyPoint(graphElements.get(s.getPosition().ID));
 			s.setValue(s.getValue()-num);
 			addSoldiers(split);
 		return split;
