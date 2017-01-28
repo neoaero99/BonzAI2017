@@ -2,6 +2,7 @@ package Castles.Objects;
 
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
+import java.util.List;
 
 import javax.swing.JComponent;
 import Castles.util.graph.Node;
@@ -48,30 +49,28 @@ import bonzai.*;
 
 public class Soldier extends JComponent {
 	
-	private static final long serialVersionUID = 3166707557130028703L;
-	// The shared sprite for the soldier
-	public static BufferedImage sprite;
-	// The combat value this unit has
-	public int value;
 	// The radius used in collision
-	public float radius;
+	public final static float radius;
 	
-	/**
-	 * So, I replaced your position reference to a node (which can be either
-	 * a vertex or edge), so that a soldier can reference the graph directly.
-	 * Also, all path generations return a linked list of edges, so I
-	 * modified your given_path as such.
-	 * 		- Joshua
-	 */
+	// The shared sprite for the soldier
+	private static BufferedImage sprite;
 	
-	// The position of the soldier on the map (on screen)
-	public Node position;
-	// An array list that holds the IDs of all nodes in the solider's current
-	public ArrayList<String> given_path;
+	private static final long serialVersionUID = 3166707557130028703L;
+	
+	private Team leader;
+	// The combat value this unit has
+	private int value;
 	// The current status of the soldier (always defaults to standby)
-	public SoldierState state;
+	private SoldierState state;
 	
-	public Team leader;
+	// An array list that holds the IDs of all nodes in the solider's current
+	private ArrayList<String> given_path;
+	// The position of the soldier on the map (on screen)
+	private Node position;
+	
+	static {
+		radius = 0f;
+	}
 	
 	/**
 	 * Method:	Soldier(VectorND base_position)
@@ -85,13 +84,70 @@ public class Soldier extends JComponent {
 	 * 
 	 * @author David Mohrhardt
 	 */
-	public Soldier(Node base_position) {
-		value = 1;
-		radius = 0f;
+	public Soldier(Team t, int iniVal, Node base_position) {
+		leader = t;
+		value = iniVal;
+		state = SoldierState.STANDBY;
+		
 		position = base_position;
 		given_path = null;
-		
-		state = SoldierState.STANDBY;
+	}
+	
+	public void gotoNext() {
+		// Not sure where you were going with this Dan ...
+	}
+	
+	public static void quickSort(List<Soldier> s){
+		if(s.size()<=1){
+			return;
+		}
+		int part=0;
+		int value=s.get(0).value;
+		for(int i=1;i<s.size();i++){
+			if(s.get(i).value>value){
+				part++;
+				Soldier temp=s.get(i);
+				s.remove(i);
+				s.add(0, temp);
+			}
+		}
+		quickSort(s.subList(0, part));
+		quickSort(s.subList(part+1, s.size()));
+	}
+	
+	public Team getLeader() {
+		return leader;
 	}
 
+	public void setLeader(Team leader) {
+		this.leader = leader;
+	}
+
+	public int getValue() {
+		return value;
+	}
+
+	public void setValue(int value) {
+		this.value = value;
+	}
+
+	public SoldierState getState() {
+		return state;
+	}
+
+	public void setState(SoldierState state) {
+		this.state = state;
+	}
+	
+	public void setPath(ArrayList<String> path) {
+		given_path = path;
+	}
+	
+	public ArrayList<String> getPath() {
+		return given_path;
+	}
+
+	public Node getPosition() {
+		return position;
+	}
 }

@@ -1,5 +1,7 @@
 package Castles.util.graph;
 
+import java.util.HashMap;
+
 import Castles.Objects.RallyPoint;
 import Castles.util.VectorND;
 import Castles.util.linkedlist.InvalidNodeException;
@@ -8,7 +10,7 @@ import bonzai.Position;
 /**
  * The segmented edge class is used for the edges of the BonzAI Graph structure.
  * It contains a number of way points, which break the edge up into equal
- * segments based on its weighted.
+ * segments based on its weight.
  * 
  * @author Joshua Hooker
  */
@@ -16,12 +18,19 @@ public class SegEdge extends Node {
 	
 	// The nodes, which this edge connects
 	public final Vertex first, second;
-	private final RallyPoint[] waypoints;
+	private final HashMap<String, RallyPoint> waypoints;
 	
+	/**
+	 * Creates an edge, with the given ID, which connects the two given edges.
+	 * 
+	 * @param weight	The number of way points on the edge
+	 * @param f			One vertex connected to the edge
+	 * @param s			The other vertex connected to the edge
+	 */
 	public SegEdge(int weight, Vertex f, Vertex s) {
 		super( String.format("!%s-%s", f.ID, s.ID) );
 		
-		waypoints = new RallyPoint[weight];
+		waypoints = new HashMap<String, RallyPoint>();
 		first = f;
 		second = s;
 		first.addConnection(this);
@@ -36,24 +45,25 @@ public class SegEdge extends Node {
 		double dist = start.getDistanceBetween(end);
 		VectorND dir = new VectorND(end.getX() - start.getX(),
 				end.getY() - start.getY());
-		dir.scalarMult( dist / ((waypoints.length + 1) * dir.magnitude()) );
+		dir.scalarMult( dist / ((weight + 1) * dir.magnitude()) );
 		
 		// Update the positions of each way point
-		for (int idx = 1; idx <= waypoints.length; ++idx) {
+		for (int idx = 1; idx <= weight; ++idx) {
 			int posX = start.getX() + (int)(idx * dir.get(0));
 			int posY = start.getY() + (int)(idx * dir.get(1));
 			
-			if (waypoints[idx - 1] == null) {
-				waypoints[idx - 1] = new RallyPoint(posX, posY, null);
-				
-			} else {
-				waypoints[idx - 1].setPosition( new Position(posX, posY) );
-			}
+			String rID = String.format("%s:%s", ID, idx);
+			waypoints.put(rID, new RallyPoint(posX, posY, rID));
 		}
 	}
 	
+	/**
+	 * Returns the number of way points associated with the edge.
+	 * 
+	 * @return	The length of the edge in terms of way points
+	 */
 	public int getWeight() {
-		return waypoints.length;
+		return waypoints.size();
 	}
 	
 	/**
@@ -89,14 +99,10 @@ public class SegEdge extends Node {
 	}
 	
 	/**
-	 * Get the way point associated with the given index value.
+	 * Get the way point associated with the given ID.
 	 */
-	public RallyPoint getWayPoint(int idx) {
-		if (idx >= 0 && idx < waypoints.length) {
-			return waypoints[idx];
-		}
-		
-		return null;
+	public RallyPoint getWayPoint(String rID) {
+		return waypoints.get(rID);
 	}
 	
 	@Override

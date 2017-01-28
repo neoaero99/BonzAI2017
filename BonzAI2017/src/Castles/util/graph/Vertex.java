@@ -6,13 +6,24 @@ import java.util.HashMap;
 
 import Castles.Objects.RallyPoint;
 
-
+/**
+ * A node in the CastlesMapGraph, which is connected to some number edges in the
+ * graph. A vertex contains a reference to a rally point, or building, which
+ * defines the position of the vertex.
+ * 
+ * @author Joshua Hooker
+ */
 public class Vertex extends Node {
 	
 	// The vertex's adjacency hashmap or set of all adjacent edges
 	private final HashMap<String, SegEdge> incEdges;
 	private final RallyPoint element;
 	
+	/**
+	 * Creates a new vertex, whose element is given.
+	 * 
+	 * @param r	The element to store in the vertex
+	 */
 	public Vertex(RallyPoint r) {
 		super(r.ID);
 		

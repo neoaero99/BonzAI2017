@@ -11,7 +11,7 @@ import Castles.util.priorityq.MinComparator;
 import Castles.util.priorityq.PQEntry;
 
 /**
- * 
+ * A simple graph, which cannot be modified once it is created.
  * 
  * @author Joshua Hooker
  */
@@ -23,14 +23,22 @@ public class CastlesMapGraph {
 	private final HashMap<String, Vertex> vertices;
 	private final HashMap<String, SegEdge> edges;
 	
+	/**
+	 * Creates a graph with the given set of vertices and edges.
+	 * 
+	 * @param V	The set of vertices in the graph
+	 * @param E	The set of edges in the graph
+	 */
 	public CastlesMapGraph(ArrayList<Vertex> V, ArrayList<SegEdge> E) {
 		vertices = new HashMap<String, Vertex>();
 		edges = new HashMap<String, SegEdge>();
-		// Add all vertices and edges to the graph
+		
+		// Add all vertices to the graph
 		for (Vertex v : V) {
 			vertices.put(v.ID, v);
 		}
 		
+		// Add all edges to the graph
 		for (SegEdge e : E) {
 			edges.put(e.ID, e);
 		}
@@ -121,27 +129,64 @@ public class CastlesMapGraph {
 		
 		/**/
 		
-System.out.println("TEST");
-		
-System.out.println("TEST");
+		System.out.println("TEST");
 	}
 	
 	/**
+	 * Searches the graph for the vertex with the given ID value and returns
+	 * that vertex, or null if no such vertex exists.
 	 * 
-	 * @param vID
-	 * @return
+	 * @param eID	The ID of the vertex to find
+	 * @return		The vertex with the given ID or null if no such vertex
+	 * 				exists
 	 */
 	public Vertex getVertex(String vID) {
 		return vertices.get(vID);
 	}
 	
 	/**
+	 * Searches the graph for the edge with the given ID value and returns that
+	 * edge, or null if no such edge exists.
 	 * 
-	 * @param eID
-	 * @return
+	 * @param eID	The ID of the edge to find
+	 * @return		The edge with the given ID or null if no such edge exists
 	 */
 	public SegEdge getEdge(String eID) {
 		return edges.get(eID);
+	}
+	
+	/**
+	 * Searches the graph for the rally point with the given ID value and
+	 * returns that rally point, or null if no such rally point exists.
+	 * 
+	 * @param rID	The ID of the rally point to find
+	 * @return		The rally point with the given ID or null if no such rally
+	 * 				point exists
+	 */
+	public RallyPoint getRallyPoint(String rID) {
+		// Is the rally point stored in a vertex?
+		Vertex v = vertices.get(rID);
+		
+		// The rally point is not in a vertex
+		if (v == null) {
+			/* The : character must exist in the ID for it to be a valid way
+			 * point */
+			int idxOfColon = rID.indexOf(':');
+			
+			if (idxOfColon > 0) {
+				/* Split the ID of the rally point to find the edge it is associated
+				 * with and what way point of the edge it is. */
+				String superID = rID.substring(0, idxOfColon);
+				SegEdge e = edges.get(superID);
+				
+				if (e != null) {
+					String subID = rID.substring(idxOfColon + 1);
+					return e.getWayPoint(subID);
+				}
+			}
+		}
+		
+		return v.getElement();
 	}
 	
 	/**
@@ -349,5 +394,39 @@ System.out.println("TEST");
 		//System.out.println("FINISHED!");
 
 		return path;
+	}
+	
+	/**
+	 * @return	A copy of this graph
+	 */
+	public CastlesMapGraph clone() {
+		
+		ArrayList<Vertex> vertexCopies = new ArrayList<Vertex>();
+		ArrayList<SegEdge> edgeCopies = new ArrayList<SegEdge>();
+		
+		HashMap<Integer, Vertex> OldToNewVertex = new HashMap<Integer, Vertex>();
+		
+		// Copy the vertices and add them to a map
+		ArrayList<Vertex> vertices = vertexList();
+		for (Vertex v : vertices) {
+			RallyPoint r = v.getElement();
+			Vertex vertexCopy = new Vertex(r.copy());
+			// TODO update Soldier path references
+			vertexCopies.add(vertexCopy);
+			OldToNewVertex.put(v.hashCode(), vertexCopy);
+		}
+		
+		// Copy the edges and the connections between edges and vertices
+		ArrayList<SegEdge> edges = edgeList();
+		for (SegEdge e : edges) {
+			// Connect the new vertices with the new edge
+			Vertex first = OldToNewVertex.get( e.first.hashCode() );
+			Vertex second = OldToNewVertex.get( e.second.hashCode() );
+			
+			SegEdge edgeCopy = new SegEdge(e.getWeight(), first, second);
+			edgeCopies.add(edgeCopy);
+		}
+		
+		return new CastlesMapGraph(vertexCopies, edgeCopies);
 	}
 }

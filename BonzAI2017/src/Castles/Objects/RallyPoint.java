@@ -26,12 +26,14 @@ public class RallyPoint implements Comparable<RallyPoint> {
 	public Position getPosition(){
 		return pos;
 	}
+	
 	/**
 	 * Set the position to a new position
 	 */
-	public void setPosition(Position pos){
+	protected void setPosition(Position pos){
 		this.pos = pos;
 	}
+	
 	@Override
 	public int compareTo(RallyPoint o) {
 		return pos.compareTo(o.getPosition());
