@@ -57,7 +57,7 @@ public class CastlesMapGraph {
 		ArrayList<SegEdge> edgeList = new ArrayList<SegEdge>();
 		
 		for (int idx = 0; idx < 11; ++idx) {
-			Vertex node = new Vertex(new RallyPoint(0, idx, Integer.toString(idx)));
+			Vertex node = new Vertex(Integer.toString(idx));
 			vertexList.add(node);
 		}
 		
@@ -152,41 +152,15 @@ public class CastlesMapGraph {
 	 * @return		The edge with the given ID or null if no such edge exists
 	 */
 	public SegEdge getEdge(String eID) {
-		return edges.get(eID);
-	}
-	
-	/**
-	 * Searches the graph for the rally point with the given ID value and
-	 * returns that rally point, or null if no such rally point exists.
-	 * 
-	 * @param rID	The ID of the rally point to find
-	 * @return		The rally point with the given ID or null if no such rally
-	 * 				point exists
-	 */
-	public RallyPoint getRallyPoint(String rID) {
-		// Is the rally point stored in a vertex?
-		Vertex v = vertices.get(rID);
+		int idxOfColon = eID.indexOf(':');
 		
-		// The rally point is not in a vertex
-		if (v == null) {
-			/* The : character must exist in the ID for it to be a valid way
-			 * point */
-			int idxOfColon = rID.indexOf(':');
-			
-			if (idxOfColon > 0) {
-				/* Split the ID of the rally point to find the edge it is associated
-				 * with and what way point of the edge it is. */
-				String superID = rID.substring(0, idxOfColon);
-				SegEdge e = edges.get(superID);
-				
-				if (e != null) {
-					String subID = rID.substring(idxOfColon + 1);
-					return e.getWayPoint(subID);
-				}
-			}
+		if (idxOfColon > 0) {
+			// The ID may be that of a way point associated with the edge
+			String superID = eID.substring(0, idxOfColon);
+			return edges.get(superID);
 		}
 		
-		return v.getElement();
+		return edges.get(eID);
 	}
 	
 	/**
@@ -283,7 +257,19 @@ public class CastlesMapGraph {
 				ArrayList<String> pathIDs = new ArrayList<String>();
 				
 				for (Node n : path) {
-					pathIDs.add(n.ID);
+					
+					if (n instanceof Vertex) {
+						pathIDs.add(((Vertex)n).ID);
+						
+					} else if (n instanceof SegEdge) {
+						SegEdge e = (SegEdge)n;
+						String[] wpIDs = e.wayPointIDs();
+						
+						for (String id : wpIDs) {
+							pathIDs.add(id);
+						}
+					}
+					
 				}
 				
 				pathIDsMap.put(endpoints, pathIDs);
@@ -409,8 +395,7 @@ public class CastlesMapGraph {
 		// Copy the vertices and add them to a map
 		ArrayList<Vertex> vertices = vertexList();
 		for (Vertex v : vertices) {
-			RallyPoint r = v.getElement();
-			Vertex vertexCopy = new Vertex(r.copy());
+			Vertex vertexCopy = new Vertex(v.ID);
 			// TODO update Soldier path references
 			vertexCopies.add(vertexCopy);
 			OldToNewVertex.put(v.hashCode(), vertexCopy);

@@ -410,15 +410,7 @@ public class Turn {
 	 * 
 	 * @return	A list of all rally points, buildings in the map
 	 */
-	public ArrayList<RallyPoint> getAllNodes() {
-		ArrayList<RallyPoint> nodes = new ArrayList<RallyPoint>();
-		ArrayList<Vertex> vertexList = map.getGraph().vertexList();
-		
-		for (Vertex v : vertexList) {
-			// Pull all the elements from all the vertices in the graph
-			nodes.add(v.getElement());
-		}
-		
-		return nodes;
+	public ArrayList<RallyPoint> getAllElements() {
+		return map.getAllElements();
 	}
 }

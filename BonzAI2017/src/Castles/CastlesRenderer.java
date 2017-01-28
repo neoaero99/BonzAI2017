@@ -228,8 +228,8 @@ public class CastlesRenderer extends bonzai.Renderer {
 		//iterate over all the paths
 		for(SegEdge p: paths){
 			//get the rally points on the edge
-			RallyPoint r1 = p.first.getElement();
-			RallyPoint r2 = p.second.getElement();
+			RallyPoint r1 = map.getElement(p.first.ID);
+			RallyPoint r2 = map.getElement(p.second.ID);
 			
 			//get the x,y coords of the two rally points
 			int x1 = r1.getPosition().getX();
@@ -270,7 +270,8 @@ public class CastlesRenderer extends bonzai.Renderer {
 	}
 
 	private static void renderBuildings(Graphics2D g, CastlesMap map) {
-		DualLinkList<RallyPoint> nodes = map.getAllNodes();
+		ArrayList<RallyPoint> nodes = map.getAllElements();
+		
 		for(RallyPoint r : nodes){
 			String name = r.ID;
 			char c = name.charAt(0);
@@ -299,7 +300,7 @@ public class CastlesRenderer extends bonzai.Renderer {
 		int i = 0;
 		for (ShoutAction s : turn.getShoutActions()) {
 			if (s != null) {
-				Position pos = turn.getMap().getEntity(i).getPosition();
+				Position pos = turn.getMap().getEntity(i);
 				String message = s.getMessage();
 	
 				g.setFont(new Font("Arial", Font.PLAIN, fontSize));

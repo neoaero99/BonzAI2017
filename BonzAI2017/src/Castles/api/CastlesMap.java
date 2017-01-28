@@ -1,6 +1,7 @@
 package Castles.api;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 
@@ -9,10 +10,9 @@ import Castles.Objects.RallyPoint;
 import Castles.Objects.Soldier;
 import Castles.Objects.SoldierState;
 import Castles.util.graph.IDPair;
-import Castles.util.graph.Vertex;
 import Castles.util.graph.SegEdge;
+import Castles.util.graph.Vertex;
 import Castles.util.graph.CastlesMapGraph;
-import Castles.util.linkedlist.DualLinkList;
 import bonzai.Position;
 import bonzai.Team;
 
@@ -24,7 +24,8 @@ public class CastlesMap {
 	
 	private HashMap<String, String> fields;
 	
-	private CastlesMapGraph graph;
+	private HashMap<String, RallyPoint> graphElements;
+	private static CastlesMapGraph graph;
 	private static HashMap<IDPair, ArrayList<String>> pathIDsMap;
 	
 	private boolean[] players;
@@ -33,15 +34,19 @@ public class CastlesMap {
 	private ArrayList<Soldier>[] soldiers;
 	
 	static {
+		graph = null;
 		pathIDsMap = null;
 	}
 	
-	public CastlesMap(HashMap<String, String> f, CastlesMapGraph g, ArrayList<Team> t, int w, int h) {
+	public CastlesMap(HashMap<String, String> f, HashMap<String, RallyPoint> ge,
+			CastlesMapGraph g, ArrayList<Team> t, int w, int h) {
+		
 		width = w;
 		height = h;
 		
 		fields = f;
 		
+		graphElements = ge;
 		graph = g;
 		pathIDsMap = g.generatePaths();
 		
@@ -70,9 +75,14 @@ public class CastlesMap {
 		
 		//set fields
 		fields = previousTurn.getFields();
-	
-		//define new variables
-		graph = previousTurn.getGraph().clone();
+		
+		// Copy the rally points, buildings, etc.
+		graphElements = new HashMap<String, RallyPoint>();
+		Collection<RallyPoint> rallyPoints = previousTurn.graphElements.values();
+		
+		for (RallyPoint r : rallyPoints) {
+			graphElements.put(r.ID, r.copy());
+		}
 		
 		//copy the list of teams
 		players = previousTurn.getPlayers();
@@ -81,10 +91,33 @@ public class CastlesMap {
 		soldiers = previousTurn.getSoldiers();
 	}
 	
-
-
-//github.com/neoaero99/BonzAI2017
+	/**
+	 * Returns a graph element based on a unique ID.
+	 * 
+	 * @param ID	The ID of the element to get
+	 * @return		The element corresponding to the given ID
+	 */
+	public RallyPoint getElement(String ID) {
+		return graphElements.get(ID);
+	}
 	
+	public Position getEntity(int i) {
+		if(!players[i]){
+			return null;
+		}
+		
+		Castles.api.Color c=Castles.api.Color.values()[i];
+		ArrayList<RallyPoint> elementList = getAllElements();
+		
+		for(RallyPoint r : elementList) {
+			if(r instanceof Building ){
+				if(((Building)r).getColor()==c){
+					return r.getPosition();
+				}
+			}
+		}
+		return null;
+}
 	
 	/**
 	 * @param input
@@ -111,36 +144,6 @@ public class CastlesMap {
 	public int getHeight() {
 		return height;
 	}
-
-	public Position getEntity(int i) {
-		if(!players[i]){
-			return null;
-		}
-		Castles.api.Color c=Castles.api.Color.values()[i];
-		ArrayList<Vertex> list = graph.vertexList();
-		for(Vertex v:list){
-			if(v.getElement() instanceof Building ){
-				if(((Building)v.getElement()).getColor()==c){
-					return v.getElement().getPosition();
-				}
-			}
-		}
-		return null;
-	}
-	
-	/**
-	 * returns an entity based on a unique id
-	 * @param s
-	 * @return
-	 */
-	public RallyPoint getEntity(String s){
-		for (Vertex v : graph.vertexList()){
-			if(v.getElement().ID.equals(s)){
-				return v.getElement();
-			}
-		}
-		return null;
-	}
 	
 	public CastlesMapGraph getGraph() {
 		return graph;
@@ -161,16 +164,8 @@ public class CastlesMap {
 		return fields;
 	}
 	
-	public DualLinkList<RallyPoint> getAllNodes() {
-		DualLinkList<RallyPoint> nodes = new DualLinkList<RallyPoint>();
-		ArrayList<Vertex> vertexList = graph.vertexList();
-		
-		for (Vertex v : vertexList) {
-			// Pull all the elements from all the vertices in the graph
-			nodes.addToBack(v.getElement());
-		}
-		
-		return nodes;
+	public ArrayList<RallyPoint> getAllElements() {
+		return new ArrayList<RallyPoint>( graphElements.values() );
 	}
 	
 	protected ArrayList<Soldier>[] getSoldiers(){

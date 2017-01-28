@@ -1,12 +1,5 @@
 package Castles.util.graph;
 
-import java.util.HashMap;
-
-import Castles.Objects.RallyPoint;
-import Castles.util.VectorND;
-import Castles.util.linkedlist.InvalidNodeException;
-import bonzai.Position;
-
 /**
  * The segmented edge class is used for the edges of the BonzAI Graph structure.
  * It contains a number of way points, which break the edge up into equal
@@ -18,7 +11,7 @@ public class SegEdge extends Node {
 	
 	// The nodes, which this edge connects
 	public final Vertex first, second;
-	private final HashMap<String, RallyPoint> waypoints;
+	private final String[] waypointIDs;
 	
 	/**
 	 * Creates an edge, with the given ID, which connects the two given edges.
@@ -30,31 +23,12 @@ public class SegEdge extends Node {
 	public SegEdge(int weight, Vertex f, Vertex s) {
 		super( String.format("!%s-%s", f.ID, s.ID) );
 		
-		waypoints = new HashMap<String, RallyPoint>();
+		waypointIDs = new String[weight];
+		
 		first = f;
 		second = s;
 		first.addConnection(this);
 		second.addConnection(this);
-		
-		Position start = first.getElement().getPosition();
-		Position end = second.getElement().getPosition();
-		
-		/* Create a direction vector, which is scaled by the the distance
-		 * between the first and second vertices over the weight of this
-		 * edge. */
-		double dist = start.getDistanceBetween(end);
-		VectorND dir = new VectorND(end.getX() - start.getX(),
-				end.getY() - start.getY());
-		dir.scalarMult( dist / ((weight + 1) * dir.magnitude()) );
-		
-		// Update the positions of each way point
-		for (int idx = 1; idx <= weight; ++idx) {
-			int posX = start.getX() + (int)(idx * dir.get(0));
-			int posY = start.getY() + (int)(idx * dir.get(1));
-			
-			String rID = String.format("%s:%s", ID, idx);
-			waypoints.put(rID, new RallyPoint(posX, posY, rID));
-		}
 	}
 	
 	/**
@@ -63,7 +37,7 @@ public class SegEdge extends Node {
 	 * @return	The length of the edge in terms of way points
 	 */
 	public int getWeight() {
-		return waypoints.size();
+		return waypointIDs.length;
 	}
 	
 	/**
@@ -98,11 +72,8 @@ public class SegEdge extends Node {
 		return node != null && (node == first || node == second);
 	}
 	
-	/**
-	 * Get the way point associated with the given ID.
-	 */
-	public RallyPoint getWayPoint(String rID) {
-		return waypoints.get(rID);
+	protected String[] wayPointIDs() {
+		return waypointIDs.clone();
 	}
 	
 	@Override

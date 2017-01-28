@@ -8,27 +8,24 @@ import Castles.Objects.RallyPoint;
 
 /**
  * A node in the CastlesMapGraph, which is connected to some number edges in the
- * graph. A vertex contains a reference to a rally point, or building, which
- * defines the position of the vertex.
+ * graph. A vertex contains a reference to the ID of a rally point, or building,
+ * which is associated with the vertex.
  * 
  * @author Joshua Hooker
  */
 public class Vertex extends Node {
 	
-	// The vertex's adjacency hashmap or set of all adjacent edges
+	// The vertex's adjacency hash map or set of all adjacent edges
 	private final HashMap<String, SegEdge> incEdges;
-	private final RallyPoint element;
 	
 	/**
 	 * Creates a new vertex, whose element is given.
 	 * 
 	 * @param r	The element to store in the vertex
 	 */
-	public Vertex(RallyPoint r) {
-		super(r.ID);
-		
+	public Vertex(String ID) {
+		super(ID);
 		incEdges = new HashMap<String, SegEdge>();
-		element = r;
 	}
 	
 	/**
@@ -95,23 +92,20 @@ public class Vertex extends Node {
 		return adjVertices;
 	}
 	
-	// Element getter and setter
-	public RallyPoint getElement() { return element; }
-	
 	@Override
 	public boolean equals(Object obj) {
 		if (obj instanceof Vertex) {
 			Vertex node = (Vertex)obj;
 			
 			// Compare elements
-			if (element == null && node.element == null) {	
+			if (ID == null && node.ID == null) {	
 				return true;
 				
-			} else if (element == null || node.element == null) {
+			} else if (ID == null || node.ID == null) {
 				return false;
 				
 			} else {
-				return node.getElement().equals(element);
+				return node.ID.equals(ID);
 			}
 		}
 		
@@ -120,6 +114,6 @@ public class Vertex extends Node {
 	
 	@Override
 	public String toString() {
-		return String.format("( %s )", element);
+		return String.format("( %s )", ID);
 	}
 }

@@ -8,8 +8,10 @@ import java.util.Scanner;
 import Castles.Objects.*;
 import Castles.util.graph.SegEdge;
 import Castles.util.graph.Vertex;
+import Castles.util.VectorND;
 import Castles.util.graph.CastlesMapGraph;
 import Castles.util.linkedlist.DualLinkList;
+import bonzai.Position;
 import bonzai.Team;
 
 public class Parser {
@@ -31,6 +33,8 @@ public class Parser {
 		
 		int width = 0, height = 0;
 		HashMap<String, String> fields = new HashMap<String, String>();
+		
+		HashMap<String, RallyPoint> graphElements = new HashMap<String, RallyPoint>();
 		
 		ArrayList<Vertex> vertices = new ArrayList<Vertex>();
 		ArrayList<SegEdge> edges = new ArrayList<SegEdge>();
@@ -61,30 +65,44 @@ public class Parser {
 					Team newTeam = new Team(Castles.api.Color.values()[teams.size()], teams.size());
 					teams.add(newTeam);
 					r = new Castle(Integer.parseInt(row[0]), Integer.parseInt(row[1]), row[2], newTeam);
-					vertices.add(new Vertex(r));
+					graphElements.put(r.ID, r);
+					vertices.add(new Vertex(r.ID));
 					break;
 
 				case PARSE_CASTLE:
 					r = new Castle(Integer.parseInt(row[0]), Integer.parseInt(row[1]), row[2], null);
-					vertices.add(new Vertex(r));
+					graphElements.put(r.ID, r);
+					vertices.add(new Vertex(r.ID));
 					break;
 					
 				case PARSE_RALLY:
 					r = new RallyPoint(Integer.parseInt(row[0]), Integer.parseInt(row[1]), row[2]);
-					vertices.add(new Vertex(r));
+					graphElements.put(r.ID, r);
+					vertices.add(new Vertex(r.ID));
 					break;
 					
 				case PARSE_PATH:
+					// Connect the two vertices and add the edge
 					Vertex v1 = getVertex(vertices, row[0]);
 					Vertex v2 = getVertex(vertices, row[1]);
 					SegEdge edge = new SegEdge(Integer.parseInt(row[2]), v1, v2);
 					
 					edges.add(edge);
+					/* Build the way point list associated with the edge and
+					 * add the points to the graph elements */
+					RallyPoint r1 = graphElements.get(row[0]);
+					RallyPoint r2 = graphElements.get(row[1]);
+					RallyPoint[] wayPoints = buildWayPoints(edge, r1.getPosition(), r2.getPosition());
+					
+					for (RallyPoint rp : wayPoints) {
+						graphElements.put(rp.ID, rp);
+					}
 					break;
 					
 				case PARSE_VILLAGE:
 					r = new Village(Integer.parseInt(row[0]), Integer.parseInt(row[1]), row[2], null);
-					vertices.add(new Vertex(r));
+					graphElements.put(r.ID, r);
+					vertices.add(new Vertex(r.ID));
 					break;
 					
 				case PARSE_FIELD:
@@ -136,16 +154,46 @@ public class Parser {
 			in.close(); // RAII semantics are really useful
 		}
 		
-		return new CastlesMap(fields, new CastlesMapGraph(vertices, edges), teams, width, height);
+		return new CastlesMap(fields, graphElements, new CastlesMapGraph(vertices, edges), teams, width, height);
 	}
 	
 	private static Vertex getVertex(ArrayList<Vertex> list, String s){
 		for (Vertex v : list){
-			if (v.getElement().ID.equals(s)){
+			if (v.ID.equals(s)){
 				return v;
 			}
 		}
 		
 		return null;
+	}
+	
+	/**
+	 * Returns a set of rally points that are associated with the given
+	 * segEdge.
+	 * 
+	 * @param e	The edge for which to build the list of way points
+	 * @return	The list of way points associated with the given edge
+	 */
+	private static RallyPoint[] buildWayPoints(SegEdge e, Position start, Position end) {
+		RallyPoint[] waypoints = new RallyPoint[e.getWeight()];
+		
+		/* Create a direction vector, which is scaled by the the distance
+		 * between the first and second vertices over the weight of this
+		 * edge. */
+		double dist = start.getDistanceBetween(end);
+		VectorND dir = new VectorND(end.getX() - start.getX(),
+				end.getY() - start.getY());
+		dir.scalarMult( dist / ((e.getWeight() + 1) * dir.magnitude()) );
+		
+		// Define the positions of each way point
+		for (int idx = 1; idx <= e.getWeight(); ++idx) {
+			int posX = start.getX() + (int)(idx * dir.get(0));
+			int posY = start.getY() + (int)(idx * dir.get(1));
+			
+			String rID = String.format("%s:%s", e.ID, idx);
+			waypoints[idx - 1] = new RallyPoint(posX, posY, rID);
+		}
+		
+		return waypoints;
 	}
 }

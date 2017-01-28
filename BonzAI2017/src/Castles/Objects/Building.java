@@ -63,7 +63,7 @@ public class Building extends RallyPoint {
 	}
 	
 	public Castles.api.Color getColor() {
-		return myTeam.getColor();
+		return myTeam == null ? null : myTeam.getColor();
 	}
 	
 	public RallyPoint copy(){
