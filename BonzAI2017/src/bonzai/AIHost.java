@@ -6,6 +6,9 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Scanner;
+import java.util.concurrent.atomic.AtomicReference;
+
+import Castles.api.MoveAction;
 
 public class AIHost {
 	private final Process process;
@@ -31,6 +34,12 @@ public class AIHost {
 		expects("ACK");
 	}
 	
+	/**
+	 * The simulation is sending a single action that
+	 * occured doing the last turn to the AI
+	 * 
+	 * @param action the action that occured in the previous turn
+	 */
 	public void apply(Action action) {
 		if(isAlive) {
 			out.printf("APPLY 1%n%s%n", AIHost.toString(action)); 
@@ -40,32 +49,50 @@ public class AIHost {
 		}
 	}
 	
-	// Send a list of actions
+	/**
+	 * The simulation is sending a list of actions that occured
+	 * durring the last turn to the AI
+	 * 
+	 * @param actions the list of actions that occured during the last turn
+	 */
 	public void apply(List<Action> actions) {
+		if(actions.size() == 0) return;
 		if (isAlive) {
-			out.printf("APPLY %d%n", actions.size());
+			//tells the AI how many actions to expect
+			out.printf("APPLY %d\n", actions.size());
+			//sends each action individually
+			for (Action a : actions){
+				out.printf("%s\n", AIHost.toString(a));
+			}
 			
-			for (Action a : actions)
-				out.printf("%s%n", AIHost.toString(a));
-				
-			out.flush();
-			expects("ACK");
+			out.flush();//might be problem causing
+			expects("ACK");//waits for the AI to send an acknowlagment
 		}
 	}
 	
+	/**
+	 * Asks the AI for its next move
+	 * 
+	 * @return the action that the AI intends to make
+	 */
 	public Action query() {
 		if(isAlive) {
+			//sends the QUERY command to the AI
 			out.println("QUERY");
 			out.flush();
-			
 			String response = expects("(?s).*");
+			//if the action returned was null, return null
+			//otherwise return the parsed action
 			Action action = response == null ? null : AIHost.toAction(response);
 			return action;
 		}
-		
+		//return null if the AI is dead
 		return null;
 	}
 	
+	/**
+	 * terminates the AI thread
+	 */
 	public void terminate() {
 		if(isAlive) {
 			out.println("TERMINATE");
@@ -75,57 +102,135 @@ public class AIHost {
 		}
 	}
 	
+	/**
+	 * gets the team ID for the AI that this AIHost represents
+	 * @return
+	 */
 	public int getTeam() {
 		return teamID;
 	}
 	
-	// Why does this require the try-catch block (if response.matches(pattern) return response)
+	/**
+	 * checks the response from AIClient to see if it matches the expected
+	 * response
+	 * nukes process if the response doesn't match
+	 * 
+	 * @param patteren A regular expression to define the set of expected responses
+	 * @return the response of the AI
+	 */
 	private String expects(String pattern) {
 		try { 
-			String response = in.nextLine(); 
+			//waits for the AIClient to send its message
+			//while(!in.hasNextLine()){}
+			//reads in the AI's response
+			String response = in.nextLine();
+			//Prints out to the command line the regular expression
+			//of expected responses and the Response of the AI
 			System.out.println("Pattern = " + pattern);
 			System.out.println("Response = " + response);
-			if (!response.matches(pattern)) { throw new IOException("Inappropriate response given.  Expected pattern " + pattern + " but got " + response); }
+			//checks if the response is in the language defined by the
+			//user defined regular expression
+			if (!response.matches(pattern)) { 
+				throw new IOException("Inappropriate response given.  Expected pattern " 
+										+ pattern + " but got " + response); 
+			}
 			return response;
 			
 		} catch(Exception e) {
+			//just error tracking stuff
+			//if there happened to be an error in
+			//the response, the method throws an IOException
 			e.printStackTrace(); 
 //			String error=err.nextLine();
 //			System.out.println(error);
 			isAlive = false;
 			process.destroy();
-			System.err.print("Expected pattern: " + pattern + ". The process has been nuked!");
+			System.err.print("Expected pattern: " + pattern + ". The process has been nuked!\n");
+			
 		}
 		
 		return null;
 	}
 	
+	/**
+	 * converts a message to an action
+	 * @param message the message from the AI that needs to be parsed
+	 * @return the parsed action
+	 */
 	public static Action toAction(String message) {
 		Scanner arguments = new Scanner(message);
-		
+		String args;
+		//uses a state machine to select the correct action
+		//this is where you put your actions so that the
+		//program can execute AI commands
 		switch(arguments.next()) {
+<<<<<<< HEAD
 			/*case "ROTATE":
 				int id = arguments.nextInt();
 				float rotation = arguments.nextFloat();
 				return new RotateAction(id, rotation);*/
 			case "SHOUT":
 				return new ShoutAction(arguments.nextLine());
+=======
+			case "MOVE":
+				MoveAction out = new MoveAction();
+				String[] move = new String[3];
+				int i = 0;
+				while(arguments.hasNext()){
+					String temp = arguments.next();
+					if(!temp.equals("[") && !temp.equals("]")){
+						move[i++] = temp;
+					}
+					if(i == 3){
+						i = 0;
+						out.addMovement(move[0], move[1], Integer.parseInt(move[2]));
+					}
+				}
+				arguments.close();
+				//MOVE actions are not yet implemented
+				return out;
+			case "SHOUT":
+				args = arguments.nextLine();
+				arguments.close();
+				//Fun banter command that is a staple of BonzAI
+				//this shouldn't need to be touched and can
+				//be used to help debug the process of AI communication
+				//because if you are having problems with a written
+				//command for your BonzAI brawl, it works best to have
+				//a command that you can be guaranteed works.  If it
+				//doesn't work, there is likely a communication problem
+				//between the AIHost and AIClient classes
+				return new ShoutAction(args);
+>>>>>>> c5416f12301fef19aa1084a610dc4e89e6f224c3
 			default:
-				return null;
+				arguments.close();
+				//if the message is an unidentified action,
+				//the program a shout action that tells the user
+				//the done messed up
+				return new ShoutAction("I tried to do something that I cannot do");
 		}
 	}
 	
+	/**
+	 * used so the AIClient can convert the action into
+	 * a string to sent to the AIHost
+	 * 
+	 * @param action The action to be converted
+	 * @return	a string that represents that action
+	 */
 	public static String toString(Action action) {
+		//here is where you need to write your Action
+		//conversion.  Make sure it follows the same pattern
+		//as your toAction() method that appeared earlier
 		
-		/*if(action instanceof RotateAction) {
-			int target = ((RotateAction)action).getRotatedObjectId();
-			float rotation = ((RotateAction)action).getRotation();
-			
-			return String.format("ROTATE %d %f", target, rotation);
-		}*/
+		//again, ShoutActions should work, use them to debug the communication
+		//between the AI and the game
 		if(action instanceof ShoutAction) {
 			ShoutAction shout = (ShoutAction)action;
 			return String.format("SHOUT %s", shout.getMessage());
+		}
+		if(action instanceof MoveAction){
+			return action.toString();
 		}
 		return "NONE";
 	}

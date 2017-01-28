@@ -223,11 +223,16 @@ public class Turn {
 	 * 			 false otherwise
 	 */
 	public boolean isValid(Action action) {
+<<<<<<< HEAD
 		//TODO 2017: This is important for us and competitors.
 		if (action instanceof ShoutAction) {
 			return true;
 		}
 		
+=======
+		//TODO 2017: This is important for us and competitors. 
+		if(action instanceof ShoutAction) return true;
+>>>>>>> c5416f12301fef19aa1084a610dc4e89e6f224c3
 		return false;
 	}
 
@@ -266,12 +271,6 @@ public class Turn {
 		//to the team ID that wants to perform them
 		HashMap<Integer, Team> rotationsToPerform = new HashMap<>();
 
-		//Store the desired rotation at [teamNum] of this array.
-		//Thus, if team 3 wanted to rotate something, their chosen rotation
-		//will be at rotationsDesired[3]. If they didn't choose to rotate
-		//something, then the array will contain null at that index.
-		Float [] rotationsDesired = new Float [teams.size()];
-
 		// Store the teams whose action failed
 		LinkedList<Team> failedTeams = new LinkedList<>();
 		
@@ -282,11 +281,19 @@ public class Turn {
 		for (Action action : actions) {
 			//TODO Actions are Handled here
 			if (isValid(action)) {
+<<<<<<< HEAD
 				
 				if (action instanceof ShoutAction) {
 					shoutActions.add((ShoutAction)action);
 				}
 				
+=======
+				if (action instanceof ShoutAction) {
+					shoutActions.add((ShoutAction)action);
+				} else {
+					shoutActions.add(null);
+				}
+>>>>>>> c5416f12301fef19aa1084a610dc4e89e6f224c3
 			} else {
 				//TODO Write code for an invalid action
 				shoutActions.add(null);
@@ -296,7 +303,7 @@ public class Turn {
 		}
 
 		//Apply all valid RotateActions to the game state.
-		for (int id : rotationsToPerform.keySet()) {
+		//for (int id : rotationsToPerform.keySet()) {
 
 			/*Rotatable r = (Rotatable)map.getEntity(id);
 
@@ -321,7 +328,7 @@ public class Turn {
 					map.replace(id, new Repeater((Repeater)r, rotationsDesired[teamRotating.getID()], teamRotating, cooldownAmount + 1, map));
 				}
 			}*/
-		}
+		//}
 		
 		//map.calculateParentsTargetsAndOwners();
 

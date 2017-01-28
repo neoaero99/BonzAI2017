@@ -9,6 +9,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Queue;
 import java.util.Scanner;
+import java.util.concurrent.atomic.AtomicReference;
 
 import bonzai.util.ProcessCPUTimer;
 import bonzai.util.TimeoutException;
@@ -16,33 +17,51 @@ import Castles.*;
 import Castles.api.*;
 import Castles.util.*;
 
+/**
+ * The AI Client class the used as a sort of wrapper for a
+ * Competitor's AI.  It works by Implementing a [channel type] Channel
+ * to communicate between the AI thread and the AIHost thread.  While the
+ * AIHost is what handles all the talking to the actual game, the AIClient
+ * is what handles talking to the competitor's AI.
+ * 
+ * Realistically, the only thing that you should have to do with this class
+ * is change the Scenario reference to reflect your game year
+ * 
+ * @author Team Secret
+ */
 public class AIClient implements Runnable {
-	private final AI ai;
-	private final Game game;
+	private final AI ai; //the AI that this client will represent
+	private final Game game; //the refrence to the game
 
 	public static final PrintStream err = System.err;
 	public static final InputStream in  = System.in;
 	public static final PrintStream out = System.out;
+
 	
 	/**
-	 *
+	 *	a basic constructor, just sets some class variables
 	 **/
 	public AIClient(CastlesScenario scenario, AIJar me, List<AIJar> jars) throws Exception {
 		this.ai = me.instantiate();
 		this.game = scenario.instantiate(jars);
 	}
 	
+
+	
 	@Override
 	public void run() {
-		// we passed intialization, so notify host
+		//tell the AIHost that we are ready to begin.
 		AIClient.out.println("ACK");
 		AIClient.out.flush();
 		
+		//create a scanner to read the channel between the
+		//AIHost and the AIClient
 		Scanner scanner = new Scanner(AIClient.in);
 		while(true) {
 			String command   = scanner.next();
 			String arguments = scanner.nextLine().trim();
-			
+			//a state machine to handle the different commands that the
+			//AIHost could send the AIClient
 			switch (command) {
 				case "APPLY":
 					List<Action> actions = new LinkedList<>();
@@ -59,7 +78,12 @@ public class AIClient implements Runnable {
 					Action action = null;
 					
 					try { 
+						//timer is the ai
+						//creates a new AI each turn
+						//this is why the AI needs to reestablish its
+						//variables each iteration
 						AIThread timer = new AIThread();
+						//sets the timeout and polling for the thread
 						ProcessCPUTimer.execute(timer, 500, 100);
 						
 						action = timer.action;
@@ -81,11 +105,12 @@ public class AIClient implements Runnable {
 					return;
 					
 				default:
-					//TODO: Figure out how to gracefully die
-					//throw new IOException("Unexpected Message Recieved");
+					err.println("Unexpected Message Recieved");
 					break;
 			}
+			scanner.close();
 		}
+		
 	}
 	
 	/**
