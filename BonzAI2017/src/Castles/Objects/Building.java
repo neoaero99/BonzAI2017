@@ -1,6 +1,5 @@
 package Castles.Objects;
 
-import java.awt.Color;
 import bonzai.*;
 
 public class Building extends RallyPoint {
@@ -41,7 +40,7 @@ public class Building extends RallyPoint {
 	 *     Soldier Stuff      *
 	 **************************/
 	
-	public void setSoldierCount(int soldierCount){
+	protected void setSoldierCount(int soldierCount){
 		soldiers = soldierCount;
 	}
 	
@@ -52,27 +51,22 @@ public class Building extends RallyPoint {
 	/*
 	 * Increments soldier count by one.
 	 */
-	public void incrementSoldier(){
+	protected void incrementSoldier(){
 		soldiers += 1;
 	}
 	
 	/*
 	 * Decrements soldier count by one.
 	 */
-	public void decrementSoldier(){
+	protected void decrementSoldier(){
 		soldiers -= 1;
 	}
-	public Castles.api.Color getColor(){
-		return myTeam.getColor();
-	}
-	public RallyPoint copy(){
-		return new Building(super.getPosition().getX(),super.getPosition().getY(),defenseValue,captureValue,super.getName(),myTeam);
+	
+	public Castles.api.Color getColor() {
+		return myTeam == null ? null : myTeam.getColor();
 	}
 	
-	public Team getTeam(){
-		return myTeam;
-	}
-	public void setTeam(Team t){
-		myTeam=t;
+	public RallyPoint copy(){
+		return new Building(super.getPosition().getX(),super.getPosition().getY(),defenseValue,captureValue,ID,myTeam);
 	}
 }

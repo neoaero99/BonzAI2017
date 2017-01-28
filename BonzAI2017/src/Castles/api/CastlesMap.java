@@ -1,54 +1,62 @@
 package Castles.api;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 
 import Castles.Objects.Building;
-import Castles.Objects.Castle;
 import Castles.Objects.RallyPoint;
 import Castles.Objects.Soldier;
 import Castles.Objects.SoldierState;
-import Castles.Objects.Target;
-import Castles.Objects.Traversable;
-import Castles.Objects.Village;
-import Castles.Objects.Wall;
-import Castles.util.graph.GraphPathSet;
+import Castles.util.graph.IDPair;
+import Castles.util.graph.SegEdge;
 import Castles.util.graph.Vertex;
-import Castles.util.graph.WeightedEdge;
-import Castles.util.graph.WeightedGraph;
-import Castles.util.linkedlist.DualLinkList;
+import Castles.util.graph.CastlesMapGraph;
 import bonzai.Position;
 import bonzai.Team;
-
 
 public class CastlesMap {
 	
 	// TODO 2017: Read in map files here. 
 
-	private int max_repeat_id = 0, max_target_id = 0, max_source_id = 0;
-	private int min, mid;
-	int width,height;
+	private int width, height;
 	
-	private HashMap<String, String> fields = new HashMap<String, String>();
-	private HashMap<Integer, Traversable> entities = new HashMap<>();
+	private HashMap<String, String> fields;
 	
-	private WeightedGraph<RallyPoint,Integer> graph = new WeightedGraph<>();
-	private GraphPathSet<RallyPoint> paths;
+	private HashMap<String, RallyPoint> graphElements;
+	private static CastlesMapGraph graph;
+	private static HashMap<IDPair, ArrayList<String>> pathIDsMap;
 	
-	private boolean players[]={true,true,true,true,true,true};
+	private boolean[] players;
 	
-	private int numTeams;
+	private ArrayList<Team> teams;
+	private ArrayList<Soldier>[] soldiers;
 	
-	private ArrayList<Team> teams= new ArrayList<Team>();
-	public ArrayList<Soldier> soldiers[]=(ArrayList<Soldier>[])new ArrayList[6];
+	static {
+		graph = null;
+		pathIDsMap = null;
+	}
 	
-	public CastlesMap(){
-		graph=new WeightedGraph<>();
+	public CastlesMap(HashMap<String, String> f, HashMap<String, RallyPoint> ge,
+			CastlesMapGraph g, ArrayList<Team> t, int w, int h) {
+		
+		width = w;
+		height = h;
+		
+		fields = f;
+		
+		graphElements = ge;
+		graph = g;
+		pathIDsMap = g.generatePaths();
+		
+		players = new boolean[] { true,true,true,true,true,true };
+		teams = t;
+		
+		soldiers = (ArrayList<Soldier>[])new ArrayList[6];
 		for(int i=0;i<6;i++){
 			soldiers[i]=new ArrayList<Soldier>();
 		}
-		numTeams=0;
 	}
 
 	/**
@@ -61,46 +69,55 @@ public class CastlesMap {
 	 * @return 
 	 */
 	public CastlesMap(CastlesMap previousTurn) {
-		if(previousTurn == null){
-			graph=new WeightedGraph<>();
-			paths= new GraphPathSet<>(graph);
-			numTeams=0;
-		}else{
-			//define new variables
-			graph=new WeightedGraph<>();
-			numTeams=0;
-			//copy the list of teams
-			teams=(ArrayList<Team>) previousTurn.getTeams();
-			//copy vertices
-			DualLinkList<Vertex<RallyPoint, Integer>> list=previousTurn.getGraph().vertexList();
-			for(Vertex<RallyPoint, Integer> v:list){
-				Vertex<RallyPoint,Integer> newVert=new Vertex<RallyPoint, Integer>(v.getElement().copy());
-				graph.addNode(newVert);
-			}
-			
-			//copy edges
-			DualLinkList<WeightedEdge<RallyPoint,Integer>> list2=previousTurn.getGraph().edgeList();
-			for(WeightedEdge<RallyPoint,Integer> w:list2){
-				int weight=w.getElement();
-				WeightedEdge<RallyPoint,Integer> nw = new WeightedEdge<>(weight);
-				nw.setFirst(new Vertex<RallyPoint,Integer>(copy(w.getFirst().getElement())));
-				nw.setSecond(new Vertex<RallyPoint, Integer>(copy(w.getSecond().getElement())));
-				graph.addEdge(nw);
-				
-			}
-			
-			//set fields
-			fields = previousTurn.getFields();
-			players=previousTurn.getPlayers();
-			height=previousTurn.getHeight();
-			width=previousTurn.getWidth();
-			paths=previousTurn.getPaths();
+		
+		height = previousTurn.getHeight();
+		width = previousTurn.getWidth();
+		
+		//set fields
+		fields = previousTurn.getFields();
+		
+		// Copy the rally points, buildings, etc.
+		graphElements = new HashMap<String, RallyPoint>();
+		Collection<RallyPoint> rallyPoints = previousTurn.graphElements.values();
+		
+		for (RallyPoint r : rallyPoints) {
+			graphElements.put(r.ID, r.copy());
 		}
-		soldiers=previousTurn.getSoldiers();
+		
+		//copy the list of teams
+		players = previousTurn.getPlayers();
+		teams = (ArrayList<Team>) previousTurn.getTeams();
+		
+		soldiers = previousTurn.getSoldiers();
 	}
-
-//github.com/neoaero99/BonzAI2017
 	
+	/**
+	 * Returns a graph element based on a unique ID.
+	 * 
+	 * @param ID	The ID of the element to get
+	 * @return		The element corresponding to the given ID
+	 */
+	public RallyPoint getElement(String ID) {
+		return graphElements.get(ID);
+	}
+	
+	public Position getEntity(int i) {
+		if(!players[i]){
+			return null;
+		}
+		
+		Castles.api.Color c=Castles.api.Color.values()[i];
+		ArrayList<RallyPoint> elementList = getAllElements();
+		
+		for(RallyPoint r : elementList) {
+			if(r instanceof Building ){
+				if(((Building)r).getColor()==c){
+					return r.getPosition();
+				}
+			}
+		}
+		return null;
+}
 	
 	/**
 	 * @param input
@@ -115,28 +132,7 @@ public class CastlesMap {
 		}
 		return fields.get(input);
 	}
-
-	public void addTarget(Target target) {
-		
-	}
-
-	public void addWall(Wall wall) {
-		
-	}
-
-	public void setField(String string, String string2) {
-		if(!string.equals("size")){
-			fields.put(string, string2);
-			System.out.println(string  + " set to " + fields.get(string));
-		} else {
-			String[] parts = string2.split(", ");
-			width = Integer.parseInt(parts[0]);
-			height = Integer.parseInt(parts[1]);
-		}
-	}
-
 	
-
 	public void removePlayer(int i) {
 		players[i]=false;
 	}
@@ -148,120 +144,8 @@ public class CastlesMap {
 	public int getHeight() {
 		return height;
 	}
-
-	public Position getEntity(int i) {
-		if(!players[i]){
-			return null;
-		}
-		Castles.api.Color c=Castles.api.Color.values()[i];
-		DualLinkList<Vertex<RallyPoint, Integer>> list=graph.vertexList();
-		for(Vertex<RallyPoint, Integer> v:list){
-			if(v.getElement() instanceof Building ){
-				if(((Building)v.getElement()).getColor()==c){
-					return v.getElement().getPosition();
-				}
-			}
-		}
-		return null;
-	}
 	
-	/**
-	 * returns an entity based on a unique id
-	 * @param s
-	 * @return
-	 */
-	public RallyPoint getEntity(String s){
-		for(Vertex<RallyPoint, Integer> v : graph.vertexList()){
-			if(v.getElement().getName().equals(s)){
-				return v.getElement();
-			}
-		}
-		return null;
-	}
-	
-	/**
-	 * returns the vertex containing an entity based on a unique id
-	 * the I param is useless, so set it to whatever you want
-	 * @param s the unique id of the entitiy
-	 * @param i useless
-	 * @return
-	 */
-	private Vertex<RallyPoint, Integer> getNode(String s){
-		for(Vertex<RallyPoint, Integer> v : graph.vertexList()){
-			if(v.getElement().getName().equals(s)){
-				return v;
-			}
-		}
-		return null;
-	}
-	
-	public void addPlayer(int x, int y, String name){
-		Team newTeam=new Team(Castles.api.Color.values()[numTeams],numTeams);
-		Castle temp=new Castle(x,y,name,newTeam);
-		Vertex <RallyPoint,Integer> temp2=new Vertex<RallyPoint, Integer>(temp);
-		graph.addNode(temp2);
-		numTeams++;
-		teams.add(newTeam);
-	}
-	/**
-	 * Adds a new castle to the map
-	 * @param x x position on the map
-	 * @param y y position on the map
-	 * @param name the name of the castle
-	 */
-	public void addCastle(int x, int y, String name){
-		Castle temp=new Castle(x,y,name,null);
-		Vertex <RallyPoint,Integer> temp2=new Vertex<RallyPoint, Integer>(temp);
-		graph.addNode(temp2);
-	}
-	/**
-	 * Adds a new village to the map
-	 * @param x x position on the map
-	 * @param y y position on the map
-	 * @param name the name of the village
-	 */
-	public void addVillage(int x, int y, String name){
-		Village temp=new Village(x,y,name,null);
-		Vertex <RallyPoint,Integer> temp2=new Vertex<RallyPoint, Integer>(temp);
-		graph.addNode(temp2);
-	}
-	/**
-	 * Adds a new  rallypoint to the map
-	 * @param x x position on the map
-	 * @param y y position on the map
-	 * @param name the name of the village
-	 */
-	public void addRally(int x, int y, String name){
-		RallyPoint temp=new RallyPoint(x,y,name);
-		Vertex <RallyPoint,Integer> temp2=new Vertex<RallyPoint, Integer>(temp);
-		graph.addNode(temp2);
-	}
-	/**
-	 * POTENTIAL ISSUE:
-	 *     ALL points must be loaded in prior to calling this method
-	 * @param n1 node 1
-	 * @param n2 node 2
-	 * @param weight the weight of the edge
-	 */
-	public void connect(String n1, String n2, int weight){
-		Vertex<RallyPoint, Integer> one= getNode(n1);
-		Vertex<RallyPoint, Integer> two= getNode(n2);
-		WeightedEdge<RallyPoint, Integer> temp=new WeightedEdge<RallyPoint, Integer>(weight);
-		temp.setFirst(one);
-		temp.setSecond(two);
-		graph.addEdge(temp);
-
-	}
-	
-	/*
-	 * change to canPassThroug(), makes a list
-	 * of nodes and edges that troops CAN pass through
-	 */
-	public GraphPathSet<RallyPoint> getPaths(){
-		return paths;
-	}
-	public WeightedGraph<RallyPoint,Integer> getGraph(){
-		if(graph == null) throw new NullPointerException("I lost my map");
+	public CastlesMapGraph getGraph() {
 		return graph;
 	}
 	/**
@@ -272,52 +156,6 @@ public class CastlesMap {
 		return players;
 	}
 	
-	public DualLinkList<Position> getRallyPointsPositions(){
-		DualLinkList<Position> pos= new DualLinkList<Position>();
-		for(Vertex<RallyPoint, Integer> r: getGraph().vertexList()){
-			if(!(r.getElement()instanceof Building)){
-				pos.addToFront(r.getElement().getPosition());
-			}
-		}
-		return pos;
-	}
-	public DualLinkList<Building> getDefaultss(){
-		DualLinkList<Building> pos= new DualLinkList<Building>();
-		for(Vertex<RallyPoint, Integer> r: getGraph().vertexList()){
-			if(r.getElement()instanceof Building&&!(r.getElement()instanceof Castle)){
-				pos.addToFront((Building)r.getElement());
-			}
-		}
-		return pos;
-	}
-	public DualLinkList<Building> getCastles(){
-		DualLinkList<Building> pos= new DualLinkList<Building>();
-		for(Vertex<RallyPoint, Integer> r: getGraph().vertexList()){
-			if(r.getElement()instanceof Castle){
-				pos.addToFront((Building)r.getElement());
-			}
-		}
-		return pos;
-	}
-	
-	/**
-	 * Takes in 2 object unique identifiers and checks if they are in the
-	 * graph and are adjacent
-	 * 
-	 * @param o1 an object
-	 * @param o2 an object
-	 * @return true if o1 and o2 are in the graph and have an edge
-	 * 			connecting them
-	 */
-	public boolean isAdjacent(String o1, String o2){
-		Vertex<RallyPoint, Integer> p1 = getNode(o1);
-		Vertex<RallyPoint, Integer> p2 = getNode(o2);
-		if(p1 == null || p2 == null){
-			return false;
-		}
-		return p1.isAdjacent(p2);
-	}
-	
 	public List<Team> getTeams(){
 		return teams;
 	}
@@ -326,71 +164,22 @@ public class CastlesMap {
 		return fields;
 	}
 	
-	public DualLinkList<RallyPoint> getAllNodes() {
-		DualLinkList<RallyPoint> nodes = new DualLinkList<RallyPoint>();
-		DualLinkList<Vertex<RallyPoint, Integer>> vertexList = graph.vertexList();
-		
-		for (Vertex<RallyPoint, Integer> v : vertexList) {
-			// Pull all the elements from all the vertices in the graph
-			nodes.addToBack(v.getElement());
-		}
-		
-		return nodes;
-	}
-	
-	/**
-	 * prints out a copy of the given rally point
-	 */
-	private RallyPoint copy(RallyPoint r){
-		if(r instanceof Castle){
-			Castle c = (Castle)r;
-			Castle temp = new Castle(r.getPosition().getX(), r.getPosition().getY(), r.getName(),  c.getTeam());
-			temp.onPoint.clear();
-			for(Soldier s:r.onPoint){
-				temp.onPoint.add(s.copy());
-			}
-			return temp;
-		}
-		if(r instanceof Village){
-			Village temp = new Village(r.getPosition().getX(), r.getPosition().getY(), r.getName(), ((Village) r).getTeam());
-			temp.onPoint.clear();
-			for(Soldier s:r.onPoint){
-				temp.onPoint.add(s.copy());
-			}
-			return temp;
-		}
-		if(r instanceof Building){
-			Building temp= (Building) ((Building)r).copy();
-			temp.onPoint.clear();
-			for(Soldier s:r.onPoint){
-				temp.onPoint.add(s.copy());
-			}
-			return temp;
-		}
-		RallyPoint temp = new RallyPoint(r.getPosition().getX(), r.getPosition().getY(), r.getName());
-		temp.onPoint.clear();
-		for(Soldier s:r.onPoint){
-			temp.onPoint.add(s.copy());
-		}
-		return temp;
+	public ArrayList<RallyPoint> getAllElements() {
+		return new ArrayList<RallyPoint>( graphElements.values() );
 	}
 	
 	protected ArrayList<Soldier>[] getSoldiers(){
-		ArrayList<Soldier> NewList[]=(ArrayList<Soldier>[])new ArrayList[6];
-		for(int i=0;i<6;i++){
-			for(Soldier s: soldiers[i]){
-				NewList[i].add(s.copy());
-			}
-		}
-		return NewList;
+		return soldiers;
 	}
+	
 	/**
 	 * Spawn a new soldier to the map
 	 * @param s the soldier to add
 	 */
-	public void addSoldiers(Soldier s){
-		soldiers[s.leader.getID()].add(s);
+	protected void addSoldiers(Soldier s){
+		soldiers[s.getLeader().getID()].add(s);
 	}
+	
 	/**
 	 * Splits the passed soldiers into two groups
 	 * @param s the first solder
@@ -398,14 +187,13 @@ public class CastlesMap {
 	 * @param path the path the split is going on
 	 * @return the second soldier
 	 */
-	public Soldier splitSoliders(Soldier s, int num,DualLinkList<String> path){
-		if(num<s.value){
-			Soldier split=new Soldier(s.position);
-			split.leader=s.leader;
-			split.state=SoldierState.MOVING;
-			split.given_path=path;
-			split.value=num;
-			s.value=s.value-num;
+	public Soldier splitSoliders(Soldier s, int num,ArrayList<String> path){
+		if(num<s.getValue()){
+			Soldier split = new Soldier(s.getLeader(), num, s.getPosition());
+			split.setState(SoldierState.MOVING);
+			split.setPath(path);
+			split.setValue(num);
+			s.setValue(s.getValue()-num);
 			addSoldiers(split);
 		return split;
 		}
@@ -424,36 +212,39 @@ public class CastlesMap {
 	 * 			 4:s1 and s2 have both been deleted
 	 */
 	private int mergeSoldiers(Soldier s1, Soldier s2){
-		if(!s1.position.equals(s2.position)){
+		if(!s1.getPosition().equals(s2.getPosition())){
 			return -1;
 		}
-		if(s1.leader.equals(s2.leader)){
-			if(s1.state==SoldierState.STANDBY||s1.given_path.Tail.getPrevious().equals(s2.given_path.Tail.getPrevious())){ //We need to figure out when the soldiers should merge
-				s1.value=s1.value+s2.value;
-				soldiers[s2.leader.getID()].remove(s2);
+		if(s1.getLeader().equals(s2.getLeader())){
+			ArrayList<String> s1Path = s1.getPath();
+			ArrayList<String> s2Path = s2.getPath();
+			
+			if( s1.getState() == SoldierState.STANDBY || s1Path.get(s1Path.size() - 1).equals(s2Path.get(s2Path.size() - 1))) {
+				s1.setValue(s1.getValue()+s2.getValue());
+				soldiers[s2.getLeader().getID()].remove(s2);
 				s2=null;
 				return 1;
 			}
 			return 0;
 		}
 		else{
-			int amount=s1.value-s2.value;
+			int amount= s1.getValue()-s2.getValue();
 			if(amount>0){
-				s1.value=amount;
-				soldiers[s2.leader.getID()].remove(s2);
+				s1.setValue(amount);
+				soldiers[s2.getLeader().getID()].remove(s2);
 				s2=null;
 				return 2;
 			}
 			else if(amount<0){
-				s2.value=amount;
-				soldiers[s1.leader.getID()].remove(s1);
+				s2.setValue(amount);
+				soldiers[s1.getLeader().getID()].remove(s1);
 				s1=null;
 				return 3;
 			}
 			else{
-				soldiers[s1.leader.getID()].remove(s1);
+				soldiers[s1.getLeader().getID()].remove(s1);
 				s1=null;
-				soldiers[s2.leader.getID()].remove(s2);
+				soldiers[s2.getLeader().getID()].remove(s2);
 				s2=null;
 				return 4;
 			}
@@ -489,8 +280,8 @@ public class CastlesMap {
 		int num[]=new int[6];
 		int total[]=new int[6];
 		for(Soldier s: onPoint){
-			num[s.leader.getID()]++;
-			total[s.leader.getID()]+=s.value;
+			num[s.getLeader().getID()]++;
+			total[s.getLeader().getID()]+= s.getValue();
 		}
 		int max=0;
 		int maxid=-1;
@@ -504,9 +295,9 @@ public class CastlesMap {
 			return -2;
 		}
 		for(Soldier s: onPoint){
-			if(s.leader.getID()!=maxid){
+			if(s.getLeader().getID()!=maxid){
 				onPoint.remove(s);
-				soldiers[s.leader.getID()].remove(s);
+				soldiers[s.getLeader().getID()].remove(s);
 				s=null;
 			}
 		}
@@ -518,19 +309,12 @@ public class CastlesMap {
 		}
 		Soldier.quickSort(onPoint);
 		while(max>0){
-			max-=onPoint.get(0).value;
+			max-=onPoint.get(0).getValue();
 			if(max>0){
 				Soldier temp=onPoint.remove(0);
-				soldiers[temp.leader.getID()].remove(temp);
+				soldiers[temp.getLeader().getID()].remove(temp);
 			}
 		}
 		return 5;
 	}
-	/**
-	 * Will calculate all possible paths
-	 */
-	public void calculatePaths(){
-		paths= new GraphPathSet<>(graph);
-	}
-
 }

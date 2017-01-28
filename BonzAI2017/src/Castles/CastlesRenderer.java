@@ -8,7 +8,6 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.Map;
 
@@ -18,17 +17,17 @@ import Castles.Objects.*;
 import Castles.api.CastlesMap;
 //import Castles.api.Color;
 import Castles.api.Turn;
-import Castles.util.graph.WeightedEdge;
+import Castles.util.graph.SegEdge;
 import Castles.util.linkedlist.DualLinkList;
 import bonzai.Action;
 import bonzai.Position;
-import bonzai.Positionable;
 import bonzai.Team;
 import bonzai.ShoutAction;
 
 /**
  * Handle rendering the actual game objects on the screen. 
  */
+@SuppressWarnings("unused")
 public class CastlesRenderer extends bonzai.Renderer {
 
 	static HashMap<String,BufferedImage> backgroundImages = new HashMap<String,BufferedImage>();
@@ -226,12 +225,12 @@ public class CastlesRenderer extends bonzai.Renderer {
 	}
 
 	private static void renderPaths(Graphics2D g, CastlesMap map) {
-		DualLinkList<WeightedEdge<RallyPoint, Integer>> paths = map.getGraph().edgeList();
+		ArrayList<SegEdge> paths = map.getGraph().edgeList();
 		//iterate over all the paths
-		for(WeightedEdge<RallyPoint, Integer> p: paths){
+		for(SegEdge p: paths){
 			//get the rally points on the edge
-			RallyPoint r1 = p.getFirst().getElement();
-			RallyPoint r2 = p.getSecond().getElement();
+			RallyPoint r1 = map.getElement(p.first.ID);
+			RallyPoint r2 = map.getElement(p.second.ID);
 			
 			//get the x,y coords of the two rally points
 			int x1 = r1.getPosition().getX();
@@ -268,13 +267,16 @@ public class CastlesRenderer extends bonzai.Renderer {
 	}
 
 	private static void renderSoldiers(Graphics2D g, CastlesMap map) {
+		//get soldiers
+		
 		
 	}
 
 	private static void renderBuildings(Graphics2D g, CastlesMap map) {
-		DualLinkList<RallyPoint> nodes = map.getAllNodes();
+		ArrayList<RallyPoint> nodes = map.getAllElements();
+		
 		for(RallyPoint r : nodes){
-			String name = r.getName();
+			String name = r.ID;
 			char c = name.charAt(0);
 			switch(c){
 			case 'V':
@@ -284,7 +286,7 @@ public class CastlesRenderer extends bonzai.Renderer {
 				drawToScale(g,castleImage,r.getPosition().getX(),r.getPosition().getY(),0,1,0);
 				break;
 			case 'P':
-				int i = r.getName().charAt(1) - 48;
+				int i = r.ID.charAt(1) - 48;
 				drawToScale(g,playerImages.get(Castles.api.Color.values()[i]),r.getPosition().getX(),r.getPosition().getY(),0,1,0);
 				break;
 			default:
@@ -300,8 +302,9 @@ public class CastlesRenderer extends bonzai.Renderer {
 
 		int i = 0;
 		for (ShoutAction s : turn.getShoutActions()) {
+			
 			if (s != null) {
-				Position pos = turn.getMap().getEntity(i).getPosition();
+				Position pos = turn.getMap().getEntity(i);
 				String message = s.getMessage();
 	
 				g.setFont(new Font("Arial", Font.PLAIN, fontSize));
@@ -319,7 +322,7 @@ public class CastlesRenderer extends bonzai.Renderer {
 				bubble.arcwidth = .4f;
 	
 				bubble.x = pos.getX() - offsetX;
-				bubble.y = -pos.getY();
+				bubble.y = pos.getY() - gridHeight;
 	
 				g.setColor(new Color(245, 245, 245, 200));
 				g.fill(bubble);
@@ -385,8 +388,8 @@ public class CastlesRenderer extends bonzai.Renderer {
 		//the grid square. If the grid square is 100x100, then these
 		//constants should never be larger than (100-textHeight) or
 		//(100-textWidth)
-		//int pixelConstantHorizontal = 25;
-		//int pixelConstantVertical = 25;
+		int pixelConstantHorizontal = 25;
+		int pixelConstantVertical = 25;
 
 		drawText(g, text, p.getX(), -p.getY(), textColor, new Color(0, 0, 0, 0), size);
 	}

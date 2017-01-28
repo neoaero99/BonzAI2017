@@ -1,23 +1,22 @@
 package Castles.util.graph;
 
 /**
- * A simple node interface to link together the Vertex and WeightedEdge classes.
+ * A simple node interface to link together the Vertex and SegEdge classes.
  * 
  * @author Joshua Hooker
- *
- * @param <E>	The type of element to store in the node
  */
-public interface Node<E> {
+public abstract class Node {
+	/**
+	 * A unique Identifier for all nodes
+	 */
+	public final String ID;
 	
 	/**
-	 * Sets the value of this node's element.
+	 * Creates a new node with the given ID value.
 	 * 
-	 * @param e	The new value for the node's element
+	 * @param id	The unique identifier for the node
 	 */
-	public abstract void setElement(E e);
-	
-	/**
-	 * @return	The current value of the node's element
-	 */
-	public abstract E getElement();
+	public Node(String id) {
+		ID = id;
+	}
 }
