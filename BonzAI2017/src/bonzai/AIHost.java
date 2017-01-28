@@ -164,14 +164,7 @@ public class AIHost {
 		//this is where you put your actions so that the
 		//program can execute AI commands
 		switch(arguments.next()) {
-<<<<<<< HEAD
-			/*case "ROTATE":
-				int id = arguments.nextInt();
-				float rotation = arguments.nextFloat();
-				return new RotateAction(id, rotation);*/
-			case "SHOUT":
-				return new ShoutAction(arguments.nextLine());
-=======
+
 			case "MOVE":
 				MoveAction out = new MoveAction();
 				String[] move = new String[3];
@@ -201,7 +194,7 @@ public class AIHost {
 				//doesn't work, there is likely a communication problem
 				//between the AIHost and AIClient classes
 				return new ShoutAction(args);
->>>>>>> c5416f12301fef19aa1084a610dc4e89e6f224c3
+				
 			default:
 				arguments.close();
 				//if the message is an unidentified action,

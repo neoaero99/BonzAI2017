@@ -2,8 +2,6 @@ import bonzai.*;
 import Castles.Objects.RallyPoint;
 import Castles.api.*;
 import Castles.util.graph.Vertex;
-import Castles.util.graph.WeightedEdge;
-
 
 /**
  * This is the class for your AI.  It will handle all
@@ -33,10 +31,7 @@ public class CompetitorAI extends AI {
 	 */
 	public Action action(Turn turn) {
 		MoveAction move = new MoveAction();
-		
-		
 		//put your AI's stuff here
-		
 		
 		return move;
 	}

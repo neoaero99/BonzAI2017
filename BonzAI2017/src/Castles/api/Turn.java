@@ -223,16 +223,11 @@ public class Turn {
 	 * 			 false otherwise
 	 */
 	public boolean isValid(Action action) {
-<<<<<<< HEAD
 		//TODO 2017: This is important for us and competitors.
 		if (action instanceof ShoutAction) {
 			return true;
 		}
-		
-=======
-		//TODO 2017: This is important for us and competitors. 
-		if(action instanceof ShoutAction) return true;
->>>>>>> c5416f12301fef19aa1084a610dc4e89e6f224c3
+
 		return false;
 	}
 
@@ -281,19 +276,12 @@ public class Turn {
 		for (Action action : actions) {
 			//TODO Actions are Handled here
 			if (isValid(action)) {
-<<<<<<< HEAD
-				
-				if (action instanceof ShoutAction) {
-					shoutActions.add((ShoutAction)action);
-				}
-				
-=======
 				if (action instanceof ShoutAction) {
 					shoutActions.add((ShoutAction)action);
 				} else {
 					shoutActions.add(null);
 				}
->>>>>>> c5416f12301fef19aa1084a610dc4e89e6f224c3
+				
 			} else {
 				//TODO Write code for an invalid action
 				shoutActions.add(null);

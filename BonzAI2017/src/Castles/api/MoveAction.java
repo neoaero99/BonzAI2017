@@ -2,6 +2,8 @@ package Castles.api;
 
 import java.util.ArrayList;
 
+import javax.swing.text.html.parser.Element;
+
 import Castles.Objects.*;
 import Castles.util.graph.Vertex;
 import bonzai.Action;
@@ -37,7 +39,7 @@ public class MoveAction implements Action{
 		
 		@Override
 		public String toString(){
-			return "[ " + s.getName() + " " + target.getName() + " " + splitAmount +" ]";
+			return "[ " + s.getName() + " " + target.ID + " " + splitAmount +" ]";
 		}
 	}
 	
@@ -56,21 +58,27 @@ public class MoveAction implements Action{
 	 * @param splitAmount the amount of unit strength to be split off
 	 */
 	public void addMovement(String sold, String target, int splitAmount){
-		Soldier s;
-		RallyPoint t;
-		for(Vertex<RallyPoint, Integer> o : map.getGraph().vertexList()){
-			if(o.getElement().getName().equals(target)){
-				t = o.getElement();
+		Soldier s = null;
+		RallyPoint t = null;
+		ArrayList<RallyPoint> elements = map.getAllElements();
+		
+		for(RallyPoint r : elements) {
+			if(r.ID.equals(target)){
+				t = r;
 				break;
 			}
 		}
-		for(Soldier o : map.getSoldiers()){
-			if(o.getName().equals(sold)){
-				s =  o;
-				break;
+		
+		for(ArrayList<Soldier> soldiers : map.getSoldiers()) {
+			for (Soldier o : soldiers) {
+				if(o.getName().equals(sold)){
+					s = o;
+					break;
+				}
 			}
 		}
-		moves.add(new Movement(s,t,splitAmount));
+		
+		moves.add(new Movement(s, t, splitAmount));
 	}
 	
 	/**
@@ -81,7 +89,7 @@ public class MoveAction implements Action{
 	 * @param target the soldier's target
 	 */
 	public void addMovement(Soldier sold, RallyPoint target){
-		moves.add(new Movement(sold, target,sold.value));
+		moves.add(new Movement(sold, target,sold.getValue()));
 	}
 	
 	/**

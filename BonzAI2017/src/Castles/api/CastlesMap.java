@@ -144,44 +144,6 @@ public class CastlesMap {
 	public int getHeight() {
 		return height;
 	}
-<<<<<<< HEAD
-=======
-
-	/**
-	 * returns a player object with the corresponding number
-	 * @param i the player number to get
-	 * @return a player
-	 */
-	public Position getEntity(int i) {
-		if(!players[i]){
-			return null;
-		}
-		Castles.api.Color c=Castles.api.Color.values()[i];
-		DualLinkList<Vertex<RallyPoint, Integer>> list=graph.vertexList();
-		for(Vertex<RallyPoint, Integer> v:list){
-			if(v.getElement() instanceof Building ){
-				if(((Building)v.getElement()).getColor()==c){
-					return v.getElement().getPosition();
-				}
-			}
-		}
-		return null;
-	}
-	
-	/**
-	 * returns an entity based on a unique id
-	 * @param s
-	 * @return
-	 */
-	public RallyPoint getEntity(String s){
-		for(Vertex<RallyPoint, Integer> v : graph.vertexList()){
-			if(v.getElement().getName().equals(s)){
-				return v.getElement();
-			}
-		}
-		return null;
-	}
->>>>>>> c5416f12301fef19aa1084a610dc4e89e6f224c3
 	
 	public CastlesMapGraph getGraph() {
 		return graph;
