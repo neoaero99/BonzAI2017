@@ -103,14 +103,17 @@ public class Soldier extends JComponent {
 			return;
 		}
 		CastlesMapGraph graph =map.getGraph();
-		String temp=given_path.remove(0);
-		String ID =given_path.get(0);
+		String temp=given_path.get(0);
+		String ID =given_path.get(1);
 		RallyPoint r=map.getElement(ID);
 		Node n=graph.getVertex(ID);
 		if(n==null){
 			n=graph.getVertex(ID);
 		}
-		//Add here for is Adjacent
+		if(map.areAdjacent(temp, ID)){
+			return;
+		}
+		given_path.remove(0);
 		position=n;
 		pos2=r;
 		if(pos2 instanceof Building){

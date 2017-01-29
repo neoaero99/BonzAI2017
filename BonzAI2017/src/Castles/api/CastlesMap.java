@@ -508,6 +508,11 @@ public class CastlesMap {
 			return 5;
 		}
 	}
+	/**
+	 * 
+	 * @param r: A rally point
+	 * @return	Returns all soldiers on r
+	 */
 	public ArrayList<Soldier> getSoldiersAt(RallyPoint r){
 		ArrayList<Soldier> temp = new ArrayList<Soldier>();
 		RallyPoint newR = graphElements.get(r.ID);
@@ -516,6 +521,11 @@ public class CastlesMap {
 		}
 		return temp;
 	}
+	/**
+	 * 
+	 * @param A: a Team
+	 * @return	All Soldiers in team A
+	 */
 	public ArrayList<Soldier> getSoldiers(Team A){
 		ArrayList<Soldier> temp = new ArrayList<Soldier>();
 		for(Soldier s: soldiers[A.getID()]){
@@ -523,6 +533,12 @@ public class CastlesMap {
 		}
 		return temp;
 	}
+	/**
+	 * 
+	 * @param From: The ID of where the soldiers is coming from
+	 * @param To:	the ID of where the soldiers is going to
+	 * @return	the path of RallyPoint IDs
+	 */
 	public ArrayList<String> getPath(String From,String To){
 		Vertex f=graph.getVertex(From);
 		Vertex t=graph.getVertex(To);
