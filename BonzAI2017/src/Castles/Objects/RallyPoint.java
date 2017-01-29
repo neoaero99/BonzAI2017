@@ -1,4 +1,6 @@
 package Castles.Objects;
+import java.util.ArrayList;
+
 import bonzai.*;
 /**
  * 
@@ -9,6 +11,7 @@ public class RallyPoint implements Comparable<RallyPoint> {
 	
 	public final String ID;
 	private Position pos;
+	public ArrayList<Soldier> onPoint;
 	
 	/**
 	 * initialize start position

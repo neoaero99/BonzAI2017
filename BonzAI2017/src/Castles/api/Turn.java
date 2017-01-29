@@ -333,7 +333,23 @@ public class Turn {
 
 			//To prevent infinite loops if a circular path is found
 			LinkedList<Positionable> visited = new LinkedList<>();
-
+			
+			ArrayList<Soldier>[] soldiers =map.getSoldiers();
+			for(int i=0;i<6;i++){
+					for(Soldier s:soldiers[i]){
+						s.gotoNext(map);
+				 		}
+				 	}
+			ArrayList<RallyPoint> rally= map.getAllElements();
+				for(RallyPoint r: rally){
+						map.mergeSoldiers(r.onPoint);
+						if(r instanceof Building){
+				 				Soldier sol= r.onPoint.get(0);
+				 				if(!sol.getLeader().equals(((Building) r).getTeam())){
+				 					((Building)r).setTeam(sol.getLeader());
+				 				}
+						}
+				}
 			//Positionable current = newTurn.getUtil().updateEntity(util.getMyEmitter());
 			//Team myTeam = ((Emitter) current).getTeam();
 			/*

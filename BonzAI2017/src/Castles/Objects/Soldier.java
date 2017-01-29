@@ -5,7 +5,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 import javax.swing.JComponent;
+
+import Castles.api.CastlesMap;
+import Castles.util.graph.CastlesMapGraph;
 import Castles.util.graph.Node;
+import Castles.util.graph.Vertex;
 import bonzai.*;
 
 /**
@@ -67,6 +71,7 @@ public class Soldier extends JComponent {
 	private ArrayList<String> given_path;
 	// The position of the soldier on the map (on screen)
 	private Node position;
+	private RallyPoint pos2;
 	
 	static {
 		radius = 0f;
@@ -93,8 +98,21 @@ public class Soldier extends JComponent {
 		given_path = null;
 	}
 	
-	public void gotoNext() {
-		// Not sure where you were going with this Dan ...
+	public void gotoNext(CastlesMap map) {
+		if(given_path.size()==1){
+			return;
+		}
+		CastlesMapGraph graph =map.getGraph();
+		String temp=given_path.remove(0);
+		String ID =given_path.get(0);
+		RallyPoint r=map.getElement(ID);
+		Node n=graph.getVertex(ID);
+		if(n==null){
+			n=graph.getVertex(ID);
+		}
+		//Add here for is Adjacent
+		position=n;
+		pos2=r;
 	}
 	
 	public static void quickSort(List<Soldier> s){
@@ -149,5 +167,16 @@ public class Soldier extends JComponent {
 
 	public Node getPosition() {
 		return position;
+	}
+	public Soldier copy(){
+		Soldier temp =new Soldier(leader,value,position);
+		temp.given_path=given_path;
+//		temp.pathPosition=pathPosition;
+		temp.sprite=sprite;
+		temp.state=state;
+		return temp;
+	}
+	public void setRallyPoint(RallyPoint r){
+		pos2=r;
 	}
 }
