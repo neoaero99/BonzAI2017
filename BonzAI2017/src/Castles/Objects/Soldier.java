@@ -113,6 +113,13 @@ public class Soldier extends JComponent {
 		//Add here for is Adjacent
 		position=n;
 		pos2=r;
+		if(pos2 instanceof Building){
+			if(((Building)pos2).getColor()==null){
+				if(((Building)pos2).getDefenseValue()<value){
+					((Building)pos2).setTeam(leader);
+				}
+			}
+		}
 	}
 	
 	public static void quickSort(List<Soldier> s){
@@ -178,5 +185,8 @@ public class Soldier extends JComponent {
 	}
 	public void setRallyPoint(RallyPoint r){
 		pos2=r;
+	}
+	public RallyPoint getRallyPoint(){
+		return pos2;
 	}
 }

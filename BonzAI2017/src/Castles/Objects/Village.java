@@ -11,7 +11,7 @@ public class Village extends Building {
 	}
 
 	public Village(int x, int y, String newID, Team c) {
-		super(x, y, 10, 10, newID, c);
+		super(x, y, 10, 10, newID, c, 0);
 		// TODO Auto-generated constructor stub
 	}
 

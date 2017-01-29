@@ -342,7 +342,7 @@ public class Turn {
 				 	}
 			ArrayList<RallyPoint> rally= map.getAllElements();
 				for(RallyPoint r: rally){
-						map.mergeSoldiers(r.onPoint);
+						map.mergeSoldiers(r.onPoint,r);
 						if(r instanceof Building){
 				 				Soldier sol= r.onPoint.get(0);
 				 				if(!sol.getLeader().equals(((Building) r).getTeam())){

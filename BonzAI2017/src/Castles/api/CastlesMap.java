@@ -10,6 +10,7 @@ import Castles.Objects.RallyPoint;
 import Castles.Objects.Soldier;
 import Castles.Objects.SoldierState;
 import Castles.util.graph.IDPair;
+import Castles.util.graph.Node;
 import Castles.util.graph.SegEdge;
 import Castles.util.graph.Vertex;
 import Castles.util.graph.CastlesMapGraph;
@@ -82,7 +83,20 @@ public class CastlesMap {
 		Collection<RallyPoint> rallyPoints = previousTurn.graphElements.values();
 		
 		for (RallyPoint r : rallyPoints) {
-			graphElements.put(r.ID, r.copy());
+			RallyPoint temp=r.copy();
+			graphElements.put(r.ID, temp);
+			if(temp instanceof Building){
+				if(((Building)temp).getColor()!=null){
+					int rate = ((Building)temp).getRate();
+					Node n=graph.getVertex(temp.ID);
+					if(n==null){
+						n=graph.getVertex(temp.ID);
+					}
+					Soldier s = new Soldier(((Building)temp).getTeam(), rate,n);
+					addSoldiers(s);
+					temp.onPoint.add(s);
+				}
+			}
 		}
 		
 		//copy the list of teams
@@ -189,13 +203,33 @@ public class CastlesMap {
 	 * @return the second soldier
 	 */
 	public Soldier splitSoliders(Soldier s, int num,ArrayList<String> path){
+		ArrayList<String> newPath=new ArrayList<String>();
+		if(path.get(0)!=s.getPosition().ID){
+			for(String t: path){
+				newPath.add(t);
+			}
+		}
+		else{
+			newPath=path;
+		}
 		if(num<s.getValue()){
 			Soldier split = new Soldier(s.getLeader(), num, s.getPosition());
 			split.setState(SoldierState.MOVING);
 			split.setRallyPoint(graphElements.get(s.getPosition().ID));
+			split.setPath(newPath);
 			s.setValue(s.getValue()-num);
 			addSoldiers(split);
 		return split;
+		}
+		else{
+			Soldier split = new Soldier(s.getLeader(), s.getValue(), s.getPosition());
+			split.setState(SoldierState.MOVING);
+			split.setRallyPoint(graphElements.get(s.getPosition().ID));
+			s=null;
+			soldiers[s.getLeader().getID()].remove(s);
+			s.getRallyPoint().onPoint.remove(s);
+			addSoldiers(split);
+			split.setPath(newPath);
 		}
 		return null;
 	}
@@ -211,7 +245,7 @@ public class CastlesMap {
 	 * 			 3:s2 has defeated the the number of soldiers in s1, s2 has been deleted
 	 * 			 4:s1 and s2 have both been deleted
 	 */
-	private int mergeSoldiers(Soldier s1, Soldier s2){
+	private int mergeSoldiers(Soldier s1, Soldier s2, RallyPoint r){
 		if(!s1.getPosition().equals(s2.getPosition())){
 			return -1;
 		}
@@ -228,25 +262,75 @@ public class CastlesMap {
 			return 0;
 		}
 		else{
-			int amount= s1.getValue()-s2.getValue();
-			if(amount>0){
-				s1.setValue(amount);
-				soldiers[s2.getLeader().getID()].remove(s2);
-				s2=null;
-				return 2;
-			}
-			else if(amount<0){
-				s2.setValue(amount);
-				soldiers[s1.getLeader().getID()].remove(s1);
-				s1=null;
-				return 3;
+			if(r instanceof RallyPoint){
+				int amount= s1.getValue()-s2.getValue();
+				if(amount>0){
+					s1.setValue(amount);
+					soldiers[s2.getLeader().getID()].remove(s2);
+					s2=null;
+					return 2;
+				}
+				else if(amount<0){
+					s2.setValue(amount);
+					soldiers[s1.getLeader().getID()].remove(s1);
+					s1=null;
+					return 3;
+				}
+				else{
+					soldiers[s1.getLeader().getID()].remove(s1);
+					s1=null;
+					soldiers[s2.getLeader().getID()].remove(s2);
+					s2=null;
+					return 4;
+				}
 			}
 			else{
-				soldiers[s1.getLeader().getID()].remove(s1);
-				s1=null;
-				soldiers[s2.getLeader().getID()].remove(s2);
-				s2=null;
-				return 4;
+				int def=((Building)r).getDefenseValue();
+				Team team=((Building)r).getTeam();
+				if(team==s1.getLeader()){
+					int amount= (s1.getValue()+def)-s2.getValue();
+					if(amount>0){
+						s1.setValue(amount);
+						soldiers[s2.getLeader().getID()].remove(s2);
+						s2=null;
+						return 2;
+					}
+					else if(amount<0){
+						s2.setValue(amount);
+						soldiers[s1.getLeader().getID()].remove(s1);
+						s1=null;
+						return 3;
+					}
+					else{
+						soldiers[s1.getLeader().getID()].remove(s1);
+						s1=null;
+						soldiers[s2.getLeader().getID()].remove(s2);
+						s2=null;
+						return 4;
+					}
+				}
+				else{
+					int amount= s1.getValue()-(s2.getValue()+def);
+					if(amount>0){
+						s1.setValue(amount);
+						soldiers[s2.getLeader().getID()].remove(s2);
+						s2=null;
+						return 2;
+					}
+					else if(amount<0){
+						s2.setValue(amount);
+						soldiers[s1.getLeader().getID()].remove(s1);
+						s1=null;
+						return 3;
+					}
+					else{
+						soldiers[s1.getLeader().getID()].remove(s1);
+						s1=null;
+						soldiers[s2.getLeader().getID()].remove(s2);
+						s2=null;
+						return 4;
+					}
+				}
 			}
 		}
 		
@@ -264,12 +348,12 @@ public class CastlesMap {
 	 * 			4 :s1 and s2 have both been deleted
 	 * 			5 : Soldiers have merged successfully
 	 */
-	public int mergeSoldiers(ArrayList<Soldier> onPoint){
+	public int mergeSoldiers(ArrayList<Soldier> onPoint, RallyPoint r){
 		if(onPoint.size()<=1){
 			return 0;
 		}
 		if(onPoint.size()==2){
-			int temp =mergeSoldiers(onPoint.get(0),onPoint.get(1));
+			int temp =mergeSoldiers(onPoint.get(0),onPoint.get(1),r);
 			for(int i =0;i<2;i++){
 				if(onPoint.get(i)==null){
 					onPoint.remove(i);
@@ -277,44 +361,90 @@ public class CastlesMap {
 			}
 			return temp;
 		}
-		int num[]=new int[6];
-		int total[]=new int[6];
-		for(Soldier s: onPoint){
-			num[s.getLeader().getID()]++;
-			total[s.getLeader().getID()]+= s.getValue();
-		}
-		int max=0;
-		int maxid=-1;
-		for(int i=0;i<6;i++){
-			if(total[i]>max){
-				maxid=i;
-				max=total[i];
+		if(r instanceof RallyPoint){
+			int num[]=new int[6];
+			int total[]=new int[6];
+			for(Soldier s: onPoint){
+				num[s.getLeader().getID()]++;
+				total[s.getLeader().getID()]+= s.getValue();
 			}
-		}
-		if(maxid==-1){
-			return -2;
-		}
-		for(Soldier s: onPoint){
-			if(s.getLeader().getID()!=maxid){
-				onPoint.remove(s);
-				soldiers[s.getLeader().getID()].remove(s);
-				s=null;
+			int max=0;
+			int maxid=-1;
+			for(int i=0;i<6;i++){
+				if(total[i]>max){
+					maxid=i;
+					max=total[i];
+				}
 			}
-		}
-		max=0;
-		for(int i=0;i<6;i++){
-			if(i!=maxid){
-				max+=total[i];
+			if(maxid==-1){
+				return -2;
 			}
-		}
-		Soldier.quickSort(onPoint);
-		while(max>0){
-			max-=onPoint.get(0).getValue();
-			if(max>0){
-				Soldier temp=onPoint.remove(0);
-				soldiers[temp.getLeader().getID()].remove(temp);
+			for(Soldier s: onPoint){
+				if(s.getLeader().getID()!=maxid){
+					onPoint.remove(s);
+					soldiers[s.getLeader().getID()].remove(s);
+					s=null;
+				}
 			}
+			max=0;
+			for(int i=0;i<6;i++){
+				if(i!=maxid){
+					max+=total[i];
+				}
+			}
+			Soldier.quickSort(onPoint);
+			while(max>0){
+				max-=onPoint.get(0).getValue();
+				if(max>0){
+					Soldier temp=onPoint.remove(0);
+					soldiers[temp.getLeader().getID()].remove(temp);
+				}
+			}
+			return 5;
 		}
-		return 5;
+		else{
+			int def=((Building)r).getDefenseValue();
+			int teamID=((Building)r).getTeam().getID();
+			int num[]=new int[6];
+			int total[]=new int[6];
+			for(Soldier s: onPoint){
+				num[s.getLeader().getID()]++;
+				total[s.getLeader().getID()]+= s.getValue();
+			}
+			total[teamID]+=def;
+			int max=0;
+			int maxid=-1;
+			for(int i=0;i<6;i++){
+				if(total[i]>max){
+					maxid=i;
+					max=total[i];
+				}
+			}
+			if(maxid==-1){
+				return -2;
+			}
+			for(Soldier s: onPoint){
+				if(s.getLeader().getID()!=maxid){
+					onPoint.remove(s);
+					soldiers[s.getLeader().getID()].remove(s);
+					s=null;
+				}
+			}
+			max=0;
+			for(int i=0;i<6;i++){
+				if(i!=maxid){
+					max+=total[i];
+				}
+			}
+			Soldier.quickSort(onPoint);
+			while(max>0){
+				max-=onPoint.get(0).getValue();
+				if(max>0){
+					Soldier temp=onPoint.remove(0);
+					soldiers[temp.getLeader().getID()].remove(temp);
+				}
+			}
+			return 5;
+		}
 	}
 }
