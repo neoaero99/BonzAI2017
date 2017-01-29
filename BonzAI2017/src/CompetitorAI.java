@@ -18,7 +18,6 @@ import Castles.util.graph.Vertex;
 //game can tell your AI apart from the rest
 @Agent(name = "MeanAI")
 public class CompetitorAI extends AI {
-	private final boolean test = true;
 	public CompetitorAI(){}
 	/**
 	 * @param Turn the current state of the map that your AI will act upon
@@ -31,11 +30,10 @@ public class CompetitorAI extends AI {
 	 * 		   with the inputed game state
 	 */
 	public Action action(Turn turn) {
-		if(test) return new ShoutAction("I Shall Shout Now");
 		MoveAction move = new MoveAction();
 		//put your AI's stuff here
 		
-		return move;
+		return  new ShoutAction("I am shouting!");
 	}
 	
 }
