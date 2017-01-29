@@ -256,7 +256,8 @@ public class CastlesMapGraph {
 				 * the path and put the list into the map */
 				ArrayList<String> pathIDs = new ArrayList<String>();
 				
-				for (Node n : path) {
+				for (int nIdx = 0; nIdx < pathIDs.size(); ++nIdx) {
+					Node n = path.get(nIdx);
 					
 					if (n instanceof Vertex) {
 						pathIDs.add(((Vertex)n).ID);
@@ -264,10 +265,22 @@ public class CastlesMapGraph {
 					} else if (n instanceof SegEdge) {
 						SegEdge e = (SegEdge)n;
 						String[] wpIDs = e.wayPointIDs();
-						
-						for (String id : wpIDs) {
-							pathIDs.add(id);
+						/* Depending on whether the prior vertex is the first
+						 * or second reference of this edge, the way points
+						 * need to be added in forward or reverse order
+						 * respectively */
+						if (nIdx > 0 && path.get(nIdx - 1) == e.first) {
+							for (int idx = 0; idx < wpIDs.length; ++idx) {
+								pathIDs.add(wpIDs[idx]);
+							}
+							
+						} else {
+							for (int idx = wpIDs.length - 1; idx >= 0; --idx) {
+								pathIDs.add(wpIDs[idx]);
+							}
 						}
+						
+
 					}
 					
 				}

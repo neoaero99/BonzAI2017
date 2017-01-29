@@ -10,6 +10,7 @@ import Castles.Objects.RallyPoint;
 import Castles.Objects.Soldier;
 import Castles.Objects.SoldierState;
 import Castles.util.graph.IDPair;
+import Castles.util.graph.Node;
 import Castles.util.graph.SegEdge;
 import Castles.util.graph.Vertex;
 import Castles.util.graph.CastlesMapGraph;
@@ -92,6 +93,65 @@ public class CastlesMap {
 	}
 	
 	/**
+	 * TODO
+	 * 
+	 * @param rID1
+	 * @param rID2
+	 * @return
+	 */
+	public boolean areAdjacent(String rID1, String rID2) {
+		Node n1 = graph.getVertex(rID1);
+		Node n2 = graph.getVertex(rID2);
+		
+		if (n1 == null) {
+			n1 = graph.getEdge(rID1);
+		}
+		
+		if (n2 == null) {
+			n2 = graph.getEdge(rID2);
+		}
+		
+		if (n1 == null || n2 == null) {
+			return false;
+		}
+		
+		if (n1 instanceof Vertex && n2 instanceof Vertex) {
+			return ((Vertex)n1).isAdjacent((Vertex)n2);
+			
+		} else if (n1 instanceof SegEdge && n2 instanceof SegEdge) {
+			SegEdge e1 = (SegEdge)n1;
+			SegEdge e2 = (SegEdge)n2;
+			
+			if (e1 == e2) {	// Are the way points on the same edge?
+				// Are the indices of the way points 1 apart?
+				return Math.abs(e1.indexOf(rID1) - e2.indexOf(rID2)) == 1;
+			}
+			
+		} else if (n1 instanceof Vertex && n2 instanceof SegEdge) {
+			return testEdgeVertexConnection((SegEdge)n2, rID2, (Vertex)n1);
+			
+		} else if (n1 instanceof SegEdge && n2 instanceof Vertex) {
+			return testEdgeVertexConnection((SegEdge)n1, rID1, (Vertex)n2);
+		}
+		
+		return false;
+	}
+	
+	/**
+	 * TODO
+	 * 
+	 * @param e
+	 * @param wayPointID
+	 * @param v
+	 * @return
+	 */
+	private boolean testEdgeVertexConnection(SegEdge e, String wayPointID, Vertex v) {
+		int idx = e.indexOf(wayPointID);
+		return (e.isConnected(v)) && ( (idx == 0 && e.first == v)
+									|| (idx == (e.getWeight() - 1) && e.second == v) );
+	}
+	
+	/**
 	 * Returns a graph element based on a unique ID.
 	 * 
 	 * @param ID	The ID of the element to get
@@ -148,6 +208,7 @@ public class CastlesMap {
 	public CastlesMapGraph getGraph() {
 		return graph;
 	}
+	
 	/**
 	 * 
 	 * @return the players
@@ -199,6 +260,7 @@ public class CastlesMap {
 		}
 		return null;
 	}
+	
 	/**
 	 * Handles merging of Soldiers, as well as battling for 2 entities, called by the other mergeSoldiers
 	 * @param s1 Soldier 1, any team

@@ -224,7 +224,7 @@ public class Turn {
 	 */
 	public boolean isValid(Action action) {
 		//TODO 2017: This is important for us and competitors.
-		if (action instanceof ShoutAction) {
+		if (action instanceof ShoutAction || action instanceof MoveAction) {
 			return true;
 		}
 

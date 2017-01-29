@@ -72,6 +72,22 @@ public class SegEdge extends Node {
 		return node != null && (node == first || node == second);
 	}
 	
+	/**
+	 * TODO
+	 * 
+	 * @param rID
+	 * @return
+	 */
+	public int indexOf(String rID) {
+		for (int idx = 0; idx < waypointIDs.length; ++idx) {
+			if (rID.equals(waypointIDs[idx])) {
+				return idx;
+			}
+		}
+		
+		return -1;
+	}
+	
 	protected String[] wayPointIDs() {
 		return waypointIDs.clone();
 	}
