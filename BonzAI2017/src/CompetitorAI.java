@@ -30,7 +30,6 @@ public class CompetitorAI extends AI {
 	 * 		   with the inputed game state
 	 */
 	public Action action(Turn turn) {
-		MoveAction move = new MoveAction();
 		//put your AI's stuff here
 		
 		return  new ShoutAction("I am shouting!");
