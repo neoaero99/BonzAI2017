@@ -447,4 +447,24 @@ public class CastlesMap {
 			return 5;
 		}
 	}
+	public ArrayList<Soldier> getSoldiersAt(RallyPoint r){
+		ArrayList<Soldier> temp = new ArrayList<Soldier>();
+		RallyPoint newR = graphElements.get(r.ID);
+		for(Soldier s: newR.onPoint){
+			temp.add(s);
+		}
+		return temp;
+	}
+	public ArrayList<Soldier> getSoldiers(Team A){
+		ArrayList<Soldier> temp = new ArrayList<Soldier>();
+		for(Soldier s: soldiers[A.getID()]){
+			temp.add(s);
+		}
+		return temp;
+	}
+	public ArrayList<String> getPath(String From,String To){
+		Vertex f=graph.getVertex(From);
+		Vertex t=graph.getVertex(To);
+		return CastlesMapGraph.getPath(pathIDsMap, f, t);
+	}
 }
