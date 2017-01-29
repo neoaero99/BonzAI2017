@@ -18,19 +18,23 @@ import Castles.util.linkedlist.DualLinkList;
  */
 @Agent(name = "DaneAI")
 public class DaneAI extends AI {
+	
 	private final String[] taunts = {"Your Mother Was a Hampster", "Your Father smelt of Elderberries"};
 	private final boolean taunt = true;
 	private int turnNumber = 0;
 	private Turn turn;
 	private CastlesMap map;
 	private ArrayList<RallyPoint> cStructs,uStructs,eStructs;
+	/**
 	private ArrayList<Troops> troops;
 	private ArrayList<Path> currentMovements;
+	/**/
 	public DaneAI(){
-		
+	
 	}
 	
 	public Action action(Turn turn) {
+		/**
 		this.turn = turn;
 		++turnNumber;
 		if(taunt || turnNumber == 1){
@@ -96,8 +100,11 @@ public class DaneAI extends AI {
 		 *  Put the inital Values in CastlesMap as static finals			   *
 		 *  Put the per turn values in the Castles map as static finals        *
 		 ***********************************************************************/
+		return new ShoutAction("");
+		/**/
 	}
 	
+	/**
 	private PriorityQueue<Path> getPossibleMoves(){
 		PriorityQueue<Path> pm = new PriorityQueue<>();
 		//YAY!!!! ORDER N^2 ALGORITHM
@@ -181,4 +188,5 @@ public class DaneAI extends AI {
 		}
 	}
 	
+	/**/
 }
