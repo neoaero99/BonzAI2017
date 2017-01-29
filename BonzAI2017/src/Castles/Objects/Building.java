@@ -20,11 +20,11 @@ public class Building extends RallyPoint {
 		myTeam= null;
 		}                    // Determine which team is which
 	
-	public Building(int x, int y, int newDefenseValue, int newCaptureValue, String newID, Team newTeam){
+	public Building(int x, int y, int newDefenseValue, int newCaptureValue, String newID, Team newTeam, int rate){
 		super(x,y,newID);
 		defenseValue = newDefenseValue;
 		captureValue = newCaptureValue;
-		soldierCreationRate = 0;
+		soldierCreationRate = rate;
 		myTeam=newTeam;
 	}
 	
@@ -67,7 +67,7 @@ public class Building extends RallyPoint {
 	}
 	
 	public RallyPoint copy(){
-		return new Building(super.getPosition().getX(),super.getPosition().getY(),defenseValue,captureValue,ID,myTeam);
+		return new Building(super.getPosition().getX(),super.getPosition().getY(),defenseValue,captureValue,ID,myTeam,soldierCreationRate);
 	}
 	public Team getTeam(){
 		return myTeam;
@@ -76,5 +76,8 @@ public class Building extends RallyPoint {
 	public void setTeam(Team leader) {
 		myTeam=leader;
 		
+	}
+	public int getRate(){
+		return soldierCreationRate;
 	}
 }
