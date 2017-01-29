@@ -70,6 +70,7 @@ public class CastlesMap {
 	 * @param previousTurn - the map of the previous turn to clone
 	 * @return 
 	 */
+	@SuppressWarnings("unchecked")
 	public CastlesMap(CastlesMap previousTurn) {
 		
 		height = previousTurn.getHeight();
@@ -77,6 +78,14 @@ public class CastlesMap {
 		
 		//set fields
 		fields = previousTurn.getFields();
+		
+		//copy the list of teams
+		players = previousTurn.getPlayers();
+		teams = (ArrayList<Team>) previousTurn.getTeams();
+		soldiers = (ArrayList<Soldier>[])new ArrayList[6];
+		for(int i=0;i<6;i++){
+			soldiers[i]=new ArrayList<Soldier>();
+		}
 		
 		// Copy the rally points, buildings, etc.
 		graphElements = new HashMap<String, RallyPoint>();
@@ -98,12 +107,6 @@ public class CastlesMap {
 				}
 			}
 		}
-		
-		//copy the list of teams
-		players = previousTurn.getPlayers();
-		teams = (ArrayList<Team>) previousTurn.getTeams();
-		
-		soldiers = previousTurn.getSoldiers();
 	}
 	
 	/**

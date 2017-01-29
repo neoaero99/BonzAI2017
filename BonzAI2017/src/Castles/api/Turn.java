@@ -8,12 +8,7 @@ import java.util.List;
 
 
 import Castles.Objects.*;
-import Castles.util.graph.Vertex;
-import Castles.util.linkedlist.DualLinkList;
 import bonzai.Action;
-import bonzai.Identifiable;
-import bonzai.Position;
-import bonzai.Positionable;
 import bonzai.Team;
 import bonzai.ShoutAction;
 
@@ -28,7 +23,8 @@ public class Turn {
 	final ArrayList<Boolean> success;
 	final int turnNumber;
 
-	final ArrayList<ShoutAction> shoutActions;
+	private final ArrayList<ShoutAction> shoutActions;
+	private final ArrayList<MoveAction> moveActions;
 	
 	// How long the Repeaters can go before being rotated again
 	private final int cooldownAmount = 3;
@@ -62,17 +58,13 @@ public class Turn {
 
 		//Clone the old map (so we can retain history)
 		this.map = new CastlesMap(map);
-		this.shoutActions = new ArrayList<>();
+		this.shoutActions = new ArrayList<ShoutAction>();
+		moveActions = new ArrayList<MoveAction>();
 
-		teams = new ArrayList<>();
-		success = new ArrayList<>();
-		/*for (Emitter e : this.map.getEmitters()) {
-			teams.add(e.getTeam());
-			success.add(true);
-		}*/
+		teams = new ArrayList<Team>();
+		success = new ArrayList<Boolean>();
 
 		//util = new TurnUtil(this);
-
 	}
 
 	/**
@@ -183,6 +175,15 @@ public class Turn {
 	}
 	
 	/**
+	 * Returns a list of move actions performed on this turn.
+	 * 
+	 * @return	a Collection of move actions performed on this turn
+	 */
+	public Collection<MoveAction> getMoveActions() {
+		return moveActions;
+	}
+	
+	/**
 	 * Returns your AI's Team object
 	 * 
 	 * @return - your AI's Team object
@@ -278,13 +279,14 @@ public class Turn {
 			if (isValid(action)) {
 				if (action instanceof ShoutAction) {
 					shoutActions.add((ShoutAction)action);
-				} else {
-					shoutActions.add(null);
+					
+				} else if (action instanceof MoveAction) {
+					moveActions.add((MoveAction)action);
+					
 				}
 				
 			} else {
-				//TODO Write code for an invalid action
-				shoutActions.add(null);
+				// TODO Write code for an invalid action
 			}
 
 			currentTeam++;
@@ -326,13 +328,6 @@ public class Turn {
 		
 		for (Team team : this.getAllTeams()) {
 			currentTeam = team.getID();
-			int multiplier = 1;
-
-			//Only score if something was moved
-			boolean validPoints = false;
-
-			//To prevent infinite loops if a circular path is found
-			LinkedList<Positionable> visited = new LinkedList<>();
 			
 			ArrayList<Soldier>[] soldiers =map.getSoldiers();
 			for(int i=0;i<6;i++){
@@ -343,7 +338,7 @@ public class Turn {
 			ArrayList<RallyPoint> rally= map.getAllElements();
 				for(RallyPoint r: rally){
 						map.mergeSoldiers(r.onPoint,r);
-						if(r instanceof Building){
+						if (r instanceof Building && ((Building)r).onPoint.size() > 0) {
 				 				Soldier sol= r.onPoint.get(0);
 				 				if(!sol.getLeader().equals(((Building) r).getTeam())){
 				 					((Building)r).setTeam(sol.getLeader());
@@ -408,11 +403,6 @@ public class Turn {
 		this.currentTeam = oldID;
 
 		return newTurn;
-	}
-
-	private Object getUtil() {
-		// TODO Auto-generated method stub
-		return null;
 	}
 
 	/**

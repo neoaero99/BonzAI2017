@@ -99,7 +99,7 @@ public class Soldier extends JComponent {
 	}
 	
 	public void gotoNext(CastlesMap map) {
-		if(given_path.size()==1){
+		if(given_path == null || given_path.size()==1){
 			return;
 		}
 		CastlesMapGraph graph =map.getGraph();
@@ -110,7 +110,7 @@ public class Soldier extends JComponent {
 		if(n==null){
 			n=graph.getVertex(ID);
 		}
-		if(map.areAdjacent(temp, ID)){
+		if(graph.areAdjacent(temp, ID)){
 			return;
 		}
 		given_path.remove(0);

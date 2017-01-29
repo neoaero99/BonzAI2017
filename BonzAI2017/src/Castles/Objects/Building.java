@@ -1,6 +1,6 @@
 package Castles.Objects;
 
-import bonzai.*;
+import bonzai.Team;
 
 public class Building extends RallyPoint {
 	
@@ -18,7 +18,7 @@ public class Building extends RallyPoint {
 		captureValue = newCaptureValue;
 		soldierCreationRate = 0;
 		myTeam= null;
-		}                    // Determine which team is which
+	}                    // Determine which team is which
 	
 	public Building(int x, int y, int newDefenseValue, int newCaptureValue, String newID, Team newTeam, int rate){
 		super(x,y,newID);

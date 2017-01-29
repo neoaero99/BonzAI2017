@@ -1,7 +1,9 @@
 package Castles.Objects;
+
 import java.util.ArrayList;
 
-import bonzai.*;
+import bonzai.Position;
+
 /**
  * 
  * Rally Point is a node that soldiers can traverse
@@ -21,6 +23,7 @@ public class RallyPoint implements Comparable<RallyPoint> {
 	public RallyPoint(int x, int y, String ID) {
 		this.ID = ID;
 		pos = new Position(x, y);
+		onPoint = new ArrayList<Soldier>();
 	}
 	
 	/**
