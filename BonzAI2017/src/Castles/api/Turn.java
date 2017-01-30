@@ -1,14 +1,16 @@
 package Castles.api;
 
+import java.awt.Graphics2D;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 
-
+import Castles.CastlesRenderer;
 import Castles.Objects.*;
 import bonzai.Action;
+import bonzai.Position;
 import bonzai.Team;
 import bonzai.ShoutAction;
 
@@ -25,6 +27,7 @@ public class Turn {
 
 	private final ArrayList<ShoutAction> shoutActions;
 	private final ArrayList<MoveAction> moveActions;
+	private final ArrayList<UpdateAction> updateActions;
 	
 	// How long the Repeaters can go before being rotated again
 	private final int cooldownAmount = 3;
@@ -58,13 +61,14 @@ public class Turn {
 
 		//Clone the old map (so we can retain history)
 		this.map = new CastlesMap(map);
-		this.shoutActions = new ArrayList<ShoutAction>();
+		shoutActions = new ArrayList<ShoutAction>();
 		moveActions = new ArrayList<MoveAction>();
+		updateActions = new ArrayList<UpdateAction>();
 
 		teams = new ArrayList<Team>();
 		success = new ArrayList<Boolean>();
-
-		//util = new TurnUtil(this);
+		
+		// TODO add hashmaps
 	}
 
 	/**
@@ -97,14 +101,19 @@ public class Turn {
 			success.set(t.getID(), false);
 		}
 	}
-
+	
 	/**
-	 * Returns the map object for the current turn
 	 * 
-	 * @return - the map object
+	 * 
+	 * @param g
 	 */
-	public CastlesMap getMap() {
-		return map;
+	public void renderMap(Graphics2D g) {
+		if (g != null) {
+			CastlesRenderer.renderBackground(g, map);
+			CastlesRenderer.renderPaths(g, map);
+			CastlesRenderer.renderBuildings(g, map);
+			CastlesRenderer.renderSoldiers(g, map);
+		}
 	}
 
 	/**
@@ -184,6 +193,13 @@ public class Turn {
 	}
 	
 	/**
+	 * @return	The list of update actions performed this turn
+	 */
+	public Collection<UpdateAction> getUpdateActions() {
+		return updateActions;
+	}
+	
+	/**
 	 * Returns your AI's Team object
 	 * 
 	 * @return - your AI's Team object
@@ -196,11 +212,9 @@ public class Turn {
 		}
 		return null;
 	}
-
-	//TODO
+	
 	/**
-	 * find a the teams list
-	 * @return
+	 * @return	The list of all teams
 	 */
 	public List<Team> getAllTeams() {
 		return map.getTeams();
@@ -224,6 +238,8 @@ public class Turn {
 	 */
 	public boolean isValid(Action action) {
 		//TODO 2017: This is important for us and competitors.
+		
+		// TODO update and move actions
 		if (action instanceof ShoutAction || action instanceof MoveAction) {
 			return true;
 		}
@@ -403,14 +419,30 @@ public class Turn {
 
 		return newTurn;
 	}
-
+	
 	/**
-	 * Returns all rally points, buildings (i.e. castles, villages) in
-	 * the map.
+	 * Who really knows ...
 	 * 
-	 * @return	A list of all rally points, buildings in the map
+	 * @param i
+	 * @return
 	 */
-	public ArrayList<RallyPoint> getAllElements() {
-		return map.getAllElements();
+	public Position getEntity(int i) {
+		return map.getEntity(i);
 	}
+	
+	/**
+	 * @return	The width of the map
+	 */
+	public int getMapWidth() {
+		return map.getWidth();
+	}
+	
+	/**
+	 * @return	The height of the map
+	 */
+	public int getMapHeight() {
+		return map.getHeight();
+	}
+	
+	
 }

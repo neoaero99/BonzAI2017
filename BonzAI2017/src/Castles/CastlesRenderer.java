@@ -167,8 +167,8 @@ public class CastlesRenderer extends bonzai.Renderer {
 		//Before we do anything, move everything so it is centered
 		AffineTransform oldTransform = g.getTransform();
 
-		float halfWidth = (turn.getMap().getWidth()+2) / 2f;
-		float height = (turn.getMap().getHeight()+2);
+		float halfWidth = (turn.getMapWidth()+2) / 2f;
+		float height = (turn.getMapHeight()+2);
 		float halfHeight = height / 2f;
 		g.scale(1/height, 1/height);
 
@@ -214,17 +214,13 @@ public class CastlesRenderer extends bonzai.Renderer {
 
 		//TODO 2017: This is where you call your custom render methods. Our versions
 		//of these methods have been left for you at the bottom of this file.
-		if(turn.getMap().getGraph().vertexList().size() == 0) throw new NullPointerException("Graph empty");
-		renderBackground(g,turn.getMap());
-		renderPaths(g, turn.getMap());
-		renderBuildings(g,turn.getMap());
-		renderSoldiers(g,turn.getMap());
+		turn.renderMap(g);
 		renderShoutActions(g, turn, nextTurn, smoothTween);
 		g.setTransform(oldTransform);
 		//renderAction();(g, turn, turn.actor(), nextTurn.current(turn.actor()), action, tweenPercent);
 	}
 
-	private static void renderPaths(Graphics2D g, CastlesMap map) {
+	public static void renderPaths(Graphics2D g, CastlesMap map) {
 		ArrayList<SegEdge> paths = map.getGraph().edgeList();
 		//iterate over all the paths
 		for(SegEdge p: paths){
@@ -266,13 +262,13 @@ public class CastlesRenderer extends bonzai.Renderer {
 		
 	}
 
-	private static void renderSoldiers(Graphics2D g, CastlesMap map) {
+	public static void renderSoldiers(Graphics2D g, CastlesMap map) {
 		//get soldiers
 		
 		
 	}
 
-	private static void renderBuildings(Graphics2D g, CastlesMap map) {
+	public static void renderBuildings(Graphics2D g, CastlesMap map) {
 		ArrayList<RallyPoint> nodes = map.getAllElements();
 		
 		for(RallyPoint r : nodes){
@@ -304,7 +300,7 @@ public class CastlesRenderer extends bonzai.Renderer {
 		for (ShoutAction s : turn.getShoutActions()) {
 			
 			if (s != null) {
-				Position pos = turn.getMap().getEntity(i);
+				Position pos = turn.getEntity(i);
 				String message = s.getMessage();
 	
 				g.setFont(new Font("Arial", Font.PLAIN, fontSize));
@@ -347,7 +343,7 @@ public class CastlesRenderer extends bonzai.Renderer {
 	 * 
 	 * @param g - the graphics object to draw onto
 	 */
-	private static void renderBackground(Graphics2D g, CastlesMap map) {
+	public static void renderBackground(Graphics2D g, CastlesMap map) {
 		setBackground(map.getField("theme"));
 		AffineTransform original = g.getTransform();
 
