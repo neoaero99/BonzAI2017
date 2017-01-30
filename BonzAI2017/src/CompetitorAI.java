@@ -32,7 +32,7 @@ public class CompetitorAI extends AI {
 	public Action action(Turn turn) {
 		//put your AI's stuff here
 		
-		return  new ShoutAction("I am shouting!");
+		return  new MoveAction();
 	}
 	
 }

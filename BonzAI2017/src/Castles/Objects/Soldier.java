@@ -118,7 +118,7 @@ public class Soldier extends JComponent {
 		pos2=r;
 		if(pos2 instanceof Building){
 			if(((Building)pos2).getColor()==null){
-				if(((Building)pos2).getDefenseValue()<value){
+				if(((Building)pos2).defenseValue<value){
 					((Building)pos2).setTeam(leader);
 				}
 			}
@@ -156,7 +156,7 @@ public class Soldier extends JComponent {
 	}
 
 	public void setValue(int value) {
-		this.value = value;
+		this.value = Math.max(0, this.value + value);
 	}
 
 	public SoldierState getState() {

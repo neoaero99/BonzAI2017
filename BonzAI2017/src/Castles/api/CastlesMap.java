@@ -94,13 +94,19 @@ public class CastlesMap {
 		for (RallyPoint r : rallyPoints) {
 			RallyPoint temp=r.copy();
 			graphElements.put(r.ID, temp);
+			
 			if(temp instanceof Building){
-				if(((Building)temp).getColor()!=null){
-					int rate = ((Building)temp).getRate();
-					Node n=graph.getVertex(temp.ID);
-					if(n==null){
+				
+				if ( ((Building)temp).getColor()!=null) {
+					
+					int rate = ((Building)temp).soldierCreationRate;
+					
+					Node n = graph.getVertex(temp.ID);
+					
+					if(n == null){
 						n=graph.getVertex(temp.ID);
 					}
+					
 					Soldier s = new Soldier(((Building)temp).getTeam(), rate,n);
 					addSoldiers(s);
 					temp.onPoint.add(s);
@@ -290,7 +296,7 @@ public class CastlesMap {
 				}
 			}
 			else{
-				int def=((Building)r).getDefenseValue();
+				int def=((Building)r).defenseValue;
 				Team team=((Building)r).getTeam();
 				if(team==s1.getLeader()){
 					int amount= (s1.getValue()+def)-s2.getValue();
@@ -408,7 +414,7 @@ public class CastlesMap {
 			return 5;
 		}
 		else{
-			int def=((Building)r).getDefenseValue();
+			int def=((Building)r).defenseValue;
 			int teamID=((Building)r).getTeam().getID();
 			int num[]=new int[6];
 			int total[]=new int[6];
