@@ -42,24 +42,32 @@ public class RallyPoint implements Comparable<RallyPoint> {
 		this.pos = pos;
 	}
 	
-	public void setSoldier(Soldier s) {
-		if (onPoint.size() == 0) {
-			onPoint.add(s);
-			
-		} else {
-			onPoint.set(0, s);
-		}	
+	public void occupy(Soldier s) {
+		// Do not add null values!
+		if (s != null) {
+			if (onPoint.size() == 0) {
+				onPoint.add(s);
+				
+			} else {
+				onPoint.set(0, s);
+			}	
+		}
 	}
 	
 	public void reinforce(int reinforcement) {
 		
-		if (s != null && onPoint.size() == 1) {
+		if (onPoint.size() == 1) { // Is this space occupied?
 			Soldier occupant = onPoint.get(0);
 			
-			if (occupant != null && occupant.getLeader() == s.getLeader()) {
-				occupant.setValue(occupant.getValue() + s.getValue());
+			if (reinforcement > 0) {
+				// Only add positive reinforcement values
+				occupant.setValue(occupant.getValue() + reinforcement);
 			}
 		}
+	}
+	
+	public Soldier getOccupant() {
+		return onPoint.size() != 1 ? null : onPoint.get(0);
 	}
 	
 	public int getSoldierCount() {
@@ -73,8 +81,14 @@ public class RallyPoint implements Comparable<RallyPoint> {
 	
 	public RallyPoint copy() {
 		RallyPoint copy = new RallyPoint(pos.getX(), pos.getY(), ID);
-		copy.setSoldier(getSoldier());
-		return new RallyPoint(pos.getX(),pos.getY(),ID);
+		// Copy the soldier, who is occupying the space
+		Soldier occupant = getOccupant();
+		
+		if (occupant != null) {
+			copy.occupy(occupant.copy());
+		}
+		
+		return copy;
 	}
 	
 	@Override

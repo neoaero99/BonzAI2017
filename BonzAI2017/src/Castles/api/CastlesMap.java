@@ -1,10 +1,12 @@
 package Castles.api;
 
+import java.awt.Graphics;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 
+import Castles.CastlesRenderer;
 import Castles.Objects.Building;
 import Castles.Objects.RallyPoint;
 import Castles.Objects.Soldier;
@@ -21,13 +23,14 @@ public class CastlesMap {
 	
 	// TODO 2017: Read in map files here. 
 
-	private int width, height;
+	private static int width, height;
 	
-	private HashMap<String, String> fields;
+	private static HashMap<String, String> fields;
 	
-	private HashMap<String, RallyPoint> graphElements;
 	private static CastlesMapGraph graph;
 	private static HashMap<IDPair, ArrayList<String>> pathIDsMap;
+	private final HashMap<String, RallyPoint> graphElements;
+
 	
 	private boolean[] players;
 	
@@ -62,26 +65,17 @@ public class CastlesMap {
 	}
 
 	/**
-	 * Copy constructor
-	 * 
-	 * I WANT A WAY AROUND THIS
-	 * Moves on to the next turn
+	 * Copy constructor for a CastlesMap
 	 * 
 	 * @param previousTurn - the map of the previous turn to clone
-	 * @return 
 	 */
 	@SuppressWarnings("unchecked")
 	public CastlesMap(CastlesMap previousTurn) {
 		
-		height = previousTurn.getHeight();
-		width = previousTurn.getWidth();
-		
-		//set fields
-		fields = previousTurn.getFields();
-		
 		//copy the list of teams
-		players = previousTurn.getPlayers();
-		teams = (ArrayList<Team>) previousTurn.getTeams();
+		players = previousTurn.players;
+		teams = previousTurn.teams;
+		
 		soldiers = (ArrayList<Soldier>[])new ArrayList[6];
 		for(int i=0;i<6;i++){
 			soldiers[i]=new ArrayList<Soldier>();
@@ -92,25 +86,19 @@ public class CastlesMap {
 		Collection<RallyPoint> rallyPoints = previousTurn.graphElements.values();
 		
 		for (RallyPoint r : rallyPoints) {
-			RallyPoint temp=r.copy();
-			graphElements.put(r.ID, temp);
+			RallyPoint rCopy = r.copy();
+			graphElements.put(r.ID, rCopy);
+			Soldier occupant = rCopy.getOccupant();
 			
-			if(temp instanceof Building){
-				
-				if ( ((Building)temp).getColor()!=null) {
-					
-					int rate = ((Building)temp).soldierCreationRate;
-					
-					Node n = graph.getVertex(temp.ID);
-					
-					if(n == null){
-						n=graph.getVertex(temp.ID);
-					}
-					
-					Soldier s = new Soldier(((Building)temp).getTeam(), rate,n);
-					addSoldiers(s);
-					temp.onPoint.add(s);
-				}
+			if (occupant != null) {
+				addSoldiers(occupant);
+			}
+			
+			// TODO resolve capturing
+			
+			if (rCopy instanceof Building && ((Building)rCopy).getColor() != null) {
+				// Add reinforcements for 
+				rCopy.reinforce( ((Building)rCopy).soldierCreationRate );
 			}
 		}
 	}
@@ -136,7 +124,7 @@ public class CastlesMap {
 		for(RallyPoint r : elementList) {
 			if(r instanceof Building ){
 				if(((Building)r).getColor()==c){
-					return r.getPosition();
+					return r.getPosition().clone();
 				}
 			}
 		}
@@ -157,7 +145,7 @@ public class CastlesMap {
 		return fields.get(input);
 	}
 	
-	public void removePlayer(int i) {
+	protected void removePlayer(int i) {
 		players[i]=false;
 	}
 
@@ -173,20 +161,12 @@ public class CastlesMap {
 		return graph;
 	}
 	
-	/**
-	 * 
-	 * @return the players
-	 */
-	public boolean[] getPlayers(){
-		return players;
-	}
-	
-	public List<Team> getTeams(){
-		return teams;
-	}
-	
 	protected HashMap<String, String> getFields(){
 		return fields;
+	}
+	
+	public List<Team> getTeams() {
+		return teams;
 	}
 	
 	public ArrayList<RallyPoint> getAllElements() {
@@ -471,6 +451,7 @@ public class CastlesMap {
 		}
 		return temp;
 	}
+	
 	/**
 	 * 
 	 * @param A: a Team
@@ -483,13 +464,14 @@ public class CastlesMap {
 		}
 		return temp;
 	}
+	
 	/**
 	 * 
 	 * @param From: The ID of where the soldiers is coming from
 	 * @param To:	the ID of where the soldiers is going to
 	 * @return	the path of RallyPoint IDs
 	 */
-	public ArrayList<String> getPath(String From,String To){
+	public ArrayList<String> getPath(String From, String To){
 		Vertex f=graph.getVertex(From);
 		Vertex t=graph.getVertex(To);
 		return CastlesMapGraph.getPath(pathIDsMap, f, t);

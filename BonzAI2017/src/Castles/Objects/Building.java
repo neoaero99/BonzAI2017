@@ -17,16 +17,21 @@ public class Building extends RallyPoint {
 		soldierCreationRate = soldSpawnRate;
 	}
 	
-	/**************************
-	 *     Soldier Stuff      *
-	 **************************/
-	
 	public Castles.api.Color getColor() {
 		return myTeam == null ? null : myTeam.getColor();
 	}
 	
-	public RallyPoint copy(){
-		return new Building(getPosition().getX(), getPosition().getY(), ID, myTeam, defenseValue, soldierCreationRate);
+	@Override
+	public RallyPoint copy() {
+		Building copy = new Building(getPosition().getX(), getPosition().getY(), ID, myTeam, defenseValue, soldierCreationRate);
+		// Copy the soldier, who is occupying the space
+		Soldier occupant = getOccupant();
+		
+		if (occupant != null) {
+			copy.occupy(occupant.copy());
+		}
+		
+		return copy;
 	}
 	
 	public Team getTeam(){

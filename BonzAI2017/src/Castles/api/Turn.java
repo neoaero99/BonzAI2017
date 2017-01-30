@@ -203,7 +203,6 @@ public class Turn {
 	 * @return
 	 */
 	public List<Team> getAllTeams() {
-		
 		return map.getTeams();
 	}
 
