@@ -102,15 +102,14 @@ public class AIClient implements Runnable {
 				case "TERMINATE":
 					AIClient.out.println("ACK");
 					AIClient.out.flush();
+					scanner.close();
 					return;
 					
 				default:
-					err.println("Unexpected Message Recieved");
+					//err.println("Unexpected Message Recieved");
 					break;
 			}
-			scanner.close();
 		}
-		
 	}
 	
 	/**

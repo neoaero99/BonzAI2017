@@ -56,10 +56,10 @@ public class AIHost {
 	 * @param actions the list of actions that occured during the last turn
 	 */
 	public void apply(List<Action> actions) {
-		if(actions.size() == 0) return;
 		if (isAlive) {
 			//tells the AI how many actions to expect
 			out.printf("APPLY %d\n", actions.size());
+			
 			//sends each action individually
 			for (Action a : actions){
 				out.printf("%s\n", AIHost.toString(a));
