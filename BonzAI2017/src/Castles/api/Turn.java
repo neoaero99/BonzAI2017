@@ -34,9 +34,6 @@ public class Turn {
 	private final ArrayList<ShoutAction> shoutActions;
 	private final ArrayList<MoveAction> moveActions;
 	private final ArrayList<UpdateAction> updateActions;
-	
-	// How long the Repeaters can go before being rotated again
-	private final int cooldownAmount = 3;
 
 	private String errorMessage = "";
 
@@ -89,6 +86,7 @@ public class Turn {
 				soldierGroups.put(data.posID, data);
 			}
 			
+			teamSoldiers.put(t.getColor(), soldierGroups);
 			teamPositions.put(t.getColor(), new HashMap<String, PositionData>());
 		}
 		
@@ -145,6 +143,24 @@ public class Turn {
 		for (Team t : failedActions) {
 			success.set(t.getID(), false);
 		}
+	}
+	
+	/**
+	 * Testing the Turn class and AI API
+	 * 
+	 * @param args	Unused
+	 */
+	public static void main(String[] args) {
+		/**
+		 * TODO
+		 * 	Build a test map
+		 * 	Add graph elements
+		 * 	Add soldiers
+		 * 	Apply actions
+		 * 	Develop test print methods
+		 */
+		
+		
 	}
 	
 	/**
@@ -318,28 +334,25 @@ public class Turn {
 	 */
 	public Turn apply(List<Action> actions) {
 		
-		
 		//TODO 2017: This is where we applied each action from the playing ai's. This is an example of our process. 
 		// Most of the game logic goes here. 
 		
-		
 		int oldID = this.currentTeam;
 
-		//Clone the map. All actions are applied to this new clone.
+		/**
+		 * Clones soldiers and graph elements into the new map. Also, updates
+		 * reinforcements.
+		 */
 		CastlesMap map = new CastlesMap(this.map);
 
-		//This is used to store the RotateActions.
-		//Maps ID's of targeted Entities (Repeaters or Emitters)
-		//to the team ID that wants to perform them
-		HashMap<Integer, Team> rotationsToPerform = new HashMap<>();
-
 		// Store the teams whose action failed
-		LinkedList<Team> failedTeams = new LinkedList<>();
-		
+		LinkedList<Team> failedTeams = new LinkedList<Team>();
 
-		//Parse the list of all actions for validity and move collisions
-		//Reduce the list to only the moves that actually need to be performed
 		currentTeam = 0;
+		
+		/**
+		 * Resolve all actions
+		 */
 		for (Action action : actions) {
 			//TODO Actions are Handled here
 			if (isValid(action)) {
@@ -361,13 +374,12 @@ public class Turn {
 					
 				} else if (action instanceof UpdateAction) {
 					UpdateAction update = (UpdateAction)action;
-					
 					RallyPoint src = map.getElement(update.getSrcID());
-					// TODO update soldier state
+					Soldier target = src.getOccupant(update.getSoldierIdx());
+					
+					target.setState(update.getState());
 					
 					updateActions.add((UpdateAction)action);
-					
-					
 				}
 				
 			} else {
@@ -380,7 +392,9 @@ public class Turn {
 		//Generate the new Turn object. We apply any earned points onto this new Turn.
 		Turn newTurn = new Turn(this, oldID, map, failedTeams);
 		
-		
+		/**
+		 * All active soldiers move one space on this designated path.
+		 */
 		for (Team team : this.getAllTeams()) {
 			currentTeam = team.getID();
 			
@@ -390,22 +404,24 @@ public class Turn {
 					s.gotoNext(map);
 		 		}
 		 	}
+		}
+		
+		/**
+		 * Resolve any soldier conflicts and building occupations
+		 */
+		ArrayList<RallyPoint> rally = map.getAllElements();
+		for (RallyPoint r: rally) {
+			map.mergeSoldiers(r.onPoint,r);
 			
-			ArrayList<RallyPoint> rally= map.getAllElements();
-			for(RallyPoint r: rally){
-				map.mergeSoldiers(r.onPoint,r);
-				
-				if (r instanceof Building && ((Building)r).onPoint.size() > 0) {
-	 				Soldier sol= r.onPoint.get(0);
-	 				
-	 				if(!sol.getLeader().equals(((Building) r).getTeam())){
-	 					((Building)r).setTeam(sol.getLeader());
-	 				}
-				}
+			if (r instanceof Building && ((Building)r).onPoint.size() > 0) {
+ 				Soldier sol= r.onPoint.get(0);
+ 				
+ 				if(!sol.getLeader().equals(((Building) r).getTeam())){
+ 					((Building)r).setTeam(sol.getLeader());
+ 				}
 			}
 		}
 		
-		//TODO uncomment everything
 		this.currentTeam = oldID;
 
 		return newTurn;

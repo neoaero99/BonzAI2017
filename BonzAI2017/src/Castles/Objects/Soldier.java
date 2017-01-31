@@ -171,9 +171,14 @@ public class Soldier extends JComponent {
 	}
 	
 	public Soldier copy(){
-		Soldier temp = new Soldier(leader,value, posID);
-		temp.given_path = new ArrayList<String>(given_path);
+		Soldier temp = new Soldier(leader, value, posID);
+		
+		if (given_path != null) {
+			temp.given_path = new ArrayList<String>(given_path);
+		}
+		
 		temp.state = state;
+		
 		return temp;
 	}
 }

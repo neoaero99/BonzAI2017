@@ -149,6 +149,7 @@ public class AIClient implements Runnable {
 		catch(Exception e) {
 			// if anything happened in our initialization, that would be bad,
 			// so we should tell the host
+			e.printStackTrace();
 			AIClient.out.println("NAK");
 			AIClient.out.flush();
 			
