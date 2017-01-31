@@ -413,12 +413,29 @@ public class Turn {
 		for (RallyPoint r: rally) {
 			map.mergeSoldiers(r.onPoint,r);
 			
-			if (r instanceof Building && ((Building)r).onPoint.size() > 0) {
- 				Soldier sol= r.onPoint.get(0);
- 				
- 				if(!sol.getLeader().equals(((Building) r).getTeam())){
- 					((Building)r).setTeam(sol.getLeader());
- 				}
+			/* Determine if the remaining soldiers on a position can capture an
+			 * unclaimed or enemy position. */
+			if (r instanceof Building) {
+				Building b = (Building)r;
+				ArrayList<Soldier> occupants = r.getOccupants();
+				
+				if (occupants.size() > 0) {
+					Team leader = occupants.get(0).getLeader();
+					
+					if (b.getColor() == null || !b.getColor().equals(leader.getColor())) {
+						int occupantSize = 0;
+						
+						for (Soldier s : occupants) {
+							occupantSize += s.getValue();
+						}
+						/* The total number of soldiers must be greater than
+						 * the defense value of the position in order to
+						 * capture it */
+						if (occupantSize > b.defenseValue) {
+							b.setTeam(leader);
+						}
+					}
+				}
 			}
 		}
 		

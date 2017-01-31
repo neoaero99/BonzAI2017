@@ -98,22 +98,12 @@ public class Soldier extends JComponent {
 	}
 	
 	public void gotoNext(CastlesMap map) {
-		if(state != SoldierState.MOVING || given_path == null || given_path.size()==1){
+		if(state != SoldierState.MOVING || given_path == null || given_path.size() <= 1) {
 			return;
 		}
 		
-		String ID =given_path.get(1);
-		RallyPoint r=map.getElement(ID);
-		
 		given_path.remove(0);
-		RallyPoint pos2 = r;
-		if(pos2 instanceof Building){
-			if(((Building)pos2).getColor()==null){
-				if(((Building)pos2).defenseValue<value){
-					((Building)pos2).setTeam(leader);
-				}
-			}
-		}
+		posID = given_path.get(0);
 	}
 	
 	public static void quickSort(List<Soldier> s){
