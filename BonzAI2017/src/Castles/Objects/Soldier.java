@@ -98,7 +98,7 @@ public class Soldier extends JComponent {
 	}
 	
 	public void gotoNext(CastlesMap map) {
-		if(given_path == null || given_path.size()==1){
+		if(state != SoldierState.MOVING || given_path == null || given_path.size()==1){
 			return;
 		}
 		

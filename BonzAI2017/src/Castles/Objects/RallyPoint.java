@@ -3,6 +3,7 @@ package Castles.Objects;
 import java.util.ArrayList;
 
 import bonzai.Position;
+import bonzai.Team;
 
 /**
  * 
@@ -29,6 +30,25 @@ public class RallyPoint implements Comparable<RallyPoint> {
 	}
 	
 	/**
+	 * Copy constructor for a rally point.
+	 * 
+	 * @param x			x position
+	 * @param y			y position
+	 * @param ID		The unique identifier of the rally point
+	 * @param occupants	The list of soldiers at this position
+	 */
+	public RallyPoint(int x, int y, String ID, ArrayList<Soldier> occupants) {
+		this.ID = ID;
+		pos = new Position(x, y);
+		onPoint = new ArrayList<Soldier>();
+		
+		for (Soldier s : occupants) {
+			// Copy each soldier
+			onPoint.add(s.copy());
+		}
+	}
+	
+	/**
 	 * Returns the position
 	 */
 	public Position getPosition(){
@@ -42,36 +62,58 @@ public class RallyPoint implements Comparable<RallyPoint> {
 		this.pos = pos;
 	}
 	
-	public void occupy(Soldier s) {
+	public Soldier getOccupant(int idx) {
+		if (idx >= 0 && idx < onPoint.size()) {
+			return onPoint.get(idx);
+		}
+		
+		return null;
+	}
+	
+	public void addOccupant(Soldier s) {
 		// Do not add null values!
 		if (s != null) {
-			if (onPoint.size() == 0) {
-				onPoint.add(s);
-				
-			} else {
-				onPoint.set(0, s);
-			}	
+			onPoint.add(s);
 		}
 	}
 	
-	public void reinforce(int reinforcement) {
+	public void setOccupant(int idx, Soldier s) {
+		if (s != null && idx >= 0 && idx < onPoint.size()) {
+			onPoint.add(idx, s);
+		}
+	}
+	
+	public Soldier reinforce(Team leader, int reinforcement) {
 		
-		if (onPoint.size() == 1) { // Is this space occupied?
+		if (reinforcement <= 0) {
+			// Only add positive reinforcement values
+			return null;
+		}
+		
+		/* Add the reinforcements to an already existing soldier group or add a
+		 * new soldier group. */
+		if (onPoint.size() > 0) {
 			Soldier occupant = onPoint.get(0);
+			occupant.setValue(occupant.getValue() + reinforcement);
+			return null;
 			
-			if (reinforcement > 0) {
-				// Only add positive reinforcement values
-				occupant.setValue(occupant.getValue() + reinforcement);
-			}
+		} else {
+			Soldier newSoldier = new Soldier(leader, reinforcement, ID);
+			onPoint.add(newSoldier);
+			return newSoldier;
 		}
 	}
 	
-	public Soldier getOccupant() {
-		return onPoint.size() != 1 ? null : onPoint.get(0);
+	public Soldier removeOccupant(int idx) {
+		if (idx >= 0 && idx < onPoint.size()) {
+			return onPoint.remove(idx);
+		}
+		
+		return null;
 	}
 	
-	public int getSoldierCount() {
-		return onPoint.size() != 1 ? 0 : onPoint.get(0).getValue();
+	public ArrayList<Soldier> getOccupants() {
+		return onPoint;
 	}
 	
 	@Override
@@ -80,14 +122,7 @@ public class RallyPoint implements Comparable<RallyPoint> {
 	}
 	
 	public RallyPoint copy() {
-		RallyPoint copy = new RallyPoint(pos.getX(), pos.getY(), ID);
-		// Copy the soldier, who is occupying the space
-		Soldier occupant = getOccupant();
-		
-		if (occupant != null) {
-			copy.occupy(occupant.copy());
-		}
-		
+		RallyPoint copy = new RallyPoint(pos.getX(), pos.getY(), ID, onPoint);
 		return copy;
 	}
 	

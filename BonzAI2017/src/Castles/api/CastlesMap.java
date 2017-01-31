@@ -88,17 +88,22 @@ public class CastlesMap {
 		for (RallyPoint r : rallyPoints) {
 			RallyPoint rCopy = r.copy();
 			graphElements.put(r.ID, rCopy);
-			Soldier occupant = rCopy.getOccupant();
-			
-			if (occupant != null) {
-				addSoldiers(occupant);
-			}
 			
 			// TODO resolve capturing
 			
 			if (rCopy instanceof Building && ((Building)rCopy).getColor() != null) {
-				// Add reinforcements for 
-				rCopy.reinforce( ((Building)rCopy).soldierCreationRate );
+				Building b = (Building)rCopy;
+				
+				if (b.getColor() != null) {
+					// Add reinforcements 
+					rCopy.reinforce(b.getTeam(), b.soldierCreationRate);
+				}
+			}
+			
+			ArrayList<Soldier> occupants = rCopy.getOccupants();
+			// Add the soldiers to the maps list of soldier references
+			for (Soldier s : occupants) {
+				this.addSoldiers(s);
 			}
 		}
 	}

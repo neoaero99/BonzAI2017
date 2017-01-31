@@ -1,5 +1,7 @@
 package Castles.Objects;
 
+import java.util.ArrayList;
+
 import bonzai.Team;
 
 public class Building extends RallyPoint {
@@ -17,19 +19,22 @@ public class Building extends RallyPoint {
 		soldierCreationRate = soldSpawnRate;
 	}
 	
+	public Building(int x, int y, String id, ArrayList<Soldier> occupants, Team newTeam, int defValue, int soldSpawnRate) {
+		super(x, y, id, occupants);
+		
+		myTeam = newTeam;
+		defenseValue = defValue;
+		soldierCreationRate = soldSpawnRate;
+	}
+	
 	public Castles.api.Color getColor() {
 		return myTeam == null ? null : myTeam.getColor();
 	}
 	
 	@Override
 	public RallyPoint copy() {
-		Building copy = new Building(getPosition().getX(), getPosition().getY(), ID, myTeam, defenseValue, soldierCreationRate);
-		// Copy the soldier, who is occupying the space
-		Soldier occupant = getOccupant();
-		
-		if (occupant != null) {
-			copy.occupy(occupant.copy());
-		}
+		Building copy = new Building(getPosition().getX(), getPosition().getY(),
+				ID, getOccupants(), myTeam, defenseValue, soldierCreationRate);
 		
 		return copy;
 	}

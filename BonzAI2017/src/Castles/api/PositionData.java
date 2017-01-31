@@ -1,5 +1,7 @@
 package Castles.api;
 
+import java.util.ArrayList;
+
 import Castles.Objects.Building;
 import Castles.Objects.RallyPoint;
 import Castles.Objects.Soldier;
@@ -36,9 +38,9 @@ public class PositionData {
 	public final int defVal;
 	
 	/**
-	 * The number of soldiers currently on this position
+	 * The list of sizes of soldier groups at this position
 	 */
-	public final int occupantSize;
+	public final int[] occupantSizes;
 	
 	/**
 	 * Fill the data of the Position with that of the given rally point.
@@ -51,10 +53,9 @@ public class PositionData {
 			leader = null;
 			occupant = null;
 			defVal = -9999;
-			occupantSize = 0;
+			occupantSizes = new int[] { 0 };
 			
 		} else {
-			Soldier s = r.getOccupant();
 			ID = r.ID;
 			
 			if (r instanceof Building) {
@@ -66,8 +67,14 @@ public class PositionData {
 				defVal = 0;
 			}
 			
-			occupantSize = (s == null) ? 0 : s.getValue();
-			occupant = (s == null) ? null : s.getLeader();
+			ArrayList<Soldier> occupants = r.getOccupants();
+			occupantSizes = new int[occupants.size()];
+			
+			for (int idx = 0 ; idx < occupants.size(); ++idx) {
+				occupantSizes[idx] = occupants.get(idx).getValue();
+			}
+			
+			occupant = (occupants.size() == 0) ? null : occupants.get(0).getLeader();
 		}
 	}
 }

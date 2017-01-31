@@ -168,6 +168,7 @@ public class AIHost {
 		switch(arguments.next()) {
 
 			case "MOVE":
+				int sdx = arguments.nextInt();
 				int splitAmt = arguments.nextInt();
 				// build the set of position IDs
 				int pathSize = arguments.nextInt();
@@ -178,10 +179,11 @@ public class AIHost {
 				}
 				
 				arguments.close();
-				return new MoveAction(splitAmt, pathIDs);
+				return new MoveAction(sdx, splitAmt, pathIDs);
 			
 			case "SOLDIER":
 				String posID = arguments.next();
+				sdx = arguments.nextInt();
 				String stateName = arguments.next();
 				SoldierState state = SoldierState.STANDBY;
 				// parse the soldier state based on its name
@@ -199,7 +201,7 @@ public class AIHost {
 				}
 				
 				arguments.close();
-				return new UpdateAction(posID, state);
+				return new UpdateAction(posID, sdx, state);
 				
 			case "SHOUT":
 				args = arguments.nextLine();

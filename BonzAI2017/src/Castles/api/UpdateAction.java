@@ -9,7 +9,9 @@ import bonzai.Action;
  * @author Joshua Hooker
  */
 public class UpdateAction implements Action {
+	
 	private String srcID;
+	private int soldierIdx;
 	private SoldierState newState;
 	
 	/**
@@ -18,10 +20,13 @@ public class UpdateAction implements Action {
 	 * nothing.
 	 * 
 	 * @param srcID		The ID of the rally point, on which the soldier is
+	 * @param sdx		The index of the soldier in the list of soldiers on a
+	 * 					position
 	 * @param state		The state that the soldier should become
 	 */
-	public UpdateAction(String srcID, SoldierState state) {
+	public UpdateAction(String srcID, int sdx, SoldierState state) {
 		this.srcID = srcID;
+		soldierIdx = sdx;
 		newState = state;
 	}
 	
@@ -30,6 +35,10 @@ public class UpdateAction implements Action {
 	 */
 	public String getSrcID() {
 		return srcID;
+	}
+	
+	public int getSoldierIdx() {
+		return soldierIdx;
 	}
 	
 	/**
@@ -41,6 +50,6 @@ public class UpdateAction implements Action {
 	
 	@Override
 	public String toString() {
-		return String.format("SOLDIER %s %s", srcID, newState.name());
+		return String.format("SOLDIER %s %d %s", srcID, soldierIdx, newState.name());
 	}
 }

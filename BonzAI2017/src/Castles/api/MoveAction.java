@@ -19,16 +19,18 @@ import bonzai.Action;
  */
 public class MoveAction implements Action {
 	
-	private int splitAmount;
+	private int soldierIdx, splitAmount;
 	private ArrayList<String> pathIDs;
 	
 	/**
 	 * 
 	 * 
+	 * @param sdx
 	 * @param splitAmt
 	 * @param pathIDs
 	 */
-	public MoveAction(int splitAmt, List<String> pathIDs) {
+	public MoveAction(int sdx, int splitAmt, List<String> pathIDs) {
+		soldierIdx = sdx;
 		splitAmount = splitAmt;
 		this.pathIDs = new ArrayList<String>(pathIDs);
 	}
@@ -38,6 +40,13 @@ public class MoveAction implements Action {
 	 */
 	public ArrayList<String> getPathIDs() {
 		return new ArrayList<String>( pathIDs );
+	}
+	
+	/**
+	 * @return
+	 */
+	public int getSoldierIdx() {
+		return soldierIdx;
 	}
 
 	/**
@@ -49,7 +58,8 @@ public class MoveAction implements Action {
 
 	@Override
 	public String toString(){
-		String actionStr = String.format("MOVE %d %d", splitAmount, pathIDs.size());
+		String actionStr = String.format("MOVE %d %d %d", soldierIdx,
+				splitAmount, pathIDs.size());
 		
 		for (int idx = 0; pathIDs != null && idx < pathIDs.size(); ++idx) {
 			// Append each ID of the position in the path

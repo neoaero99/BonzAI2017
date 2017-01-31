@@ -267,9 +267,10 @@ public class Turn {
 			 * and an ending position */
 			if (pathIDs != null && pathIDs.size() > 1) {
 				RallyPoint prev = map.getElement(pathIDs.get(0));
+				Soldier target = prev.getOccupant(move.getSoldierIdx());
 				
-				if (prev != null && prev.getOccupant() != null &&
-						prev.getOccupant().getValue() > move.getSplitAmount()) {
+				if (prev != null && target != null &&
+						target.getValue() > move.getSplitAmount()) {
 					/* The positions in the path must exist and form a chain of
 					 * adjacent positions */
 					for (int idx = 1; idx < pathIDs.size(); ++idx) {
@@ -289,7 +290,7 @@ public class Turn {
 			/* The position must exist and have a soldier group and you can
 			 * only command soldiers to move or halt */
 			RallyPoint r = map.getElement(update.getSrcID());
-			return r != null && r.getOccupant() != null &&
+			return r != null && r.getOccupant(update.getSoldierIdx()) != null &&
 					(update.getState() == SoldierState.MOVING ||
 					update.getState() == SoldierState.STANDBY);
 		}
@@ -346,10 +347,27 @@ public class Turn {
 					shoutActions.add((ShoutAction)action);
 					
 				} else if (action instanceof MoveAction) {
-					moveActions.add((MoveAction)action);
+					MoveAction move = (MoveAction)action;
+					ArrayList<String> path = move.getPathIDs();
+					RallyPoint src = map.getElement(path.get(0));
+					/* Split off a group of soldiers and give them the path
+					 * specified by the move action */
+					Soldier s = src.getOccupant(move.getSoldierIdx());
+					Soldier partition = map.splitSoliders(s, move.getSplitAmount(), path);
+					partition.setState(SoldierState.MOVING);
+					map.addSoldiers(partition);
+					
+					moveActions.add(move);
 					
 				} else if (action instanceof UpdateAction) {
+					UpdateAction update = (UpdateAction)action;
+					
+					RallyPoint src = map.getElement(update.getSrcID());
+					// TODO update soldier state
+					
 					updateActions.add((UpdateAction)action);
+					
+					
 				}
 				
 			} else {
@@ -358,36 +376,6 @@ public class Turn {
 
 			currentTeam++;
 		}
-
-		//Apply all valid RotateActions to the game state.
-		//for (int id : rotationsToPerform.keySet()) {
-
-			/*Rotatable r = (Rotatable)map.getEntity(id);
-
-			if (r instanceof Emitter) {
-
-				LinkedList<Emitter> emitters = (LinkedList<Emitter>)map.getEmitters();
-
-				//Create a new Emitter object to replace the old one. The new Emitter is set to have the new rotation.
-				// Okay to not use LazersMap.replace as emitters have the lowest id's
-				emitters.set(r.getID(), new Emitter((Emitter)r, rotationsDesired[rotationsToPerform.get(id).getID()], map));
-
-			} else {
-				//Create a new Repeater object to replace the old one (as there is no setRotation method)
-				Team teamRotating = rotationsToPerform.get(id);
-
-				if (teamRotating == null) {	//Two teams tried to move the same Repeater
-					map.replace(id, new Repeater((Repeater)r, r.getRotation(), null, cooldownAmount + 1, map));
-				} else {
-					//Some team is performing a RotateAction on Repeater r.
-
-
-					map.replace(id, new Repeater((Repeater)r, rotationsDesired[teamRotating.getID()], teamRotating, cooldownAmount + 1, map));
-				}
-			}*/
-		//}
-		
-		//map.calculateParentsTargetsAndOwners();
 
 		//Generate the new Turn object. We apply any earned points onto this new Turn.
 		Turn newTurn = new Turn(this, oldID, map, failedTeams);
@@ -398,74 +386,25 @@ public class Turn {
 			
 			ArrayList<Soldier>[] soldiers =map.getSoldiers();
 			for(int i=0;i<6;i++){
-					for(Soldier s:soldiers[i]){
-						s.gotoNext(map);
-				 		}
-				 	}
+				for(Soldier s:soldiers[i]){
+					s.gotoNext(map);
+		 		}
+		 	}
+			
 			ArrayList<RallyPoint> rally= map.getAllElements();
-				for(RallyPoint r: rally){
-						map.mergeSoldiers(r.onPoint,r);
-						if (r instanceof Building && ((Building)r).onPoint.size() > 0) {
-				 				Soldier sol= r.onPoint.get(0);
-				 				if(!sol.getLeader().equals(((Building) r).getTeam())){
-				 					((Building)r).setTeam(sol.getLeader());
-				 				}
-						}
-				}
-			//Positionable current = newTurn.getUtil().updateEntity(util.getMyEmitter());
-			//Team myTeam = ((Emitter) current).getTeam();
-			/*
-			//Traverse the path of the Emitter/Repeater chain until we hit a Wall or Target.
-			while (current != null && !visited.contains(current) && current instanceof Rotatable) {				
-				if (current instanceof Repeater) {
-					Repeater r = (Repeater) current;
-
-					//If the current team has control, or if no one has control
-					if (myTeam.equals(r.getOwner())) {
-						visited.add(current);
-
-						multiplier *= 2;
-					} else { 
-						//The person does not have control of this Repeater. They should not get points, as their lazer isn't emitting.
-						validPoints = false;
-						break;
-					}
-
-					//Prevent ais from getting points by moving through an opponent's emitter
-				} else if (current instanceof Emitter && !current.getPosition().equals(util.getMyEmitter().getPosition())) {
-					validPoints = false;
-					break;
-				}
-
-				validPoints = validPoints || rotationsToPerform.containsKey(((Identifiable)current).getID());
-				current = ((Rotatable)current).getTarget();
-			}
-			*/
-			//The lazer's path traveled to a Target this turn. See if it is a valid hit.
-			//"Valid" is defined as "this team performed a valid rotation action this turn on some Rotatable
-			//that is within the path from Emitter to Target" (including rotation actions on the Emitter itself).
-			//We also only want to calculate points if the team has not hit the target before.
-			/*if ((current instanceof Target) && validPoints) {
-				//Refresh the target in case another team hit it this turn
-				//Due to dangling references from getTarget, the hit array won't be accurate
-				//I'm not sure how to better explain this, just trust me
-				Target hitTarget = (Target)newTurn.getUtil().updateEntity((Target)current);
-
-				//Don't calculate points if a team has hit the target before
-				if (hitTarget.isDiscoveredByTeam(team)) {
-					break;
-				}
-
-				//Get the number of points the target was worth last turn
-				int points = ((Target) map.updateEntity(hitTarget)).getPointValue();
-
-				//Increment the players points total
-				newTurn.addPoints(team.getID(), points * multiplier);
+			for(RallyPoint r: rally){
+				map.mergeSoldiers(r.onPoint,r);
 				
-				//Update the next turn's target with the correct hit records
-				newTurn.map.replace(hitTarget, new Target(hitTarget, team.getID()));
-			}*/
+				if (r instanceof Building && ((Building)r).onPoint.size() > 0) {
+	 				Soldier sol= r.onPoint.get(0);
+	 				
+	 				if(!sol.getLeader().equals(((Building) r).getTeam())){
+	 					((Building)r).setTeam(sol.getLeader());
+	 				}
+				}
+			}
 		}
+		
 		//TODO uncomment everything
 		this.currentTeam = oldID;
 
