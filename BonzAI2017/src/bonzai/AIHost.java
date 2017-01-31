@@ -8,7 +8,9 @@ import java.util.List;
 import java.util.Scanner;
 import java.util.concurrent.atomic.AtomicReference;
 
+import Castles.Objects.SoldierState;
 import Castles.api.MoveAction;
+import Castles.api.UpdateAction;
 
 public class AIHost {
 	private final Process process;
@@ -166,9 +168,6 @@ public class AIHost {
 		switch(arguments.next()) {
 
 			case "MOVE":
-				// Ignore token 'MOVE'
-				arguments.next();
-				
 				int splitAmt = arguments.nextInt();
 				// build the set of position IDs
 				int pathSize = arguments.nextInt();
@@ -180,6 +179,28 @@ public class AIHost {
 				
 				arguments.close();
 				return new MoveAction(splitAmt, pathIDs);
+			
+			case "SOLDIER":
+				String posID = arguments.next();
+				String stateName = arguments.next();
+				SoldierState state = SoldierState.STANDBY;
+				// parse the soldier state based on its name
+				if (stateName.equals("MOVING")) {
+					state = SoldierState.MOVING;
+					
+				} else if (stateName.equals("CONFLICT")) {
+					state = SoldierState.CONFLICT;
+					
+				} else if (stateName.equals("DEFENDING")) {
+					state = SoldierState.DEFENDING;
+					
+				} else if (stateName.equals("SIEGING")) {
+					state = SoldierState.SIEGING;
+				}
+				
+				arguments.close();
+				return new UpdateAction(posID, state);
+				
 			case "SHOUT":
 				args = arguments.nextLine();
 				arguments.close();
@@ -216,14 +237,12 @@ public class AIHost {
 		
 		//again, ShoutActions should work, use them to debug the communication
 		//between the AI and the game
-		if(action instanceof ShoutAction) {
-			ShoutAction shout = (ShoutAction)action;
-			return String.format("SHOUT %s", shout.getMessage());
-		}
-		if(action instanceof MoveAction){
+		if (action instanceof Action) {
 			return action.toString();
+			
+		} else {
+			return "NONE";
 		}
-		return "NONE";
 	}
 	
 	public static AIHost spawn(String timestamp, bonzai.Scenario scenario, bonzai.Jar me, List<bonzai.Jar> jars, int id) throws IOException {

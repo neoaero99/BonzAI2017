@@ -30,7 +30,7 @@ public class MoveAction implements Action {
 	 */
 	public MoveAction(int splitAmt, List<String> pathIDs) {
 		splitAmount = splitAmt;
-		pathIDs = new ArrayList<String>(pathIDs);
+		this.pathIDs = new ArrayList<String>(pathIDs);
 	}
 	
 	/**
@@ -51,9 +51,9 @@ public class MoveAction implements Action {
 	public String toString(){
 		String actionStr = String.format("MOVE %d %d", splitAmount, pathIDs.size());
 		
-		for (String ID : pathIDs) {
+		for (int idx = 0; pathIDs != null && idx < pathIDs.size(); ++idx) {
 			// Append each ID of the position in the path
-			actionStr += ID + " ";
+			actionStr += " " + pathIDs.get(idx);
 		}
 		
 		return actionStr;

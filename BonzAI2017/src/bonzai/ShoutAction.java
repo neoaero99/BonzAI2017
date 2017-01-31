@@ -17,4 +17,9 @@ public class ShoutAction implements Action {
 	public String getMessage() {
 		return message;
 	}
+	
+	@Override
+	public String toString() {
+		return String.format("SHOUT %s", message);
+	}
 }
