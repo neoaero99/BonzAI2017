@@ -194,7 +194,7 @@ public class CastlesMap {
 	 */
 	public Soldier splitSoliders(Soldier s, int num,ArrayList<String> path){
 		ArrayList<String> newPath=new ArrayList<String>();
-		if(path.get(0)!=s.getPosition().ID){
+		if(path.get(0)!=s.getPositionID()){
 			for(String t: path){
 				newPath.add(t);
 			}
@@ -203,21 +203,19 @@ public class CastlesMap {
 			newPath=path;
 		}
 		if(num<s.getValue()){
-			Soldier split = new Soldier(s.getLeader(), num, s.getPosition());
+			Soldier split = new Soldier(s.getLeader(), num, s.getPositionID());
 			split.setState(SoldierState.MOVING);
-			split.setRallyPoint(graphElements.get(s.getPosition().ID));
 			split.setPath(newPath);
 			s.setValue(s.getValue()-num);
 			addSoldiers(split);
 		return split;
 		}
 		else{
-			Soldier split = new Soldier(s.getLeader(), s.getValue(), s.getPosition());
+			Soldier split = new Soldier(s.getLeader(), s.getValue(), s.getPositionID());
 			split.setState(SoldierState.MOVING);
-			split.setRallyPoint(graphElements.get(s.getPosition().ID));
 			s=null;
 			soldiers[s.getLeader().getID()].remove(s);
-			s.getRallyPoint().onPoint.remove(s);
+			graphElements.get(s.getPositionID()).onPoint.remove(s);
 			addSoldiers(split);
 			split.setPath(newPath);
 		}
@@ -237,7 +235,7 @@ public class CastlesMap {
 	 * 			 4:s1 and s2 have both been deleted
 	 */
 	private int mergeSoldiers(Soldier s1, Soldier s2, RallyPoint r){
-		if(!s1.getPosition().equals(s2.getPosition())){
+		if(!s1.getPositionID().equals(s2.getPositionID())){
 			return -1;
 		}
 		if(s1.getLeader().equals(s2.getLeader())){

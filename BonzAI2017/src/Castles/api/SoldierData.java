@@ -54,13 +54,7 @@ public class SoldierData {
 			size = s.getValue();
 			state = s.getState();
 			path = new ArrayList<String>( s.getPath() );
-			
-			if (path != null && path.size() > 0) {
-				posID = path.get(0);
-				
-			} else {
-				posID = null;
-			}
+			posID = s.getPositionID();
 		}
 	}
 }

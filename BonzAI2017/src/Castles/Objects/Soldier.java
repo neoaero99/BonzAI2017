@@ -69,9 +69,8 @@ public class Soldier extends JComponent {
 	
 	// An array list that holds the IDs of all nodes in the solider's current
 	private ArrayList<String> given_path;
-	// The position of the soldier on the map (on screen)
-	private Node position;
-	private RallyPoint pos2;
+	// The ID of the position where the soldier is on the map
+	private String posID;
 	
 	static {
 		radius = 0f;
@@ -89,12 +88,12 @@ public class Soldier extends JComponent {
 	 * 
 	 * @author David Mohrhardt
 	 */
-	public Soldier(Team t, int iniVal, Node base_position) {
+	public Soldier(Team t, int iniVal, String posID) {
 		leader = t;
 		value = iniVal;
 		state = SoldierState.STANDBY;
 		
-		position = base_position;
+		this.posID = posID;
 		given_path = null;
 	}
 	
@@ -102,16 +101,12 @@ public class Soldier extends JComponent {
 		if(given_path == null || given_path.size()==1){
 			return;
 		}
-		CastlesMapGraph graph =map.getGraph();
-		String temp=given_path.get(0);
+		
 		String ID =given_path.get(1);
 		RallyPoint r=map.getElement(ID);
 		
-		if(graph.areAdjacent(temp, ID)){
-			return;
-		}
 		given_path.remove(0);
-		pos2=r;
+		RallyPoint pos2 = r;
 		if(pos2 instanceof Building){
 			if(((Building)pos2).getColor()==null){
 				if(((Building)pos2).defenseValue<value){
@@ -171,21 +166,14 @@ public class Soldier extends JComponent {
 		return given_path;
 	}
 
-	public Node getPosition() {
-		return position;
+	public String getPositionID() {
+		return posID;
 	}
+	
 	public Soldier copy(){
-		Soldier temp =new Soldier(leader,value,position);
-		temp.given_path=given_path;
-//		temp.pathPosition=pathPosition;
-		temp.sprite=sprite;
-		temp.state=state;
+		Soldier temp = new Soldier(leader,value, posID);
+		temp.given_path = new ArrayList<String>(given_path);
+		temp.state = state;
 		return temp;
-	}
-	public void setRallyPoint(RallyPoint r){
-		pos2=r;
-	}
-	public RallyPoint getRallyPoint(){
-		return pos2;
 	}
 }

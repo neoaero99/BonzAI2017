@@ -1,11 +1,7 @@
 package Castles.api;
 
 import java.util.ArrayList;
-
-import javax.swing.text.html.parser.Element;
-
-import Castles.Objects.*;
-import Castles.util.graph.Vertex;
+import java.util.List;
 import bonzai.Action;
 
 /**
@@ -21,35 +17,27 @@ import bonzai.Action;
  * @author Dane Jensen
  * @author Team Secret (2016 - 2017)
  */
-public class MoveAction implements Action{
-	private String srcID, destID;
+public class MoveAction implements Action {
+	
 	private int splitAmount;
+	private ArrayList<String> pathIDs;
 	
 	/**
 	 * 
 	 * 
-	 * @param sID
-	 * @param dID
 	 * @param splitAmt
+	 * @param pathIDs
 	 */
-	public MoveAction(String sID, String dID, int splitAmt) {
-		srcID = sID;
-		destID = dID;
+	public MoveAction(int splitAmt, List<String> pathIDs) {
 		splitAmount = splitAmt;
+		pathIDs = new ArrayList<String>(pathIDs);
 	}
 	
 	/**
 	 * @return
 	 */
-	public String getSrcID() {
-		return srcID;
-	}
-
-	/**
-	 * @return
-	 */
-	public String getDestID() {
-		return destID;
+	public ArrayList<String> getPathIDs() {
+		return new ArrayList<String>( pathIDs );
 	}
 
 	/**
@@ -61,7 +49,14 @@ public class MoveAction implements Action{
 
 	@Override
 	public String toString(){
-		return String.format("MOVE %s %d %s", srcID, splitAmount, destID);
+		String actionStr = String.format("MOVE %d %d", splitAmount, pathIDs.size());
+		
+		for (String ID : pathIDs) {
+			// Append each ID of the position in the path
+			actionStr += ID + " ";
+		}
+		
+		return actionStr;
 	}
 	
 }

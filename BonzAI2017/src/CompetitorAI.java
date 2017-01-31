@@ -1,4 +1,7 @@
 import bonzai.*;
+
+import java.util.ArrayList;
+
 import Castles.Objects.RallyPoint;
 import Castles.api.*;
 import Castles.util.graph.Vertex;
@@ -32,7 +35,7 @@ public class CompetitorAI extends AI {
 	public Action action(Turn turn) {
 		//put your AI's stuff here
 		
-		return  new MoveAction();
+		return  new MoveAction(0, new ArrayList<String>());
 	}
 	
 }

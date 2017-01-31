@@ -20,7 +20,13 @@ import bonzai.ShoutAction;
  * those entities at this turn.
  **/
 public class Turn {
+	
 	final CastlesMap map;
+	// Data used for AI queries
+	private final HashMap<Color, HashMap<String, SoldierData>> teamSoldiers;
+	private final HashMap<Color, HashMap<String, PositionData>> teamPositions;
+	private final HashMap<String, PositionData> unclaimedPositions;
+	
 	final ArrayList<Team> teams;
 	final ArrayList<Boolean> success;
 	final int turnNumber;
@@ -61,14 +67,53 @@ public class Turn {
 
 		//Clone the old map (so we can retain history)
 		this.map = new CastlesMap(map);
+		teamSoldiers = new HashMap<Color, HashMap<String, SoldierData>>();
+		teamPositions = new HashMap<Color, HashMap<String, PositionData>>();
+		unclaimedPositions = new HashMap<String, PositionData>();
+		
 		shoutActions = new ArrayList<ShoutAction>();
 		moveActions = new ArrayList<MoveAction>();
 		updateActions = new ArrayList<UpdateAction>();
 
-		teams = new ArrayList<Team>();
+		teams = (ArrayList<Team>) map.getTeams();
 		success = new ArrayList<Boolean>();
 		
-		// TODO add hashmaps
+		for (Team t : teams) {
+			/* Associate each group of soldiers with their team color and with
+			 * their position */
+			HashMap<String, SoldierData> soldierGroups = new HashMap<String, SoldierData>();
+			ArrayList<Soldier> soldiers = map.getSoldiers(t);
+			
+			for (Soldier s : soldiers) {
+				SoldierData data = new SoldierData(s);
+				soldierGroups.put(data.posID, data);
+			}
+			
+			teamPositions.put(t.getColor(), new HashMap<String, PositionData>());
+		}
+		
+		ArrayList<RallyPoint> elements = map.getAllElements();
+		
+		for (RallyPoint r : elements) {
+			/* Associated claimed positions with the color of the team, which
+			 * owns the position and then with the positions ID. Unclaimed
+			 * positions are simply associated with their ID. */
+			PositionData p = new PositionData(r);
+			
+			if (r instanceof Building) {
+				Building b = (Building)r;
+				
+				if (b.getColor() != null) {
+					teamPositions.get(b.getColor()).put(p.ID, p);
+					
+				} else {
+					unclaimedPositions.put(p.ID, p);
+				}
+				
+			} else {
+				unclaimedPositions.put(p.ID, p);
+			}
+		}
 	}
 
 	/**
@@ -115,34 +160,7 @@ public class Turn {
 			CastlesRenderer.renderSoldiers(g, map);
 		}
 	}
-
-	/**
-	 * Returns a Collection of Positionables that represent a 
-	 * valid path between points A and B. The path is not
-	 * guaranteed to be a shortest, longest, best, or worst path.
-	 * There are also no guarantees that each Repeater on this 
-	 * path is controllable at the current time by your AI.
-	 * 
-	 * @param a - the start point for the path-generator
-	 * @param b - the end point for the path-generator 
-	 * @return - a Collection of Positionable objects (usually Repeaters)
-	 * that can be chained together to form a Lazer path. 
-	 */
-	/*public Collection<Positionable> getPath(Rotatable a, Traversable b) {
-		return Pathfinding.getPath(a, b,this.getMyTeam(), map );
-	}*/
 	
-	/**
-	 * Returns a Collection of all team objects on the map
-	 * 
-	 * @return - a Collection of Teams
-	 */
-	/*public Collection<Team> getAllTeams() {
-		return teams;
-	}*/
-	
-	
-	/*
 	/**
 	 * Returns whether this is the first turn or not
 	 * 
@@ -239,9 +257,41 @@ public class Turn {
 	public boolean isValid(Action action) {
 		//TODO 2017: This is important for us and competitors.
 		
-		// TODO update and move actions
-		if (action instanceof ShoutAction || action instanceof MoveAction) {
+		if (action instanceof ShoutAction) {
 			return true;
+			
+		} else if(action instanceof MoveAction) {
+			MoveAction move = (MoveAction)action;
+			ArrayList<String> pathIDs = move.getPathIDs();
+			/* A path must contain the starting position, occupied by soldiers,
+			 * and an ending position */
+			if (pathIDs != null && pathIDs.size() > 1) {
+				RallyPoint prev = map.getElement(pathIDs.get(0));
+				
+				if (prev != null && prev.getOccupant() != null &&
+						prev.getOccupant().getValue() > move.getSplitAmount()) {
+					/* The positions in the path must exist and form a chain of
+					 * adjacent positions */
+					for (int idx = 1; idx < pathIDs.size(); ++idx) {
+						RallyPoint curr = map.getElement(pathIDs.get(idx));
+						
+						if (curr == null || map.getGraph().areAdjacent(prev.ID, curr.ID)) {	
+							return false;
+						}
+					}
+					
+					return true;
+				}
+			}
+			
+		} else if (action instanceof UpdateAction) {
+			UpdateAction update = (UpdateAction)action;
+			/* The position must exist and have a soldier group and you can
+			 * only command soldiers to move or halt */
+			RallyPoint r = map.getElement(update.getSrcID());
+			return r != null && r.getOccupant() != null &&
+					(update.getState() == SoldierState.MOVING ||
+					update.getState() == SoldierState.STANDBY);
 		}
 
 		return false;
@@ -298,6 +348,8 @@ public class Turn {
 				} else if (action instanceof MoveAction) {
 					moveActions.add((MoveAction)action);
 					
+				} else if (action instanceof UpdateAction) {
+					updateActions.add((UpdateAction)action);
 				}
 				
 			} else {

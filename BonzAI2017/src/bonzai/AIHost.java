@@ -166,22 +166,20 @@ public class AIHost {
 		switch(arguments.next()) {
 
 			case "MOVE":
-				MoveAction out = new MoveAction();
-				String[] move = new String[3];
-				int i = 0;
-				while(arguments.hasNext()){
-					String temp = arguments.next();
-					if(!temp.equals("[") && !temp.equals("]")){
-						move[i++] = temp;
-					}
-					if(i == 3){
-						i = 0;
-						out.addMovement(move[0], move[1], Integer.parseInt(move[2]));
-					}
+				// Ignore token 'MOVE'
+				arguments.next();
+				
+				int splitAmt = arguments.nextInt();
+				// build the set of position IDs
+				int pathSize = arguments.nextInt();
+				ArrayList<String> pathIDs = new ArrayList<String>();
+				
+				for (int idx = 0; idx < pathSize; ++idx) {
+					pathIDs.add( arguments.next() );
 				}
+				
 				arguments.close();
-				//MOVE actions are not yet implemented
-				return out;
+				return new MoveAction(splitAmt, pathIDs);
 			case "SHOUT":
 				args = arguments.nextLine();
 				arguments.close();
