@@ -114,7 +114,7 @@ public class SegEdge extends Node {
 		char firstConnect = (first == null) ? '(' : '<';
 		char secondConnect = (second == null) ? ')' : '>';
 		
-		return String.format("%c %d %c", firstConnect, getWeight(),
+		return String.format("%c %s %d %c", firstConnect, ID, getWeight(),
 				secondConnect);
 	}
 }

@@ -27,8 +27,8 @@ public class CastlesMap {
 	
 	private static HashMap<String, String> fields;
 	
-	private static CastlesMapGraph graph;
-	private static HashMap<IDPair, ArrayList<String>> pathIDsMap;
+	private CastlesMapGraph graph;
+	private HashMap<IDPair, ArrayList<String>> pathIDsMap;
 	private final HashMap<String, RallyPoint> graphElements;
 
 	
@@ -36,11 +36,6 @@ public class CastlesMap {
 	
 	private ArrayList<Team> teams;
 	private ArrayList<Soldier>[] soldiers;
-	
-	static {
-		graph = null;
-		pathIDsMap = null;
-	}
 	
 	@SuppressWarnings("unchecked")
 	public CastlesMap(HashMap<String, String> f, HashMap<String, RallyPoint> ge,
@@ -53,6 +48,7 @@ public class CastlesMap {
 		
 		graphElements = ge;
 		graph = g;
+		
 		pathIDsMap = g.generatePaths();
 		
 		players = new boolean[] { true,true,true,true,true,true };
@@ -81,6 +77,9 @@ public class CastlesMap {
 			soldiers[i]=new ArrayList<Soldier>();
 		}
 		
+		graph = previousTurn.graph;
+		pathIDsMap = previousTurn.pathIDsMap;
+		
 		// Copy the rally points, buildings, etc.
 		graphElements = new HashMap<String, RallyPoint>();
 		Collection<RallyPoint> rallyPoints = previousTurn.graphElements.values();
@@ -107,22 +106,55 @@ public class CastlesMap {
 	}
 	
 	/**
-	 * Returns a graph element based on a unique ID.
+	 * Returns the position, with which the given ID is associated or null if
+	 * no such position exists.
 	 * 
-	 * @param ID	The ID of the element to get
-	 * @return		The element corresponding to the given ID
+	 * @param ID	The ID of the position to get
+	 * @return		The position corresponding to the given ID
 	 */
-	public RallyPoint getElement(String ID) {
+	public RallyPoint getPosition(String ID) {
 		return graphElements.get(ID);
 	}
 	
+	/**
+	 * @return	A list of positions on the map
+	 */
+	public ArrayList<RallyPoint> getAllPositions() {
+		return new ArrayList<RallyPoint>( graphElements.values() );
+	}
+	
+	/**
+	 * @return	A list of edges in the graph
+	 */
+	public ArrayList<SegEdge> edgeList() {
+		return graph.edgeList();
+	}
+	
+	/**
+	 * Determines if the positions with the given IDs are adjacent based on the
+	 * map's vertex and edge relations.
+	 * 
+	 * @param rID1	The ID of some position
+	 * @param rID2	The ID of another position
+	 * @return		If the positions of the given IDs are adjacent
+	 */
+	public boolean areAdjacent(String rID1, String rID2) {
+		return graph.areAdjacent(rID1, rID2);
+	}
+	
+	/**
+	 * 
+	 * 
+	 * @param i
+	 * @return
+	 */
 	public Position getEntity(int i) {
 		if(!players[i]){
 			return null;
 		}
 		
 		Castles.api.Color c=Castles.api.Color.values()[i];
-		ArrayList<RallyPoint> elementList = getAllElements();
+		ArrayList<RallyPoint> elementList = getAllPositions();
 		
 		for(RallyPoint r : elementList) {
 			if(r instanceof Building ){
@@ -132,7 +164,7 @@ public class CastlesMap {
 			}
 		}
 		return null;
-}
+	}
 	
 	/**
 	 * @param input
@@ -160,10 +192,6 @@ public class CastlesMap {
 		return height;
 	}
 	
-	public CastlesMapGraph getGraph() {
-		return graph;
-	}
-	
 	protected HashMap<String, String> getFields(){
 		return fields;
 	}
@@ -172,9 +200,7 @@ public class CastlesMap {
 		return teams;
 	}
 	
-	public ArrayList<RallyPoint> getAllElements() {
-		return new ArrayList<RallyPoint>( graphElements.values() );
-	}
+
 	
 	public ArrayList<Soldier>[] getSoldiers(){
 		return soldiers;

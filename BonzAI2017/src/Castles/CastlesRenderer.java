@@ -221,12 +221,18 @@ public class CastlesRenderer extends bonzai.Renderer {
 	}
 
 	public static void renderPaths(Graphics2D g, CastlesMap map) {
-		ArrayList<SegEdge> paths = map.getGraph().edgeList();
+		Stroke origin = g.getStroke();
+		ArrayList<SegEdge> paths = map.edgeList();
+		
+		g.setStroke(new BasicStroke(0.05f));
+		
 		//iterate over all the paths
 		for(SegEdge p: paths){
 			//get the rally points on the edge
-			RallyPoint r1 = map.getElement(p.first.ID);
-			RallyPoint r2 = map.getElement(p.second.ID);
+			RallyPoint r1 = map.getPosition(p.first.ID);
+			RallyPoint r2 = map.getPosition(p.second.ID);
+			
+			g.translate(0.5f, 0.5f);
 			
 			//get the x,y coords of the two rally points
 			int x1 = r1.getPosition().getX();
@@ -235,31 +241,12 @@ public class CastlesRenderer extends bonzai.Renderer {
 			int y2 = r2.getPosition().getY();
 			
 			g.setColor(Color.PINK);
+			g.drawLine(x1, y1 - gridHeight, x2, y2 - gridHeight);
 			
-			//use the coords' locations to make the line between the two points
-			if(x1 != x2){
-				if(x2 < x1){
-					int temp = x2;
-					x2 = x1;
-					x1 = temp;
-					temp = y2;
-					y2 = y1;
-					y1 = y2;
-				}
-				g.drawRect(x1, y1 - gridHeight, x2 - x1, 1);
-			}else{
-				if(x2 < x1){
-					int temp = x2;
-					x2 = x1;
-					x1 = temp;
-					temp = y2;
-					y2 = y1;
-					y1 = y2;
-				}
-				g.drawRect(x1, y1 - gridHeight, 1, y2-y1);
-			}
+			g.translate(-0.5f, -0.5f);
 		}
 		
+		g.setStroke(origin);
 	}
 
 	public static void renderSoldiers(Graphics2D g, CastlesMap map) {
@@ -269,7 +256,7 @@ public class CastlesRenderer extends bonzai.Renderer {
 	}
 
 	public static void renderBuildings(Graphics2D g, CastlesMap map) {
-		ArrayList<RallyPoint> nodes = map.getAllElements();
+		ArrayList<RallyPoint> nodes = map.getAllPositions();
 		
 		for(RallyPoint r : nodes){
 			String name = r.ID;
@@ -415,7 +402,7 @@ public class CastlesRenderer extends bonzai.Renderer {
 		int gx = 1;
 		int gy = 1;
 		
-		g.drawImage((Image)img, (int)(gx * x), (int)(gy * y) -gridHeight, (int)gx, (int)gy, null);
+		g.drawImage((Image)img, (int)(gx * x), (int)(gy * y) - gridHeight, (int)gx, (int)gy, null);
 		
 	}
 

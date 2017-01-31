@@ -9,6 +9,7 @@ import java.util.List;
 
 import Castles.CastlesRenderer;
 import Castles.Objects.*;
+import Castles.util.graph.CastlesMapGraph;
 import bonzai.Action;
 import bonzai.Position;
 import bonzai.Team;
@@ -90,7 +91,7 @@ public class Turn {
 			teamPositions.put(t.getColor(), new HashMap<String, PositionData>());
 		}
 		
-		ArrayList<RallyPoint> elements = map.getAllElements();
+		ArrayList<RallyPoint> elements = map.getAllPositions();
 		
 		for (RallyPoint r : elements) {
 			/* Associated claimed positions with the color of the team, which
@@ -160,7 +161,13 @@ public class Turn {
 		 * 	Develop test print methods
 		 */
 		
+		try {
+			CastlesMap map = Parser.parseFile("scenarios/testmap.dat");
+			Turn t = new Turn(0, 1, map);
 		
+		} catch (Exception Ex) {
+			Ex.printStackTrace();
+		}
 	}
 	
 	/**
@@ -282,7 +289,7 @@ public class Turn {
 			/* A path must contain the starting position, occupied by soldiers,
 			 * and an ending position */
 			if (pathIDs != null && pathIDs.size() > 1) {
-				RallyPoint prev = map.getElement(pathIDs.get(0));
+				RallyPoint prev = map.getPosition(pathIDs.get(0));
 				Soldier target = prev.getOccupant(move.getSoldierIdx());
 				
 				if (prev != null && target != null &&
@@ -290,9 +297,9 @@ public class Turn {
 					/* The positions in the path must exist and form a chain of
 					 * adjacent positions */
 					for (int idx = 1; idx < pathIDs.size(); ++idx) {
-						RallyPoint curr = map.getElement(pathIDs.get(idx));
+						RallyPoint curr = map.getPosition(pathIDs.get(idx));
 						
-						if (curr == null || map.getGraph().areAdjacent(prev.ID, curr.ID)) {	
+						if (curr == null || map.areAdjacent(prev.ID, curr.ID)) {	
 							return false;
 						}
 					}
@@ -305,7 +312,7 @@ public class Turn {
 			UpdateAction update = (UpdateAction)action;
 			/* The position must exist and have a soldier group and you can
 			 * only command soldiers to move or halt */
-			RallyPoint r = map.getElement(update.getSrcID());
+			RallyPoint r = map.getPosition(update.getSrcID());
 			return r != null && r.getOccupant(update.getSoldierIdx()) != null &&
 					(update.getState() == SoldierState.MOVING ||
 					update.getState() == SoldierState.STANDBY);
@@ -362,7 +369,7 @@ public class Turn {
 				} else if (action instanceof MoveAction) {
 					MoveAction move = (MoveAction)action;
 					ArrayList<String> path = move.getPathIDs();
-					RallyPoint src = map.getElement(path.get(0));
+					RallyPoint src = map.getPosition(path.get(0));
 					/* Split off a group of soldiers and give them the path
 					 * specified by the move action */
 					Soldier s = src.getOccupant(move.getSoldierIdx());
@@ -374,7 +381,7 @@ public class Turn {
 					
 				} else if (action instanceof UpdateAction) {
 					UpdateAction update = (UpdateAction)action;
-					RallyPoint src = map.getElement(update.getSrcID());
+					RallyPoint src = map.getPosition(update.getSrcID());
 					Soldier target = src.getOccupant(update.getSoldierIdx());
 					
 					target.setState(update.getState());
@@ -409,7 +416,7 @@ public class Turn {
 		/**
 		 * Resolve any soldier conflicts and building occupations
 		 */
-		ArrayList<RallyPoint> rally = map.getAllElements();
+		ArrayList<RallyPoint> rally = map.getAllPositions();
 		for (RallyPoint r: rally) {
 			map.mergeSoldiers(r.onPoint,r);
 			
