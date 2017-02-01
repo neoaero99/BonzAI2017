@@ -394,7 +394,7 @@ public class Turn {
 		// Store the teams whose action failed
 		LinkedList<Team> failedTeams = new LinkedList<Team>();
 		List<Team> teams = newMap.getTeams();
-
+		int[] teamScoreAdditions = new int[teams.size()];
 		int teamID = 0;
 		
 		/**
@@ -431,12 +431,16 @@ public class Turn {
 				
 			} else {
 				failedTeams.add(teams.get(teamID));
+				// Test scoring
+				teamScoreAdditions[teamID] += 1;
 			}
 
 			teamID++;
 		}
 
 		// TODO apply any earned points onto this new Turn.
+		newMap.updateTeamScores(teamScoreAdditions);
+		
 		
 		newMap.moveSoldiers();
 		
