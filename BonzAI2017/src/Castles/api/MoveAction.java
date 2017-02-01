@@ -20,7 +20,7 @@ import bonzai.Action;
 public class MoveAction implements Action {
 	
 	private int soldierIdx, splitAmount;
-	private ArrayList<String> pathIDs;
+	private List<String> pathIDs;
 	
 	/**
 	 * 
@@ -38,7 +38,7 @@ public class MoveAction implements Action {
 	/**
 	 * @return
 	 */
-	public ArrayList<String> getPathIDs() {
+	public List<String> getPathIDs() {
 		return new ArrayList<String>( pathIDs );
 	}
 	

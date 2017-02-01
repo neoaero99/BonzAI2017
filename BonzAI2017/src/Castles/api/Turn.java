@@ -2,7 +2,6 @@ package Castles.api;
 
 import java.awt.Graphics2D;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -10,7 +9,6 @@ import java.util.List;
 
 import Castles.CastlesRenderer;
 import Castles.Objects.*;
-import Castles.util.graph.CastlesMapGraph;
 import bonzai.Action;
 import bonzai.Position;
 import bonzai.Team;
@@ -202,18 +200,139 @@ public class Turn {
 		System.out.printf("%s\n\n\n", unclaimedPositions);
 	}
 	
-	/**
+	
+	
+	
+	/*************************************************************************
 	 * 
-	 * 
-	 * @param g
+	 *						  ADD API METHODS HERE!!!!!!!!!
+	 *
 	 */
-	public void renderMap(Graphics2D g) {
-		if (g != null) {
-			CastlesRenderer.renderBackground(g, map);
-			CastlesRenderer.renderPaths(g, map);
-			CastlesRenderer.renderBuildings(g, map);
-			CastlesRenderer.renderSoldiers(g, map);
+	
+	/**
+	 * Returns the position with the given ID value, if one exists. If no
+	 * position exits with the given ID, null is returned.
+	 * 
+	 * @param ID	The unique identifier of a position in the map
+	 * @return		The position associated with the given ID, if it exists in
+	 * 				the map
+	 */
+	public PositionData getPosition(String ID) {
+		Collection<HashMap<String, PositionData>> claimedPositions = teamPositions.values();
+		// Check each list of positions owned by teams for the position
+		for (HashMap<String, PositionData> positionsSet : claimedPositions) {
+			PositionData pos = positionsSet.get(ID);
+			
+			if (pos != null) {
+				return pos;
+			}
 		}
+		// Finally, check the unclaimed positions
+		return unclaimedPositions.get(ID);
+	}
+	
+	/**
+	 * Returns a list of soldiers, which occupy the position with the given ID.
+	 * If the position with the given ID is unoccupied, an empty set is
+	 * returned. If no position with the given ID exists, then null is
+	 * returned.
+	 * 
+	 * @param ID	The ID of a position on the map
+	 * @return		The list of soldiers occupying the position with the given
+	 * 				ID
+	 */
+	public ArrayList<SoldierData> getSoldiersAt(String ID) {
+		// TODO
+		return null;
+	}
+	
+	/**
+	 * Returns a set of positions controlled by the team of the given color. If
+	 * the given color is null, then a list of uncontrolled positions will be
+	 * returned.
+	 * 
+	 * @param teamColor	The color of the team controlling positions, of which
+	 * 					will by queried, or null to query for uncontrolled
+	 * 					positions
+	 * @return			A list of positions controlled by the team of the given
+	 * 					color
+	 */
+	public List<PositionData> getPositionsControlledBy(Color teamColor) {
+		// TODO
+		return null;
+	}
+	
+	/**
+	 * Returns a set of soldiers, which are controlled by the team with the
+	 * given color. If no team with the given color exists, then an empty
+	 * list is returned.
+	 * 
+	 * @param teamColor	The color of the team, whose soldier data to get
+	 * @return			The list of soldiers associated with the team with the
+	 * 					given color
+	 */
+	public List<SoldierData> getSoldiersControlledBy(Color teamColor) {
+		// TODO
+		return null;
+	}
+	
+	/**
+	 * Returns a list of IDs corresponding to positions, which form a path from
+	 * the position with startID to the position with endID. The path includes
+	 * the starting and ending IDs.
+	 * 
+	 * @param startID	The ID of a vertex on the map
+	 * @param endID		The ID of another vertex on the map
+	 * @return			The path between the two vertices of given IDs
+	 */
+	public List<String> getPath(String startID, String endID) {
+		return map.getPath(startID, endID);
+	}
+	
+	/*************************************************************************/
+	
+	
+	
+	
+	/**
+	 * Returns your AI's Team object
+	 * 
+	 * @return - your AI's Team object
+	 */
+	public Team getMyTeam() {
+		for (Team t : getAllTeams()) {
+			if (t.getID() == currentTeam) {
+				return t;
+			}
+		}
+		return null;
+	}
+	
+	/**
+	 * @return	The list of all teams
+	 */
+	public List<Team> getAllTeams() {
+		return map.getTeams();
+	}
+	
+	/**
+	 * If isValid() returns false, this method returns
+	 * a String containing a more detailed error message
+	 * 
+	 * @return - a String explaining why a move is invalid
+	 */
+	public String getIsValidError() {
+		return errorMessage;
+	}
+	
+	/**
+	 * Who really knows ...
+	 * 
+	 * @param i
+	 * @return
+	 */
+	public Position getEntity(int i) {
+		return map.getEntity(i);
 	}
 	
 	/**
@@ -242,6 +361,243 @@ public class Turn {
 	 */
 	public int getTurnsRemaining() {
 		return MAX_TURNS - turnNumber;
+	}
+
+	/**
+	 * Test if a given Action is a valid one if it were applied on this Turn object.
+	 * This method returns true if the Action is a valid Action, false otherwise.
+	 * There are no guarantees that the Action will be performed, even if it is
+	 * valid, as another team may be performing an Action that interferes
+	 * with the given Action. (For example, if two teams try to rotate the same
+	 * Repeater on the same turn.) 
+	 * 
+	 * If this method returns false, calling getIsValidError() will return the
+	 * reason for failure.
+	 * 
+	 * @param action - the Action object to check for validity
+	 * 
+	 * @return - true if the Action is valid for the current gamestate,
+	 * 			 false otherwise
+	 */
+	public boolean isValid(Team team, Action action) {
+		//TODO 2017: This is important for us and competitors.
+		
+		if (team == null) {
+			errorMessage = "Team argument cannot be null.";
+			
+		} else if (action == null) {
+			errorMessage = "Action argument cann be null";
+			
+		} else if (action instanceof ShoutAction) {
+			errorMessage = "";
+			return true;
+			
+		} else if (action instanceof MoveAction) {
+			MoveAction move = (MoveAction)action;
+			List<String> pathIDs = move.getPathIDs();
+			/* A path must contain the starting position, occupied by soldiers,
+			 * and an ending position */
+			if (pathIDs == null || pathIDs.size() < 2) {
+				errorMessage = String.format("The path must be of length 2 or greater.");
+				
+			} else {
+				RallyPoint prev = map.getPosition(pathIDs.get(0));
+				
+				if (prev == null) {
+					errorMessage = String.format("Position %s is not valid.",
+							pathIDs.get(0));
+					
+				} else {
+					Soldier target = prev.getOccupant(move.getSoldierIdx());
+					
+					if (target == null) {
+						errorMessage = String.format("No soldier on %s at %d.",
+								prev.ID, move.getSoldierIdx());
+						
+					} else if (target.getLeaderColor() != team.getColor()) {
+						errorMessage = String.format("AI %s cannot move soldier on %s.",
+								team.getColor(), target.getLeaderColor());
+						
+					} else if (target.getValue() > move.getSplitAmount()) {
+						errorMessage = String.format("Cannot split off %d soldiers from a group of size %d.",
+								target.getValue(), move.getSplitAmount());
+					
+					} else {
+						/* The positions in the path must exist and form a chain of
+						 * adjacent positions */
+						for (int idx = 1; idx < pathIDs.size(); ++idx) {
+							RallyPoint curr = map.getPosition(pathIDs.get(idx));
+							
+							if (curr == null) {
+								errorMessage = String.format("Position %s is invalid.",
+										pathIDs.get(idx));
+								return false;
+								
+							} else if (!map.areAdjacent(prev.ID, curr.ID)) {
+								errorMessage = String.format("%s and %s are not adjacent.",
+										pathIDs.get(idx - 1), pathIDs.get(idx)); 
+								return false;
+							}
+						}
+						
+						errorMessage = "";
+						return true;
+					}
+				}
+			}
+			
+		} else if (action instanceof UpdateAction) {
+			UpdateAction update = (UpdateAction)action;
+			/* The position must exist and have a soldier group and you can
+			 * only command soldiers to move or halt */
+			RallyPoint r = map.getPosition(update.getSrcID());
+			
+			if (r != null) {
+				Soldier target = r.getOccupant(update.getSoldierIdx());
+				
+				if (target == null) {
+					errorMessage = String.format("There is not soldier on %s at position %d.",
+							update.getSrcID(), update.getSoldierIdx());
+					
+				} else if (target.getLeaderColor() != team.getColor()) {
+					errorMessage = String.format("AI %s cannot move a soldier on %s.",
+							target.getLeaderColor(), team.getColor());
+					
+				} else if (!(update.getState() == SoldierState.MOVING ||
+						update.getState() == SoldierState.STANDBY)) {
+					
+					errorMessage = String.format("%s is an invalid state.", update.getState());
+					
+				} else {
+					errorMessage = "";
+					return true;
+				}
+				
+			} else {
+				errorMessage = String.format("%s is not a valid position.",
+						update.getSrcID());
+			}
+			
+		} else {
+			errorMessage = "Invalid action given.";
+		}
+		
+		return false;
+	}
+
+	/**
+	 * Applies an action to the current turn. This should 
+	 * not be called by an AI as it is almost useless.
+	 * 
+	 * @param actions - the list of actions to apply
+	 * @return - the new Turn object created after applying 
+	 * the actions
+	 */
+	public Turn apply(List<Action> actions) {
+		
+		//TODO 2017: This is where we applied each action from the playing ai's. This is an example of our process. 
+		// Most of the game logic goes here.
+		
+		/**
+		 * Clones soldiers and graph elements into the new map.
+		 */
+		CastlesMap newMap = new CastlesMap(map);
+
+		// Store the teams whose action failed
+		LinkedList<Team> failedTeams = new LinkedList<Team>();
+		List<Team> teams = newMap.getTeams();
+		int[] teamScoreAdditions = new int[teams.size()];
+		int teamID = 0;
+		
+		/**
+		 * Resolve all actions
+		 */
+		for (Action action : actions) {
+			//TODO Actions are Handled here
+			if (isValid(teams.get(teamID), action)) {
+				if (action instanceof ShoutAction) {
+					shoutActions.add((ShoutAction)action);
+					
+				} else if (action instanceof MoveAction) {
+					MoveAction move = (MoveAction)action;
+					List<String> path = move.getPathIDs();
+					RallyPoint src = newMap.getPosition(path.get(0));
+					/* Split off a group of soldiers and give them the path
+					 * specified by the move action */
+					Soldier s = src.getOccupant(move.getSoldierIdx());
+					Soldier partition = newMap.splitSoliders(s, move.getSplitAmount(),
+							new ArrayList<String>(path));
+					
+					partition.setState(SoldierState.MOVING);
+					newMap.addSoldiers(partition);
+					
+					moveActions.add(move);
+					
+				} else if (action instanceof UpdateAction) {
+					UpdateAction update = (UpdateAction)action;
+					RallyPoint src = newMap.getPosition(update.getSrcID());
+					Soldier target = src.getOccupant(update.getSoldierIdx());
+					
+					target.setState(update.getState());
+					
+					updateActions.add((UpdateAction)action);
+				}
+				
+			} else {
+				failedTeams.add(teams.get(teamID));
+				// Test scoring
+				teamScoreAdditions[teamID] += 1;
+			}
+
+			teamID++;
+		}
+
+		// TODO apply any earned points onto this new Turn.
+		newMap.updateTeamScores(teamScoreAdditions);
+		
+		newMap.moveSoldiers();
+		
+		/**
+		 * Resolve any soldier conflicts and building occupations
+		 */
+		ArrayList<RallyPoint> rally = newMap.getAllPositions();
+		for (RallyPoint r: rally) {
+			newMap.mergeSoldiers(r.onPoint, r);
+			
+			/* Determine if the remaining soldiers on a position can capture an
+			 * unclaimed or enemy position. */
+			if (r instanceof Building) {
+				Building b = (Building)r;
+				ArrayList<Soldier> occupants = r.getOccupants();
+				
+				if (occupants.size() > 0) {
+					Color leaderColor = occupants.get(0).getLeaderColor();
+					
+					if (b.getTeamColor() == null || b.getTeamColor() != leaderColor) {
+						int occupantSize = 0;
+						
+						for (Soldier s : occupants) {
+							occupantSize += s.getValue();
+						}
+						/* The total number of soldiers must be greater than
+						 * the defense value of the position in order to
+						 * capture it */
+						if (occupantSize > b.defenseValue) {
+							b.setTeamColor(leaderColor);
+						}
+					}
+				}
+				
+				// Apply reinforcements for claimed positions
+				Soldier s = b.reinforce();
+				
+				if (s != null) {
+					newMap.addSoldiers(s);
+				}
+			}
+		}
+		
+		return new Turn(this, teamID, newMap, failedTeams);
 	}
 	
 	/**
@@ -273,227 +629,18 @@ public class Turn {
 	}
 	
 	/**
-	 * Returns your AI's Team object
+	 * Renders all the elements of the map, including the background for this
+	 * turn.
 	 * 
-	 * @return - your AI's Team object
+	 * @param g	The graphics object used for rendering
 	 */
-	public Team getMyTeam() {
-		for (Team t : getAllTeams()) {
-			if (t.getID() == currentTeam) {
-				return t;
-			}
+	public void renderMap(Graphics2D g) {
+		if (g != null) {
+			CastlesRenderer.renderBackground(g, map);
+			CastlesRenderer.renderPaths(g, map);
+			CastlesRenderer.renderBuildings(g, map);
+			CastlesRenderer.renderSoldiers(g, map);
 		}
-		return null;
-	}
-	
-	/**
-	 * @return	The list of all teams
-	 */
-	public List<Team> getAllTeams() {
-		return map.getTeams();
-	}
-
-	/**
-	 * Test if a given Action is a valid one if it were applied on this Turn object.
-	 * This method returns true if the Action is a valid Action, false otherwise.
-	 * There are no guarantees that the Action will be performed, even if it is
-	 * valid, as another team may be performing an Action that interferes
-	 * with the given Action. (For example, if two teams try to rotate the same
-	 * Repeater on the same turn.) 
-	 * 
-	 * If this method returns false, calling getIsValidError() will return the
-	 * reason for failure.
-	 * 
-	 * @param action - the Action object to check for validity
-	 * 
-	 * @return - true if the Action is valid for the current gamestate,
-	 * 			 false otherwise
-	 */
-	public boolean isValid(Team team, Action action) {
-		//TODO 2017: This is important for us and competitors.
-		
-		if (team == null || action == null) {
-			return false;
-		}
-		
-		if (action instanceof ShoutAction) {
-			return true;
-			
-		} else if(action instanceof MoveAction) {
-			MoveAction move = (MoveAction)action;
-			ArrayList<String> pathIDs = move.getPathIDs();
-			/* A path must contain the starting position, occupied by soldiers,
-			 * and an ending position */
-			if (pathIDs != null && pathIDs.size() > 1) {
-				RallyPoint prev = map.getPosition(pathIDs.get(0));
-				Soldier target = prev.getOccupant(move.getSoldierIdx());
-				
-				if (target.getLeaderColor().equals(team) && prev != null && target != null &&
-						target.getValue() > move.getSplitAmount()) {
-					/* The positions in the path must exist and form a chain of
-					 * adjacent positions */
-					for (int idx = 1; idx < pathIDs.size(); ++idx) {
-						RallyPoint curr = map.getPosition(pathIDs.get(idx));
-						
-						if (curr == null || map.areAdjacent(prev.ID, curr.ID)) {	
-							return false;
-						}
-					}
-					
-					return true;
-				}
-			}
-			
-		} else if (action instanceof UpdateAction) {
-			UpdateAction update = (UpdateAction)action;
-			/* The position must exist and have a soldier group and you can
-			 * only command soldiers to move or halt */
-			RallyPoint r = map.getPosition(update.getSrcID());
-			
-			if (r != null) {
-				Soldier target = r.getOccupant(update.getSoldierIdx());
-				
-				return target != null && target.getLeaderColor().equals(team) &&
-						(update.getState() == SoldierState.MOVING ||
-						update.getState() == SoldierState.STANDBY);
-			}
-		}
-
-		return false;
-	}
-
-	/**
-	 * If isValid() returns false, this method returns
-	 * a String containing a more detailed error message
-	 * 
-	 * @return - a String explaining why a move is invalid
-	 */
-	public String getIsValidError() {
-		return errorMessage;
-	}
-
-	/**
-	 * Applies an action to the current turn. This should 
-	 * not be called by an AI as it is almost useless.
-	 * 
-	 * @param actions - the list of actions to apply
-	 * @return - the new Turn object created after applying 
-	 * the actions
-	 */
-	public Turn apply(List<Action> actions) {
-		
-		//TODO 2017: This is where we applied each action from the playing ai's. This is an example of our process. 
-		// Most of the game logic goes here.
-		
-		/**
-		 * Clones soldiers and graph elements into the new map. Also, updates
-		 * reinforcements.
-		 */
-		CastlesMap newMap = new CastlesMap(map);
-
-		// Store the teams whose action failed
-		LinkedList<Team> failedTeams = new LinkedList<Team>();
-		List<Team> teams = newMap.getTeams();
-		int[] teamScoreAdditions = new int[teams.size()];
-		int teamID = 0;
-		
-		/**
-		 * Resolve all actions
-		 */
-		for (Action action : actions) {
-			//TODO Actions are Handled here
-			if (isValid(teams.get(teamID), action)) {
-				if (action instanceof ShoutAction) {
-					shoutActions.add((ShoutAction)action);
-					
-				} else if (action instanceof MoveAction) {
-					MoveAction move = (MoveAction)action;
-					ArrayList<String> path = move.getPathIDs();
-					RallyPoint src = newMap.getPosition(path.get(0));
-					/* Split off a group of soldiers and give them the path
-					 * specified by the move action */
-					Soldier s = src.getOccupant(move.getSoldierIdx());
-					Soldier partition = newMap.splitSoliders(s, move.getSplitAmount(), path);
-					partition.setState(SoldierState.MOVING);
-					newMap.addSoldiers(partition);
-					
-					moveActions.add(move);
-					
-				} else if (action instanceof UpdateAction) {
-					UpdateAction update = (UpdateAction)action;
-					RallyPoint src = newMap.getPosition(update.getSrcID());
-					Soldier target = src.getOccupant(update.getSoldierIdx());
-					
-					target.setState(update.getState());
-					
-					updateActions.add((UpdateAction)action);
-				}
-				
-			} else {
-				failedTeams.add(teams.get(teamID));
-				// Test scoring
-				teamScoreAdditions[teamID] += 1;
-			}
-
-			teamID++;
-		}
-
-		// TODO apply any earned points onto this new Turn.
-		newMap.updateTeamScores(teamScoreAdditions);
-		
-		
-		newMap.moveSoldiers();
-		
-		/**
-		 * Resolve any soldier conflicts and building occupations
-		 */
-		ArrayList<RallyPoint> rally = newMap.getAllPositions();
-		for (RallyPoint r: rally) {
-			//newMap.mergeSoldiers(r.onPoint, r);
-			
-			/* Determine if the remaining soldiers on a position can capture an
-			 * unclaimed or enemy position. */
-			if (r instanceof Building) {
-				Building b = (Building)r;
-				ArrayList<Soldier> occupants = r.getOccupants();
-				
-				if (occupants.size() > 0) {
-					Color leaderColor = occupants.get(0).getLeaderColor();
-					
-					if (b.getTeamColor() == null || b.getTeamColor() != leaderColor) {
-						int occupantSize = 0;
-						
-						for (Soldier s : occupants) {
-							occupantSize += s.getValue();
-						}
-						/* The total number of soldiers must be greater than
-						 * the defense value of the position in order to
-						 * capture it */
-						if (occupantSize > b.defenseValue) {
-							b.setTeamColor(leaderColor);
-						}
-					}
-				}
-				
-				Soldier s = b.reinforce();
-				
-				if (s != null) {
-					newMap.addSoldiers(s);
-				}
-			}
-		}
-		
-		return new Turn(this, teamID, newMap, failedTeams);
-	}
-	
-	/**
-	 * Who really knows ...
-	 * 
-	 * @param i
-	 * @return
-	 */
-	public Position getEntity(int i) {
-		return map.getEntity(i);
 	}
 	
 	/**
@@ -509,6 +656,4 @@ public class Turn {
 	public int getMapHeight() {
 		return map.getHeight();
 	}
-	
-	
 }
