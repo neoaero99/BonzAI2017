@@ -2,6 +2,7 @@ package Castles.api;
 
 import java.awt.Graphics;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
@@ -88,19 +89,12 @@ public class CastlesMap {
 			RallyPoint rCopy = r.copy();
 			graphElements.put(r.ID, rCopy);
 			
-			if (rCopy instanceof Building && ((Building)rCopy).getColor() != null) {
-				Building b = (Building)rCopy;
-				
-				if (b.getColor() != null) {
-					// Apply reinforcements 
-					rCopy.reinforce(b.getTeam(), b.soldierCreationRate);
-				}
-			}
-			
-			ArrayList<Soldier> occupants = rCopy.getOccupants();
+			ArrayList<Soldier> occupants = r.getOccupants();
 			// Add the soldiers to the list of soldier references
 			for (Soldier s : occupants) {
-				this.addSoldiers(s);
+				Soldier sCopy = s.copy();
+				rCopy.addOccupant(sCopy);
+				soldiers[s.getLeader().getID()].add(sCopy);
 			}
 		}
 	}
@@ -200,18 +194,36 @@ public class CastlesMap {
 		return teams;
 	}
 	
-
-	
 	public ArrayList<Soldier>[] getSoldiers(){
 		return soldiers;
 	}
 	
 	/**
 	 * Spawn a new soldier to the map
+	 * 
 	 * @param s the soldier to add
 	 */
-	protected void addSoldiers(Soldier s){
+	protected void addSoldiers(Soldier s) {
 		soldiers[s.getLeader().getID()].add(s);
+		
+		RallyPoint r = getPosition(s.getPositionID());
+		r.addOccupant(s);
+	}
+	
+	/**
+	 * Moves all active soldiers one position across their designated path.
+	 */
+	protected void moveSoldiers() {
+		for (ArrayList<Soldier> soldierGroup : soldiers) {
+			for (Soldier s : soldierGroup) {
+				String oldPosID = s.updatePositionID();
+				
+				if (oldPosID != null) {
+					getPosition(oldPosID).removeOccupant(s);
+					getPosition(s.getPositionID()).addOccupant(s);
+				}
+			}
+		}
 	}
 	
 	/**
@@ -222,7 +234,13 @@ public class CastlesMap {
 	 * @return the second soldier
 	 */
 	public Soldier splitSoliders(Soldier s, int num,ArrayList<String> path){
+		if (s.getValue() == 0) {
+			// This should never be true!
+			return null;
+		}
+		
 		ArrayList<String> newPath=new ArrayList<String>();
+		
 		if(path.get(0)!=s.getPositionID()){
 			for(String t: path){
 				newPath.add(t);

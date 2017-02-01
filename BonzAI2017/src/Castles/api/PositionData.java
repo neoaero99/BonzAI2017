@@ -1,6 +1,7 @@
 package Castles.api;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 
 import Castles.Objects.Building;
 import Castles.Objects.RallyPoint;
@@ -76,5 +77,13 @@ public class PositionData {
 			
 			occupant = (occupants.size() == 0) ? null : occupants.get(0).getLeader();
 		}
+	}
+	
+	public String toString() {
+		String claimedBy = (leader == null) ? "N/A" : leader.getColor().name();
+		String occupantColor = (occupant == null) ? "N/A" : occupant.getColor().name();
+		
+		return String.format("id:%s def:%d claimed_by:%s occupants:%s : %s", ID,
+				defVal, claimedBy, occupantColor, Arrays.toString(occupantSizes));
 	}
 }

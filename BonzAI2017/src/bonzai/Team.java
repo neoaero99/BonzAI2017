@@ -77,6 +77,16 @@ public class Team extends Entity<Team> {
 	}
 	
 	/**
+	 * Determines if the given team is equivalent to this.
+	 * 
+	 * @param t
+	 * @return
+	 */
+	public boolean equals(Team t) {
+		return color.equals(t.getColor());
+	}
+	
+	/**
 	 * Returns a String representation of the Team object,
 	 * containing this team's color and score.
 	 * 

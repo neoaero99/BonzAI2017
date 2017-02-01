@@ -64,4 +64,10 @@ public class SoldierData {
 			posID = s.getPositionID();
 		}
 	}
+	
+	@Override
+	public String toString() {
+		return String.format("leader:%s state:%s size:%d pos:%s",
+				leader.getColor(), state, size, posID);
+	}
 }

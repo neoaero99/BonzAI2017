@@ -94,16 +94,7 @@ public class Soldier extends JComponent {
 		state = SoldierState.STANDBY;
 		
 		this.posID = posID;
-		given_path = null;
-	}
-	
-	public void gotoNext(CastlesMap map) {
-		if(state != SoldierState.MOVING || given_path == null || given_path.size() <= 1) {
-			return;
-		}
-		
-		given_path.remove(0);
-		posID = given_path.get(0);
+		given_path = new ArrayList<String>();
 	}
 	
 	public static void quickSort(List<Soldier> s){
@@ -137,7 +128,7 @@ public class Soldier extends JComponent {
 	}
 
 	public void setValue(int value) {
-		this.value = Math.max(0, this.value + value);
+		this.value = Math.max(0, value);
 	}
 
 	public SoldierState getState() {
@@ -155,6 +146,21 @@ public class Soldier extends JComponent {
 	public ArrayList<String> getPath() {
 		return given_path;
 	}
+	
+	/**
+	 * 
+	 * @return	The ID of the previous position of the soldier, or null if the
+	 * 			soldier did not move
+	 */
+	public String updatePositionID() {
+		if (state == SoldierState.MOVING && given_path.size() > 1) {
+			String oldID = given_path.remove(0);
+			posID = given_path.get(0);
+			return oldID;
+		}
+		
+		return null;
+	}
 
 	public String getPositionID() {
 		return posID;
@@ -170,5 +176,11 @@ public class Soldier extends JComponent {
 		temp.state = state;
 		
 		return temp;
+	}
+	
+	@Override
+	public String toString() {
+		return String.format("leader:%s state:%s val:%d pos:%s",
+				leader.getColor(), state, value, posID);
 	}
 }

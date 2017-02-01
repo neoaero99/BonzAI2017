@@ -2,6 +2,7 @@ package Castles.api;
 
 import java.awt.Graphics2D;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -63,8 +64,7 @@ public class Turn {
 		this.currentTeam = teamNumber;
 		this.turnNumber = turnNumber;
 
-		//Clone the old map (so we can retain history)
-		this.map = new CastlesMap(map);
+		this.map = map;
 		teamSoldiers = new HashMap<Color, HashMap<String, SoldierData>>();
 		teamPositions = new HashMap<Color, HashMap<String, PositionData>>();
 		unclaimedPositions = new HashMap<String, PositionData>();
@@ -152,22 +152,55 @@ public class Turn {
 	 * @param args	Unused
 	 */
 	public static void main(String[] args) {
-		/**
-		 * TODO
-		 * 	Build a test map
-		 * 	Add graph elements
-		 * 	Add soldiers
-		 * 	Apply actions
-		 * 	Develop test print methods
-		 */
 		
 		try {
 			CastlesMap map = Parser.parseFile("scenarios/testmap.dat");
+			ArrayList<Team> teams = (ArrayList<Team>) map.getTeams();
+			
+			Soldier s0 = new Soldier(teams.get(0), 5, "P0");
+			Soldier s1 = new Soldier(teams.get(1), 3, "P1");
+			
+			ArrayList<String> path0 = new ArrayList<String>();
+			path0.add("P0");
+			path0.add("C0");
+			path0.add("V0");
+			
+			s0.setPath(path0);
+			s0.setState(SoldierState.MOVING);
+			
+			map.addSoldiers(s0);
+			map.addSoldiers(s1);
+			
 			Turn t = new Turn(0, 1, map);
-		
+			t.outputState();
+			
+			Turn nextT = t.apply(new ArrayList<Action>());
+			nextT.outputState();
+			
 		} catch (Exception Ex) {
 			Ex.printStackTrace();
 		}
+	}
+	
+	/**
+	 * Outputs the data associated with the Turn to the console.
+	 */
+	private void outputState() {
+		Collection<HashMap<String, SoldierData>> soldierGroups = teamSoldiers.values();
+		
+		for (HashMap<String, SoldierData> groups : soldierGroups) {
+			System.out.printf("%s\n", groups);
+		}
+		System.out.println();
+		
+		Collection<HashMap<String, PositionData>> claimed = teamPositions.values();
+		
+		for (HashMap<String, PositionData> positions : claimed) {
+			System.out.printf("%s\n", positions);
+		}
+		System.out.println();
+		
+		System.out.printf("%s\n\n\n", unclaimedPositions);
 	}
 	
 	/**
@@ -277,8 +310,12 @@ public class Turn {
 	 * @return - true if the Action is valid for the current gamestate,
 	 * 			 false otherwise
 	 */
-	public boolean isValid(Action action) {
+	public boolean isValid(Team team, Action action) {
 		//TODO 2017: This is important for us and competitors.
+		
+		if (team == null || action == null) {
+			return false;
+		}
 		
 		if (action instanceof ShoutAction) {
 			return true;
@@ -292,7 +329,7 @@ public class Turn {
 				RallyPoint prev = map.getPosition(pathIDs.get(0));
 				Soldier target = prev.getOccupant(move.getSoldierIdx());
 				
-				if (prev != null && target != null &&
+				if (target.getLeader().equals(team) && prev != null && target != null &&
 						target.getValue() > move.getSplitAmount()) {
 					/* The positions in the path must exist and form a chain of
 					 * adjacent positions */
@@ -313,9 +350,14 @@ public class Turn {
 			/* The position must exist and have a soldier group and you can
 			 * only command soldiers to move or halt */
 			RallyPoint r = map.getPosition(update.getSrcID());
-			return r != null && r.getOccupant(update.getSoldierIdx()) != null &&
-					(update.getState() == SoldierState.MOVING ||
-					update.getState() == SoldierState.STANDBY);
+			
+			if (r != null) {
+				Soldier target = r.getOccupant(update.getSoldierIdx());
+				
+				return target != null && target.getLeader().equals(team) &&
+						(update.getState() == SoldierState.MOVING ||
+						update.getState() == SoldierState.STANDBY);
+			}
 		}
 
 		return false;
@@ -342,46 +384,44 @@ public class Turn {
 	public Turn apply(List<Action> actions) {
 		
 		//TODO 2017: This is where we applied each action from the playing ai's. This is an example of our process. 
-		// Most of the game logic goes here. 
-		
-		int oldID = this.currentTeam;
+		// Most of the game logic goes here.
 
 		/**
 		 * Clones soldiers and graph elements into the new map. Also, updates
 		 * reinforcements.
 		 */
-		CastlesMap map = new CastlesMap(this.map);
+		CastlesMap newMap = new CastlesMap(map);
 
 		// Store the teams whose action failed
 		LinkedList<Team> failedTeams = new LinkedList<Team>();
 
-		currentTeam = 0;
+		int teamID = 0;
 		
 		/**
 		 * Resolve all actions
 		 */
 		for (Action action : actions) {
 			//TODO Actions are Handled here
-			if (isValid(action)) {
+			if (isValid(teams.get(teamID), action)) {
 				if (action instanceof ShoutAction) {
 					shoutActions.add((ShoutAction)action);
 					
 				} else if (action instanceof MoveAction) {
 					MoveAction move = (MoveAction)action;
 					ArrayList<String> path = move.getPathIDs();
-					RallyPoint src = map.getPosition(path.get(0));
+					RallyPoint src = newMap.getPosition(path.get(0));
 					/* Split off a group of soldiers and give them the path
 					 * specified by the move action */
 					Soldier s = src.getOccupant(move.getSoldierIdx());
-					Soldier partition = map.splitSoliders(s, move.getSplitAmount(), path);
+					Soldier partition = newMap.splitSoliders(s, move.getSplitAmount(), path);
 					partition.setState(SoldierState.MOVING);
-					map.addSoldiers(partition);
+					newMap.addSoldiers(partition);
 					
 					moveActions.add(move);
 					
 				} else if (action instanceof UpdateAction) {
 					UpdateAction update = (UpdateAction)action;
-					RallyPoint src = map.getPosition(update.getSrcID());
+					RallyPoint src = newMap.getPosition(update.getSrcID());
 					Soldier target = src.getOccupant(update.getSoldierIdx());
 					
 					target.setState(update.getState());
@@ -390,35 +430,22 @@ public class Turn {
 				}
 				
 			} else {
-				// TODO Write code for an invalid action
+				// TODO Add AI to failedTeams list
 			}
 
-			currentTeam++;
+			teamID++;
 		}
 
-		//Generate the new Turn object. We apply any earned points onto this new Turn.
-		Turn newTurn = new Turn(this, oldID, map, failedTeams);
+		// TODO apply any earned points onto this new Turn.
 		
-		/**
-		 * All active soldiers move one space on this designated path.
-		 */
-		for (Team team : this.getAllTeams()) {
-			currentTeam = team.getID();
-			
-			ArrayList<Soldier>[] soldiers =map.getSoldiers();
-			for(int i=0;i<6;i++){
-				for(Soldier s:soldiers[i]){
-					s.gotoNext(map);
-		 		}
-		 	}
-		}
+		newMap.moveSoldiers();
 		
 		/**
 		 * Resolve any soldier conflicts and building occupations
 		 */
-		ArrayList<RallyPoint> rally = map.getAllPositions();
+		ArrayList<RallyPoint> rally = newMap.getAllPositions();
 		for (RallyPoint r: rally) {
-			map.mergeSoldiers(r.onPoint,r);
+			//newMap.mergeSoldiers(r.onPoint, r);
 			
 			/* Determine if the remaining soldiers on a position can capture an
 			 * unclaimed or enemy position. */
@@ -429,7 +456,7 @@ public class Turn {
 				if (occupants.size() > 0) {
 					Team leader = occupants.get(0).getLeader();
 					
-					if (b.getColor() == null || !b.getColor().equals(leader.getColor())) {
+					if (b.getTeam() == null || !b.getTeam().equals(leader)) {
 						int occupantSize = 0;
 						
 						for (Soldier s : occupants) {
@@ -443,12 +470,16 @@ public class Turn {
 						}
 					}
 				}
+				
+				Soldier s = b.reinforce();
+				
+				if (s != null) {
+					newMap.addSoldiers(s);
+				}
 			}
 		}
 		
-		this.currentTeam = oldID;
-
-		return newTurn;
+		return new Turn(this, teamID, newMap, failedTeams);
 	}
 	
 	/**
