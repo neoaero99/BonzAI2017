@@ -6,7 +6,6 @@ import java.util.Arrays;
 import Castles.Objects.Building;
 import Castles.Objects.RallyPoint;
 import Castles.Objects.Soldier;
-import bonzai.Team;
 
 /**
  * Stores the information for a position on the graph, which an AI will need to
@@ -24,13 +23,13 @@ public class PositionData {
 	 * The team, who currently controls this position, or null if it is
 	 * unclaimed
 	 */
-	public final Team leader;
+	public final Color leader;
 	
 	/**
 	 * The team, who has soldiers currently occupying this position, or null if
 	 * no soldiers exists at this position.
 	 */
-	public final Team occupant;
+	public final Color occupant;
 	
 	/**
 	 * The bonus given to the defending team's soldiers, if this position is
@@ -60,7 +59,7 @@ public class PositionData {
 			ID = r.ID;
 			
 			if (r instanceof Building) {
-				leader = ((Building)r).getTeam();
+				leader = ((Building)r).getTeamColor();
 				defVal = ((Building)r).defenseValue;
 				
 			} else {
@@ -75,13 +74,13 @@ public class PositionData {
 				occupantSizes[idx] = occupants.get(idx).getValue();
 			}
 			
-			occupant = (occupants.size() == 0) ? null : occupants.get(0).getLeader();
+			occupant = (occupants.size() == 0) ? null : occupants.get(0).getLeaderColor();
 		}
 	}
 	
 	public String toString() {
-		String claimedBy = (leader == null) ? "N/A" : leader.getColor().name();
-		String occupantColor = (occupant == null) ? "N/A" : occupant.getColor().name();
+		String claimedBy = (leader == null) ? "N/A" : leader.name();
+		String occupantColor = (occupant == null) ? "N/A" : occupant.name();
 		
 		return String.format("id:%s def:%d claimed_by:%s occupants:%s : %s", ID,
 				defVal, claimedBy, occupantColor, Arrays.toString(occupantSizes));

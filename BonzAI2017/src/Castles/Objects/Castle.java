@@ -1,14 +1,14 @@
 package Castles.Objects;
 
-import bonzai.Team;
+import Castles.api.Color;
 
 public class Castle extends Building {
 
-	public Castle(int x, int y, String id, Team c) {
+	public Castle(int x, int y, String id, Color c) {
 		super(x, y, id, c, 5, 3);
 	}
 	
-	public Castle(int x, int y, String id, Team c, int defVal, int soldSpawnRate) {
+	public Castle(int x, int y, String id, Color c, int defVal, int soldSpawnRate) {
 		super(x, y, id, c, defVal, soldSpawnRate);
 	}
 }

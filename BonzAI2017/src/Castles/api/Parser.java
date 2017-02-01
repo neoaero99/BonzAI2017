@@ -64,7 +64,7 @@ public class Parser {
 				case PARSE_PLAYER:
 					Team newTeam = new Team(Castles.api.Color.values()[teams.size()], teams.size());
 					teams.add(newTeam);
-					r = new Castle(Integer.parseInt(row[0]), Integer.parseInt(row[1]), row[2], newTeam);
+					r = new Castle(Integer.parseInt(row[0]), Integer.parseInt(row[1]), row[2], newTeam.getColor());
 					graphElements.put(r.ID, r);
 					vertices.add(new Vertex(r.ID));
 					break;

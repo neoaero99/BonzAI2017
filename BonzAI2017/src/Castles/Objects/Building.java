@@ -1,26 +1,24 @@
 package Castles.Objects;
 
-import java.util.ArrayList;
-
-import bonzai.Team;
+import Castles.api.Color;
 
 public class Building extends RallyPoint {
 	
 	public final int defenseValue;         // how strong is the castle?
 	public final int soldierCreationRate;  // number of soldiers being produced (more details needed!)
 	
-	private Team myTeam;
+	private Color myTeamColor;
 	
-	public Building(int x, int y, String id, Team newTeam, int defValue, int soldSpawnRate) {
+	public Building(int x, int y, String id, Color teamColor, int defValue, int soldSpawnRate) {
 		super(x, y, id);
 		
-		myTeam = newTeam;
+		myTeamColor = teamColor;
 		defenseValue = defValue;
 		soldierCreationRate = soldSpawnRate;
 	}
 	
-	public Castles.api.Color getColor() {
-		return myTeam == null ? null : myTeam.getColor();
+	public Color getTeamColor() {
+		return myTeamColor;
 	}
 	
 	/**
@@ -35,17 +33,17 @@ public class Building extends RallyPoint {
 	 */
 	public Soldier reinforce() {
 				
-		if (myTeam != null) {
+		if (myTeamColor != null) {
 			/* Add the reinforcements to an already existing soldier group or add a
 			 * new soldier group. */
-			if (onPoint.size() > 0 && onPoint.get(0).getLeader().getColor().equals(myTeam.getColor())) {
+			if (onPoint.size() > 0 && onPoint.get(0).getLeaderColor().equals(myTeamColor)) {
 				Soldier occupant = onPoint.get(0);
 				occupant.setValue(occupant.getValue() + soldierCreationRate);
 				return null;
 				
 			} else {
 				// Create a new soldier and return it to be added to the map
-				Soldier newSoldier = new Soldier(myTeam, soldierCreationRate, ID);
+				Soldier newSoldier = new Soldier(myTeamColor, soldierCreationRate, ID);
 				return newSoldier;
 			}
 		}
@@ -56,17 +54,12 @@ public class Building extends RallyPoint {
 	@Override
 	public RallyPoint copy() {
 		Building copy = new Building(getPosition().getX(), getPosition().getY(),
-				ID, myTeam, defenseValue, soldierCreationRate);
+				ID, myTeamColor, defenseValue, soldierCreationRate);
 		
 		return copy;
 	}
-	
-	public Team getTeam(){
-		return myTeam;
-	}
 
-	public void setTeam(Team leader) {
-		myTeam=leader;
-		
+	public void setTeamColor(Color teamColor) {
+		myTeamColor = teamColor;
 	}
 }

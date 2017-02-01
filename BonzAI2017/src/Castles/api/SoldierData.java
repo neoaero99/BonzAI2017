@@ -3,7 +3,6 @@ package Castles.api;
 import java.util.ArrayList;
 import Castles.Objects.Soldier;
 import Castles.Objects.SoldierState;
-import bonzai.Team;
 
 /**
  * Stores the data associated with a soldier, that an AI needs to know
@@ -14,7 +13,7 @@ public class SoldierData {
 	/**
 	 * The team, to which this soldier group belongs
 	 */
-	public final Team leader;
+	public final Color leader;
 	
 	/**
 	 * The current state of the soldier group
@@ -50,7 +49,7 @@ public class SoldierData {
 			path = null;
 			
 		} else {
-			leader = s.getLeader();
+			leader = s.getLeaderColor();
 			size = s.getValue();
 			state = s.getState();
 			
@@ -68,6 +67,6 @@ public class SoldierData {
 	@Override
 	public String toString() {
 		return String.format("leader:%s state:%s size:%d pos:%s",
-				leader.getColor(), state, size, posID);
+				leader, state, size, posID);
 	}
 }

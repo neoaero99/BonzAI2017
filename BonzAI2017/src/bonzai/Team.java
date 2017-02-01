@@ -19,14 +19,6 @@ public class Team extends Entity<Team> {
 		this.score = 0;
 	}
 	
-	/**This does nothing for players
-	 * 
-	 * @param name
-	 */
-	public void setName(String name) {
-		this.name = name;
-	}
-	
 	/**
 	 * Copy constructor
 	 * 
@@ -40,6 +32,14 @@ public class Team extends Entity<Team> {
 		this.uid = copy.getID();
 		this.score = score;
 		this.name = copy.name;
+	}
+	
+	/**This does nothing for players
+	 * 
+	 * @param name
+	 */
+	public void setName(String name) {
+		this.name = name;
 	}
 	
 	public String getName() {

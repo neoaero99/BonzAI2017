@@ -29,7 +29,6 @@ public class Turn {
 	private final HashMap<Color, HashMap<String, PositionData>> teamPositions;
 	private final HashMap<String, PositionData> unclaimedPositions;
 	
-	final ArrayList<Team> teams;
 	final ArrayList<Boolean> success;
 	final int turnNumber;
 
@@ -73,7 +72,7 @@ public class Turn {
 		moveActions = new ArrayList<MoveAction>();
 		updateActions = new ArrayList<UpdateAction>();
 
-		teams = (ArrayList<Team>) map.getTeams();
+		List<Team> teams = map.getTeams();
 		success = new ArrayList<Boolean>();
 		
 		for (Team t : teams) {
@@ -102,8 +101,8 @@ public class Turn {
 			if (r instanceof Building) {
 				Building b = (Building)r;
 				
-				if (b.getColor() != null) {
-					teamPositions.get(b.getColor()).put(p.ID, p);
+				if (b.getTeamColor() != null) {
+					teamPositions.get(b.getTeamColor()).put(p.ID, p);
 					
 				} else {
 					unclaimedPositions.put(p.ID, p);
@@ -142,7 +141,7 @@ public class Turn {
 		this.MAX_TURNS = turn.MAX_TURNS;
 
 		for (Team t : failedActions) {
-			success.set(t.getID(), false);
+			//success.set(t.getID(), false);
 		}
 	}
 	
@@ -157,8 +156,8 @@ public class Turn {
 			CastlesMap map = Parser.parseFile("scenarios/testmap.dat");
 			ArrayList<Team> teams = (ArrayList<Team>) map.getTeams();
 			
-			Soldier s0 = new Soldier(teams.get(0), 5, "P0");
-			Soldier s1 = new Soldier(teams.get(1), 3, "P1");
+			Soldier s0 = new Soldier(teams.get(0).getColor(), 6, "P0");
+			Soldier s1 = new Soldier(teams.get(1).getColor(), 3, "P1");
 			
 			ArrayList<String> path0 = new ArrayList<String>();
 			path0.add("P0");
@@ -329,7 +328,7 @@ public class Turn {
 				RallyPoint prev = map.getPosition(pathIDs.get(0));
 				Soldier target = prev.getOccupant(move.getSoldierIdx());
 				
-				if (target.getLeader().equals(team) && prev != null && target != null &&
+				if (target.getLeaderColor().equals(team) && prev != null && target != null &&
 						target.getValue() > move.getSplitAmount()) {
 					/* The positions in the path must exist and form a chain of
 					 * adjacent positions */
@@ -354,7 +353,7 @@ public class Turn {
 			if (r != null) {
 				Soldier target = r.getOccupant(update.getSoldierIdx());
 				
-				return target != null && target.getLeader().equals(team) &&
+				return target != null && target.getLeaderColor().equals(team) &&
 						(update.getState() == SoldierState.MOVING ||
 						update.getState() == SoldierState.STANDBY);
 			}
@@ -385,7 +384,7 @@ public class Turn {
 		
 		//TODO 2017: This is where we applied each action from the playing ai's. This is an example of our process. 
 		// Most of the game logic goes here.
-
+		
 		/**
 		 * Clones soldiers and graph elements into the new map. Also, updates
 		 * reinforcements.
@@ -394,6 +393,7 @@ public class Turn {
 
 		// Store the teams whose action failed
 		LinkedList<Team> failedTeams = new LinkedList<Team>();
+		List<Team> teams = newMap.getTeams();
 
 		int teamID = 0;
 		
@@ -430,7 +430,7 @@ public class Turn {
 				}
 				
 			} else {
-				// TODO Add AI to failedTeams list
+				failedTeams.add(teams.get(teamID));
 			}
 
 			teamID++;
@@ -454,9 +454,9 @@ public class Turn {
 				ArrayList<Soldier> occupants = r.getOccupants();
 				
 				if (occupants.size() > 0) {
-					Team leader = occupants.get(0).getLeader();
+					Color leaderColor = occupants.get(0).getLeaderColor();
 					
-					if (b.getTeam() == null || !b.getTeam().equals(leader)) {
+					if (b.getTeamColor() == null || b.getTeamColor() != leaderColor) {
 						int occupantSize = 0;
 						
 						for (Soldier s : occupants) {
@@ -466,7 +466,7 @@ public class Turn {
 						 * the defense value of the position in order to
 						 * capture it */
 						if (occupantSize > b.defenseValue) {
-							b.setTeam(leader);
+							b.setTeamColor(leaderColor);
 						}
 					}
 				}

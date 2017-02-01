@@ -6,11 +6,7 @@ import java.util.List;
 
 import javax.swing.JComponent;
 
-import Castles.api.CastlesMap;
-import Castles.util.graph.CastlesMapGraph;
-import Castles.util.graph.Node;
-import Castles.util.graph.Vertex;
-import bonzai.*;
+import Castles.api.Color;
 
 /**
  * Class:	Soldier.java
@@ -61,7 +57,7 @@ public class Soldier extends JComponent {
 	
 	private static final long serialVersionUID = 3166707557130028703L;
 	
-	private Team leader;
+	private Color leaderColor;
 	// The combat value this unit has
 	private int value;
 	// The current status of the soldier (always defaults to standby)
@@ -88,8 +84,8 @@ public class Soldier extends JComponent {
 	 * 
 	 * @author David Mohrhardt
 	 */
-	public Soldier(Team t, int iniVal, String posID) {
-		leader = t;
+	public Soldier(Color teamColor, int iniVal, String posID) {
+		leaderColor = teamColor;
 		value = iniVal;
 		state = SoldierState.STANDBY;
 		
@@ -115,12 +111,8 @@ public class Soldier extends JComponent {
 		quickSort(s.subList(part+1, s.size()));
 	}
 	
-	public Team getLeader() {
-		return leader;
-	}
-
-	public void setLeader(Team leader) {
-		this.leader = leader;
+	public Color getLeaderColor() {
+		return leaderColor;
 	}
 
 	public int getValue() {
@@ -167,7 +159,7 @@ public class Soldier extends JComponent {
 	}
 	
 	public Soldier copy(){
-		Soldier temp = new Soldier(leader, value, posID);
+		Soldier temp = new Soldier(leaderColor, value, posID);
 		
 		if (given_path != null) {
 			temp.given_path = new ArrayList<String>(given_path);
@@ -181,6 +173,6 @@ public class Soldier extends JComponent {
 	@Override
 	public String toString() {
 		return String.format("leader:%s state:%s val:%d pos:%s",
-				leader.getColor(), state, value, posID);
+				leaderColor, state, value, posID);
 	}
 }
