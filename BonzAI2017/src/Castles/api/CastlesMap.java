@@ -1,19 +1,15 @@
 package Castles.api;
 
-import java.awt.Graphics;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 
-import Castles.CastlesRenderer;
 import Castles.Objects.Building;
 import Castles.Objects.RallyPoint;
 import Castles.Objects.Soldier;
 import Castles.Objects.SoldierState;
 import Castles.util.graph.IDPair;
-import Castles.util.graph.Node;
 import Castles.util.graph.SegEdge;
 import Castles.util.graph.Vertex;
 import Castles.util.graph.CastlesMapGraph;
@@ -40,7 +36,8 @@ public class CastlesMap {
 	
 	@SuppressWarnings("unchecked")
 	public CastlesMap(HashMap<String, String> f, HashMap<String, RallyPoint> ge,
-			CastlesMapGraph g, ArrayList<Team> t, int w, int h) {
+			ArrayList<Soldier> initialSoldiers, CastlesMapGraph g, ArrayList<Team> t,
+			int w, int h) {
 		
 		width = w;
 		height = h;
@@ -56,8 +53,12 @@ public class CastlesMap {
 		teams = t;
 		
 		soldiers = (ArrayList<Soldier>[])new ArrayList[6];
-		for(int i=0;i<6;i++){
+		for(int i=0;i<6;i++) {
 			soldiers[i]=new ArrayList<Soldier>();
+		}
+		
+		for (Soldier s : initialSoldiers) {
+			addSoldiers(s);
 		}
 	}
 
@@ -92,9 +93,7 @@ public class CastlesMap {
 			ArrayList<Soldier> occupants = r.getOccupants();
 			// Add the soldiers to the list of soldier references
 			for (Soldier s : occupants) {
-				Soldier sCopy = s.copy();
-				rCopy.addOccupant(sCopy);
-				soldiers[s.getLeaderColor().ordinal()].add(sCopy);
+				addSoldiers( s.copy() );
 			}
 		}
 	}
@@ -217,10 +216,31 @@ public class CastlesMap {
 	 * @param s the soldier to add
 	 */
 	protected void addSoldiers(Soldier s) {
-		soldiers[s.getLeaderColor().ordinal()].add(s);
+		if (s != null) {
+			// Add to team soldiers list
+			soldiers[s.getLeaderColor().ordinal()].add(s);
+			// Add to the initial position
+			getPosition(s.getPositionID()).addOccupant(s);
+		}
+
+	}
+	
+	/**
+	 * Removes a soldier from the map
+	 * 
+	 * @param s	The soldier group to remove from the map
+	 */
+	private void removeSoldiers(Soldier s) {
 		
-		RallyPoint r = getPosition(s.getPositionID());
-		r.addOccupant(s);
+		/* PLEASR DAN, USE THIS METHOD! I BEG OF YOU!
+		 *      - JOSHUA */
+		
+		if (s != null) {
+			// Remove from the team soldiers list
+			soldiers[s.getLeaderColor().ordinal()].remove(s);
+			// Remove from the current position 
+			getPosition(s.getPositionID()).removeOccupant(s);
+		}
 	}
 	
 	/**
@@ -262,22 +282,21 @@ public class CastlesMap {
 		else{
 			newPath=path;
 		}
-		if(num<s.getValue()){
+		if(num > 0 && num < s.getValue()){
 			Soldier split = new Soldier(s.getLeaderColor(), num, s.getPositionID());
+			
 			split.setState(SoldierState.MOVING);
 			split.setPath(newPath);
 			s.setValue(s.getValue()-num);
+			
 			addSoldiers(split);
-		return split;
+			
+			return split;
 		}
-		else{
-			Soldier split = new Soldier(s.getLeaderColor(), s.getValue(), s.getPositionID());
-			split.setState(SoldierState.MOVING);
-			s=null;
-			soldiers[s.getLeaderColor().ordinal()].remove(s);
-			graphElements.get(s.getPositionID()).onPoint.remove(s);
-			addSoldiers(split);
-			split.setPath(newPath);
+		else if (num == s.getValue()) {
+			// Redefine the path for the entire soldier group
+			s.setPath(newPath);
+			s.setState(SoldierState.MOVING);
 		}
 		return null;
 	}
@@ -410,6 +429,9 @@ public class CastlesMap {
 			}
 			return temp;
 		}
+		/* TODO This will not work
+		 * Since the Building class extends RallyPoint, "r instanceof RallyPoint"
+		 * will return true for all Building objects */
 		if(r instanceof RallyPoint){
 			int num[]=new int[6];
 			int total[]=new int[6];
@@ -496,6 +518,7 @@ public class CastlesMap {
 			return 5;
 		}
 	}
+	
 	/**
 	 * 
 	 * @param r: A rally point

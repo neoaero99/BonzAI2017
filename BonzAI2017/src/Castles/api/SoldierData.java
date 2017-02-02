@@ -1,6 +1,9 @@
 package Castles.api;
 
+import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.List;
+
 import Castles.Objects.Soldier;
 import Castles.Objects.SoldierState;
 
@@ -33,7 +36,7 @@ public class SoldierData {
 	/**
 	 * The path, which this soldier will move along, when in the MOVING state.
 	 */
-	public final ArrayList<String> path;
+	public final List<String> path;
 	
 	/**
 	 * Copies the data of the given soldier group to this.

@@ -154,24 +154,22 @@ public class Turn {
 			CastlesMap map = Parser.parseFile("scenarios/testmap.dat");
 			ArrayList<Team> teams = (ArrayList<Team>) map.getTeams();
 			
-			Soldier s0 = new Soldier(teams.get(0).getColor(), 6, "P0");
-			Soldier s1 = new Soldier(teams.get(1).getColor(), 3, "P1");
-			
 			ArrayList<String> path0 = new ArrayList<String>();
 			path0.add("P0");
 			path0.add("C0");
 			path0.add("V0");
 			
-			s0.setPath(path0);
-			s0.setState(SoldierState.MOVING);
-			
-			map.addSoldiers(s0);
-			map.addSoldiers(s1);
-			
 			Turn t = new Turn(0, 1, map);
 			t.outputState();
 			
-			Turn nextT = t.apply(new ArrayList<Action>());
+			ArrayList<Action> actions = new ArrayList<Action>();
+			
+			ArrayList<SoldierData> soldierSet = t.getSoldiersAt("P0");
+			SoldierData s0 = soldierSet.get(0);
+			
+			actions.add(new MoveAction(0, s0.size, path0));
+			
+			Turn nextT = t.apply(actions);
 			nextT.outputState();
 			
 		} catch (Exception Ex) {
@@ -525,11 +523,8 @@ public class Turn {
 					/* Split off a group of soldiers and give them the path
 					 * specified by the move action */
 					Soldier s = src.getOccupant(move.getSoldierIdx());
-					Soldier partition = newMap.splitSoliders(s, move.getSplitAmount(),
+					newMap.splitSoliders(s, move.getSplitAmount(),
 							new ArrayList<String>(path));
-					
-					partition.setState(SoldierState.MOVING);
-					newMap.addSoldiers(partition);
 					
 					moveActions.add(move);
 					

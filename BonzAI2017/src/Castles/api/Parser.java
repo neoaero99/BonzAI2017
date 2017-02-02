@@ -10,7 +10,6 @@ import Castles.util.graph.SegEdge;
 import Castles.util.graph.Vertex;
 import Castles.util.VectorND;
 import Castles.util.graph.CastlesMapGraph;
-import Castles.util.linkedlist.DualLinkList;
 import bonzai.Position;
 import bonzai.Team;
 
@@ -35,6 +34,7 @@ public class Parser {
 		HashMap<String, String> fields = new HashMap<String, String>();
 		
 		HashMap<String, RallyPoint> graphElements = new HashMap<String, RallyPoint>();
+		ArrayList<Soldier> iniSoldiers = new ArrayList<Soldier>();
 		
 		ArrayList<Vertex> vertices = new ArrayList<Vertex>();
 		ArrayList<SegEdge> edges = new ArrayList<SegEdge>();
@@ -62,9 +62,15 @@ public class Parser {
 
 				switch(parse_mode) {
 				case PARSE_PLAYER:
+					// Create the player's team
 					Team newTeam = new Team(Castles.api.Color.values()[teams.size()], teams.size());
 					teams.add(newTeam);
+					// Create the player's initial castle
 					r = new Castle(Integer.parseInt(row[0]), Integer.parseInt(row[1]), row[2], newTeam.getColor());
+					// Create the player's initial soldier group
+					Soldier iniTeamGroup = new Soldier(newTeam.getColor(), 5, r.ID);
+					iniSoldiers.add(iniTeamGroup);
+					// Add the castle to the map
 					graphElements.put(r.ID, r);
 					vertices.add(new Vertex(r.ID));
 					break;
@@ -154,7 +160,8 @@ public class Parser {
 			in.close(); // RAII semantics are really useful
 		}
 		
-		return new CastlesMap(fields, graphElements, new CastlesMapGraph(vertices, edges), teams, width, height);
+		return new CastlesMap(fields, graphElements, iniSoldiers,
+				new CastlesMapGraph(vertices, edges), teams, width, height);
 	}
 	
 	private static Vertex getVertex(ArrayList<Vertex> list, String s){
