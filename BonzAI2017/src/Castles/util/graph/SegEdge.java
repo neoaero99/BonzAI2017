@@ -25,6 +25,10 @@ public class SegEdge extends Node {
 		
 		waypointIDs = new String[weight];
 		
+		for (int idx = 0; idx < weight; ++idx) {
+			waypointIDs[idx] = String.format("%s:%s", ID, idx);
+		}
+		
 		first = f;
 		second = s;
 		first.addConnection(this);
@@ -110,7 +114,7 @@ public class SegEdge extends Node {
 		char firstConnect = (first == null) ? '(' : '<';
 		char secondConnect = (second == null) ? ')' : '>';
 		
-		return String.format("%c %d %c", firstConnect, getWeight(),
+		return String.format("%c %s %d %c", firstConnect, ID, getWeight(),
 				secondConnect);
 	}
 }

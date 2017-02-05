@@ -6,11 +6,7 @@ import java.util.List;
 
 import javax.swing.JComponent;
 
-import Castles.api.CastlesMap;
-import Castles.util.graph.CastlesMapGraph;
-import Castles.util.graph.Node;
-import Castles.util.graph.Vertex;
-import bonzai.*;
+import Castles.api.Color;
 
 /**
  * Class:	Soldier.java
@@ -61,7 +57,7 @@ public class Soldier extends JComponent {
 	
 	private static final long serialVersionUID = 3166707557130028703L;
 	
-	private Team leader;
+	private Color leaderColor;
 	// The combat value this unit has
 	private int value;
 	// The current status of the soldier (always defaults to standby)
@@ -69,9 +65,8 @@ public class Soldier extends JComponent {
 	
 	// An array list that holds the IDs of all nodes in the solider's current
 	private ArrayList<String> given_path;
-	// The position of the soldier on the map (on screen)
-	private Node position;
-	private RallyPoint pos2;
+	// The ID of the position where the soldier is on the map
+	private String posID;
 	
 	static {
 		radius = 0f;
@@ -89,40 +84,13 @@ public class Soldier extends JComponent {
 	 * 
 	 * @author David Mohrhardt
 	 */
-	public Soldier(Team t, int iniVal, Node base_position) {
-		leader = t;
+	public Soldier(Color teamColor, int iniVal, String posID) {
+		leaderColor = teamColor;
 		value = iniVal;
 		state = SoldierState.STANDBY;
 		
-		position = base_position;
-		given_path = null;
-	}
-	
-	public void gotoNext(CastlesMap map) {
-		if(given_path.size()==1){
-			return;
-		}
-		CastlesMapGraph graph =map.getGraph();
-		String temp=given_path.get(0);
-		String ID =given_path.get(1);
-		RallyPoint r=map.getElement(ID);
-		Node n=graph.getVertex(ID);
-		if(n==null){
-			n=graph.getVertex(ID);
-		}
-		if(map.areAdjacent(temp, ID)){
-			return;
-		}
-		given_path.remove(0);
-		position=n;
-		pos2=r;
-		if(pos2 instanceof Building){
-			if(((Building)pos2).getColor()==null){
-				if(((Building)pos2).getDefenseValue()<value){
-					((Building)pos2).setTeam(leader);
-				}
-			}
-		}
+		this.posID = posID;
+		given_path = new ArrayList<String>();
 	}
 	
 	public static void quickSort(List<Soldier> s){
@@ -143,12 +111,8 @@ public class Soldier extends JComponent {
 		quickSort(s.subList(part+1, s.size()));
 	}
 	
-	public Team getLeader() {
-		return leader;
-	}
-
-	public void setLeader(Team leader) {
-		this.leader = leader;
+	public Color getLeaderColor() {
+		return leaderColor;
 	}
 
 	public int getValue() {
@@ -156,7 +120,7 @@ public class Soldier extends JComponent {
 	}
 
 	public void setValue(int value) {
-		this.value = value;
+		this.value = Math.max(0, value);
 	}
 
 	public SoldierState getState() {
@@ -174,22 +138,41 @@ public class Soldier extends JComponent {
 	public ArrayList<String> getPath() {
 		return given_path;
 	}
-
-	public Node getPosition() {
-		return position;
+	
+	/**
+	 * 
+	 * @return	The ID of the previous position of the soldier, or null if the
+	 * 			soldier did not move
+	 */
+	public String updatePositionID() {
+		if (state == SoldierState.MOVING && given_path.size() > 1) {
+			String oldID = given_path.remove(0);
+			posID = given_path.get(0);
+			return oldID;
+		}
+		
+		return null;
 	}
+
+	public String getPositionID() {
+		return posID;
+	}
+	
 	public Soldier copy(){
-		Soldier temp =new Soldier(leader,value,position);
-		temp.given_path=given_path;
-//		temp.pathPosition=pathPosition;
-		temp.sprite=sprite;
-		temp.state=state;
+		Soldier temp = new Soldier(leaderColor, value, posID);
+		
+		if (given_path != null) {
+			temp.given_path = new ArrayList<String>(given_path);
+		}
+		
+		temp.state = state;
+		
 		return temp;
 	}
-	public void setRallyPoint(RallyPoint r){
-		pos2=r;
-	}
-	public RallyPoint getRallyPoint(){
-		return pos2;
+	
+	@Override
+	public String toString() {
+		return String.format("leader:%s state:%s val:%d pos:%s",
+				leaderColor, state, value, posID);
 	}
 }

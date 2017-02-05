@@ -107,7 +107,7 @@ public class CastlesMapGraph {
 				if (v0 == null && v.ID.equals(connections[idx][0])) {
 					v0 = v; 
 					
-				} else if (v1 == null && v.ID.equals(connections[idx][0])) {
+				} else if (v1 == null && v.ID.equals(connections[idx][1])) {
 					v1 = v;
 				}
 			}
@@ -127,9 +127,77 @@ public class CastlesMapGraph {
 			System.out.printf("%s -> %s\n", sp, SPPathsMap.get(sp));
 		}
 		
+		Vertex v0 = vertexList.get(0),
+			   v1 = vertexList.get(1),
+			   v3 = vertexList.get(3),
+			   v5 = vertexList.get(5);
+		SegEdge e5 = edgeList.get(5),
+				e6 = edgeList.get(6);
+		
+		System.out.printf("%s, %s : %b\n", v0, v1, g.areAdjacent(v0.ID, v1.ID));
+		System.out.printf("%s, %s : %b\n", v0, v3, g.areAdjacent(v0.ID, v3.ID));
+		System.out.printf("%s, %s : %b\n", v5, e5, g.areAdjacent(v5.ID, e5.wayPointIDs()[0]));
+		System.out.printf("%s, %s : %b\n", e5, e6, g.areAdjacent(e5.wayPointIDs()[0], e6.wayPointIDs()[0]));
+		
 		/**/
 		
 		System.out.println("TEST");
+	}
+	
+	/**
+	 * TODO
+	 * 
+	 * @param rID1
+	 * @param rID2
+	 * @return
+	 */
+	public boolean areAdjacent(String rID1, String rID2) {
+		Node n1 = getVertex(rID1);
+		Node n2 = getVertex(rID2);
+		
+		if (n1 == null) {
+			n1 = getEdge(rID1);
+		}
+		
+		if (n2 == null) {
+			n2 = getEdge(rID2);
+		}
+		
+		if (n1 == null || n2 == null) {
+			return false;
+		}
+		
+		if (n1 instanceof SegEdge && n2 instanceof SegEdge) {
+			SegEdge e1 = (SegEdge)n1;
+			SegEdge e2 = (SegEdge)n2;
+			
+			if (e1 == e2) {	// Are the way points on the same edge?
+				// Are the indices of the way points 1 apart?
+				return Math.abs(e1.indexOf(rID1) - e2.indexOf(rID2)) == 1;
+			}
+			
+		} else if (n1 instanceof Vertex && n2 instanceof SegEdge) {
+			return testEdgeVertexConnection((SegEdge)n2, rID2, (Vertex)n1);
+			
+		} else if (n1 instanceof SegEdge && n2 instanceof Vertex) {
+			return testEdgeVertexConnection((SegEdge)n1, rID1, (Vertex)n2);
+		}
+		
+		return false;
+	}
+	
+	/**
+	 * TODO
+	 * 
+	 * @param e
+	 * @param wayPointID
+	 * @param v
+	 * @return
+	 */
+	private boolean testEdgeVertexConnection(SegEdge e, String wayPointID, Vertex v) {
+		int idx = e.indexOf(wayPointID);
+		return (e.isConnected(v)) && ( (idx == 0 && e.first == v)
+									|| (idx == (e.getWeight() - 1) && e.second == v) );
 	}
 	
 	/**
@@ -256,7 +324,7 @@ public class CastlesMapGraph {
 				 * the path and put the list into the map */
 				ArrayList<String> pathIDs = new ArrayList<String>();
 				
-				for (int nIdx = 0; nIdx < pathIDs.size(); ++nIdx) {
+				for (int nIdx = 0; nIdx < path.size(); ++nIdx) {
 					Node n = path.get(nIdx);
 					
 					if (n instanceof Vertex) {
@@ -279,12 +347,11 @@ public class CastlesMapGraph {
 								pathIDs.add(wpIDs[idx]);
 							}
 						}
-						
-
 					}
 					
 				}
 				
+				//System.out.printf("%s\n", pathIDs);
 				pathIDsMap.put(endpoints, pathIDs);
 			}
 		}
@@ -389,6 +456,10 @@ public class CastlesMapGraph {
 				limbo = ((SegEdge)limbo).getOpposite(lastVertex);
 			}
 		}
+		
+		if (limbo != null) {
+			path.add(start);
+		}
 
 		//System.out.println("FINISHED!");
 
@@ -398,7 +469,7 @@ public class CastlesMapGraph {
 	/**
 	 * @return	A copy of this graph
 	 */
-	public CastlesMapGraph clone() {
+	protected CastlesMapGraph clone() {
 		
 		ArrayList<Vertex> vertexCopies = new ArrayList<Vertex>();
 		ArrayList<SegEdge> edgeCopies = new ArrayList<SegEdge>();
@@ -409,7 +480,7 @@ public class CastlesMapGraph {
 		ArrayList<Vertex> vertices = vertexList();
 		for (Vertex v : vertices) {
 			Vertex vertexCopy = new Vertex(v.ID);
-			// TODO update Soldier path references
+			
 			vertexCopies.add(vertexCopy);
 			OldToNewVertex.put(v.hashCode(), vertexCopy);
 		}
