@@ -10,7 +10,6 @@ import Castles.Objects.RallyPoint;
 import Castles.Objects.Soldier;
 import Castles.Objects.SoldierState;
 import Castles.util.graph.IDPair;
-import Castles.util.graph.Node;
 import Castles.util.graph.SegEdge;
 import Castles.util.graph.Vertex;
 import Castles.util.graph.CastlesMapGraph;
@@ -21,27 +20,23 @@ public class CastlesMap {
 	
 	// TODO 2017: Read in map files here. 
 
-	private int width, height;
+	private static int width, height;
 	
-	private HashMap<String, String> fields;
+	private static HashMap<String, String> fields;
 	
-	private HashMap<String, RallyPoint> graphElements;
-	private static CastlesMapGraph graph;
-	private static HashMap<IDPair, ArrayList<String>> pathIDsMap;
+	private CastlesMapGraph graph;
+	private HashMap<IDPair, ArrayList<String>> pathIDsMap;
+	private final HashMap<String, RallyPoint> graphElements;
 	
 	private boolean[] players;
 	
 	private ArrayList<Team> teams;
 	private ArrayList<Soldier>[] soldiers;
 	
-	static {
-		graph = null;
-		pathIDsMap = null;
-	}
-	
 	@SuppressWarnings("unchecked")
 	public CastlesMap(HashMap<String, String> f, HashMap<String, RallyPoint> ge,
-			CastlesMapGraph g, ArrayList<Team> t, int w, int h) {
+			ArrayList<Soldier> initialSoldiers, CastlesMapGraph g, ArrayList<Team> t,
+			int w, int h) {
 		
 		width = w;
 		height = h;
@@ -50,148 +45,118 @@ public class CastlesMap {
 		
 		graphElements = ge;
 		graph = g;
+		
 		pathIDsMap = g.generatePaths();
 		
 		players = new boolean[] { true,true,true,true,true,true };
 		teams = t;
 		
 		soldiers = (ArrayList<Soldier>[])new ArrayList[6];
-		for(int i=0;i<6;i++){
+		for(int i=0;i<6;i++) {
 			soldiers[i]=new ArrayList<Soldier>();
+		}
+		
+		for (Soldier s : initialSoldiers) {
+			addSoldiers(s);
 		}
 	}
 
 	/**
-	 * Copy constructor
-	 * 
-	 * I WANT A WAY AROUND THIS
-	 * Moves on to the next turn
+	 * Copy constructor for a CastlesMap
 	 * 
 	 * @param previousTurn - the map of the previous turn to clone
-	 * @return 
 	 */
+	@SuppressWarnings("unchecked")
 	public CastlesMap(CastlesMap previousTurn) {
 		
-		height = previousTurn.getHeight();
-		width = previousTurn.getWidth();
+		//copy the list of teams
+		players = previousTurn.players;
+		teams = previousTurn.teams;
 		
-		//set fields
-		fields = previousTurn.getFields();
+		soldiers = (ArrayList<Soldier>[])new ArrayList[6];
+		for(int i=0;i<6;i++){
+			soldiers[i]=new ArrayList<Soldier>();
+		}
+		
+		graph = previousTurn.graph;
+		pathIDsMap = previousTurn.pathIDsMap;
 		
 		// Copy the rally points, buildings, etc.
 		graphElements = new HashMap<String, RallyPoint>();
 		Collection<RallyPoint> rallyPoints = previousTurn.graphElements.values();
 		
 		for (RallyPoint r : rallyPoints) {
-			RallyPoint temp=r.copy();
-			graphElements.put(r.ID, temp);
-			if(temp instanceof Building){
-				if(((Building)temp).getColor()!=null){
-					int rate = ((Building)temp).getRate();
-					Node n=graph.getVertex(temp.ID);
-					if(n==null){
-						n=graph.getVertex(temp.ID);
-					}
-					Soldier s = new Soldier(((Building)temp).getTeam(), rate,n);
-					addSoldiers(s);
-					temp.onPoint.add(s);
-				}
+			RallyPoint rCopy = r.copy();
+			graphElements.put(r.ID, rCopy);
+			
+			ArrayList<Soldier> occupants = r.getOccupants();
+			// Add the soldiers to the list of soldier references
+			for (Soldier s : occupants) {
+				addSoldiers( s.copy() );
 			}
 		}
-		
-		//copy the list of teams
-		players = previousTurn.getPlayers();
-		teams = (ArrayList<Team>) previousTurn.getTeams();
-		
-		soldiers = previousTurn.getSoldiers();
 	}
 	
 	/**
-	 * TODO
+	 * Returns the position, with which the given ID is associated or null if
+	 * no such position exists.
 	 * 
-	 * @param rID1
-	 * @param rID2
-	 * @return
+	 * @param ID	The ID of the position to get
+	 * @return		The position corresponding to the given ID
 	 */
-	public boolean areAdjacent(String rID1, String rID2) {
-		Node n1 = graph.getVertex(rID1);
-		Node n2 = graph.getVertex(rID2);
-		
-		if (n1 == null) {
-			n1 = graph.getEdge(rID1);
-		}
-		
-		if (n2 == null) {
-			n2 = graph.getEdge(rID2);
-		}
-		
-		if (n1 == null || n2 == null) {
-			return false;
-		}
-		
-		if (n1 instanceof Vertex && n2 instanceof Vertex) {
-			return ((Vertex)n1).isAdjacent((Vertex)n2);
-			
-		} else if (n1 instanceof SegEdge && n2 instanceof SegEdge) {
-			SegEdge e1 = (SegEdge)n1;
-			SegEdge e2 = (SegEdge)n2;
-			
-			if (e1 == e2) {	// Are the way points on the same edge?
-				// Are the indices of the way points 1 apart?
-				return Math.abs(e1.indexOf(rID1) - e2.indexOf(rID2)) == 1;
-			}
-			
-		} else if (n1 instanceof Vertex && n2 instanceof SegEdge) {
-			return testEdgeVertexConnection((SegEdge)n2, rID2, (Vertex)n1);
-			
-		} else if (n1 instanceof SegEdge && n2 instanceof Vertex) {
-			return testEdgeVertexConnection((SegEdge)n1, rID1, (Vertex)n2);
-		}
-		
-		return false;
-	}
-	
-	/**
-	 * TODO
-	 * 
-	 * @param e
-	 * @param wayPointID
-	 * @param v
-	 * @return
-	 */
-	private boolean testEdgeVertexConnection(SegEdge e, String wayPointID, Vertex v) {
-		int idx = e.indexOf(wayPointID);
-		return (e.isConnected(v)) && ( (idx == 0 && e.first == v)
-									|| (idx == (e.getWeight() - 1) && e.second == v) );
-	}
-	
-	/**
-	 * Returns a graph element based on a unique ID.
-	 * 
-	 * @param ID	The ID of the element to get
-	 * @return		The element corresponding to the given ID
-	 */
-	public RallyPoint getElement(String ID) {
+	public RallyPoint getPosition(String ID) {
 		return graphElements.get(ID);
 	}
 	
+	/**
+	 * @return	A list of positions on the map
+	 */
+	public ArrayList<RallyPoint> getAllPositions() {
+		return new ArrayList<RallyPoint>( graphElements.values() );
+	}
+	
+	/**
+	 * @return	A list of edges in the graph
+	 */
+	public ArrayList<SegEdge> edgeList() {
+		return graph.edgeList();
+	}
+	
+	/**
+	 * Determines if the positions with the given IDs are adjacent based on the
+	 * map's vertex and edge relations.
+	 * 
+	 * @param rID1	The ID of some position
+	 * @param rID2	The ID of another position
+	 * @return		If the positions of the given IDs are adjacent
+	 */
+	public boolean areAdjacent(String rID1, String rID2) {
+		return graph.areAdjacent(rID1, rID2);
+	}
+	
+	/**
+	 * 
+	 * 
+	 * @param i
+	 * @return
+	 */
 	public Position getEntity(int i) {
 		if(!players[i]){
 			return null;
 		}
 		
 		Castles.api.Color c=Castles.api.Color.values()[i];
-		ArrayList<RallyPoint> elementList = getAllElements();
+		ArrayList<RallyPoint> elementList = getAllPositions();
 		
 		for(RallyPoint r : elementList) {
 			if(r instanceof Building ){
-				if(((Building)r).getColor()==c){
-					return r.getPosition();
+				if(((Building)r).getTeamColor()==c){
+					return r.getPosition().clone();
 				}
 			}
 		}
 		return null;
-}
+	}
 	
 	/**
 	 * @param input
@@ -207,7 +172,7 @@ public class CastlesMap {
 		return fields.get(input);
 	}
 	
-	public void removePlayer(int i) {
+	protected void removePlayer(int i) {
 		players[i]=false;
 	}
 
@@ -219,28 +184,25 @@ public class CastlesMap {
 		return height;
 	}
 	
-	public CastlesMapGraph getGraph() {
-		return graph;
-	}
-	
-	/**
-	 * 
-	 * @return the players
-	 */
-	public boolean[] getPlayers(){
-		return players;
-	}
-	
-	public List<Team> getTeams(){
-		return teams;
-	}
-	
 	protected HashMap<String, String> getFields(){
 		return fields;
 	}
 	
-	public ArrayList<RallyPoint> getAllElements() {
-		return new ArrayList<RallyPoint>( graphElements.values() );
+	/**
+	 * Adds the values from the array to each respective team's score. This
+	 * method does update the references of the teams as a result.
+	 * 
+	 * @param additions
+	 */
+	protected void updateTeamScores(int[] additions) {
+		for (int idx = 0; idx < teams.size(); ++idx) {
+			Team oldRef = teams.get(idx);
+			teams.set(idx, new Team(oldRef, oldRef.getScore() + additions[idx]));
+		}
+	}
+	
+	public List<Team> getTeams() {
+		return teams;
 	}
 	
 	public ArrayList<Soldier>[] getSoldiers(){
@@ -249,10 +211,51 @@ public class CastlesMap {
 	
 	/**
 	 * Spawn a new soldier to the map
+	 * 
 	 * @param s the soldier to add
 	 */
-	protected void addSoldiers(Soldier s){
-		soldiers[s.getLeader().getID()].add(s);
+	protected void addSoldiers(Soldier s) {
+		if (s != null) {
+			// Add to team soldiers list
+			soldiers[s.getLeaderColor().ordinal()].add(s);
+			// Add to the initial position
+			getPosition(s.getPositionID()).addOccupant(s);
+		}
+
+	}
+	
+	/**
+	 * Removes a soldier from the map
+	 * 
+	 * @param s	The soldier group to remove from the map
+	 */
+	private void removeSoldiers(Soldier s) {
+		
+		/* PLEASR DAN, USE THIS METHOD! I BEG OF YOU!
+		 *      - JOSHUA */
+		
+		if (s != null) {
+			// Remove from the team soldiers list
+			soldiers[s.getLeaderColor().ordinal()].remove(s);
+			// Remove from the current position 
+			getPosition(s.getPositionID()).removeOccupant(s);
+		}
+	}
+	
+	/**
+	 * Moves all active soldiers one position across their designated path.
+	 */
+	protected void moveSoldiers() {
+		for (ArrayList<Soldier> soldierGroup : soldiers) {
+			for (Soldier s : soldierGroup) {
+				String oldPosID = s.updatePositionID();
+				
+				if (oldPosID != null) {
+					getPosition(oldPosID).removeOccupant(s);
+					getPosition(s.getPositionID()).addOccupant(s);
+				}
+			}
+		}
 	}
 	
 	/**
@@ -263,8 +266,14 @@ public class CastlesMap {
 	 * @return the second soldier
 	 */
 	public Soldier splitSoliders(Soldier s, int num,ArrayList<String> path){
+		if (s.getValue() == 0) {
+			// This should never be true!
+			return null;
+		}
+		
 		ArrayList<String> newPath=new ArrayList<String>();
-		if(path.get(0)!=s.getPosition().ID){
+		
+		if(path.get(0)!=s.getPositionID()){
 			for(String t: path){
 				newPath.add(t);
 			}
@@ -272,24 +281,21 @@ public class CastlesMap {
 		else{
 			newPath=path;
 		}
-		if(num<s.getValue()){
-			Soldier split = new Soldier(s.getLeader(), num, s.getPosition());
+		if(num > 0 && num < s.getValue()){
+			Soldier split = new Soldier(s.getLeaderColor(), num, s.getPositionID());
+			
 			split.setState(SoldierState.MOVING);
-			split.setRallyPoint(graphElements.get(s.getPosition().ID));
 			split.setPath(newPath);
 			s.setValue(s.getValue()-num);
+			
 			addSoldiers(split);
-		return split;
+			
+			return split;
 		}
-		else{
-			Soldier split = new Soldier(s.getLeader(), s.getValue(), s.getPosition());
-			split.setState(SoldierState.MOVING);
-			split.setRallyPoint(graphElements.get(s.getPosition().ID));
-			s=null;
-			soldiers[s.getLeader().getID()].remove(s);
-			s.getRallyPoint().onPoint.remove(s);
-			addSoldiers(split);
-			split.setPath(newPath);
+		else if (num == s.getValue()) {
+			// Redefine the path for the entire soldier group
+			s.setPath(newPath);
+			s.setState(SoldierState.MOVING);
 		}
 		return null;
 	}
@@ -307,16 +313,16 @@ public class CastlesMap {
 	 * 			 4:s1 and s2 have both been deleted
 	 */
 	private int mergeSoldiers(Soldier s1, Soldier s2, RallyPoint r){
-		if(!s1.getPosition().equals(s2.getPosition())){
+		if(!s1.getPositionID().equals(s2.getPositionID())){
 			return -1;
 		}
-		if(s1.getLeader().equals(s2.getLeader())){
+		if(s1.getLeaderColor().equals(s2.getLeaderColor())){
 			ArrayList<String> s1Path = s1.getPath();
 			ArrayList<String> s2Path = s2.getPath();
 			
 			if( s1.getState() == SoldierState.STANDBY || s1Path.get(s1Path.size() - 1).equals(s2Path.get(s2Path.size() - 1))) {
 				s1.setValue(s1.getValue()+s2.getValue());
-				soldiers[s2.getLeader().getID()].remove(s2);
+				soldiers[s2.getLeaderColor().ordinal()].remove(s2);
 				s2=null;
 				return 1;
 			}
@@ -327,45 +333,45 @@ public class CastlesMap {
 				int amount= s1.getValue()-s2.getValue();
 				if(amount>0){
 					s1.setValue(amount);
-					soldiers[s2.getLeader().getID()].remove(s2);
+					soldiers[s2.getLeaderColor().ordinal()].remove(s2);
 					s2=null;
 					return 2;
 				}
 				else if(amount<0){
 					s2.setValue(amount);
-					soldiers[s1.getLeader().getID()].remove(s1);
+					soldiers[s1.getLeaderColor().ordinal()].remove(s1);
 					s1=null;
 					return 3;
 				}
 				else{
-					soldiers[s1.getLeader().getID()].remove(s1);
+					soldiers[s1.getLeaderColor().ordinal()].remove(s1);
 					s1=null;
-					soldiers[s2.getLeader().getID()].remove(s2);
+					soldiers[s2.getLeaderColor().ordinal()].remove(s2);
 					s2=null;
 					return 4;
 				}
 			}
 			else{
-				int def=((Building)r).getDefenseValue();
-				Team team=((Building)r).getTeam();
-				if(team==s1.getLeader()){
+				int def=((Building)r).defenseValue;
+				Color team=((Building)r).getTeamColor();
+				if(team==s1.getLeaderColor()){
 					int amount= (s1.getValue()+def)-s2.getValue();
 					if(amount>0){
 						s1.setValue(amount);
-						soldiers[s2.getLeader().getID()].remove(s2);
+						soldiers[s2.getLeaderColor().ordinal()].remove(s2);
 						s2=null;
 						return 2;
 					}
 					else if(amount<0){
 						s2.setValue(amount);
-						soldiers[s1.getLeader().getID()].remove(s1);
+						soldiers[s1.getLeaderColor().ordinal()].remove(s1);
 						s1=null;
 						return 3;
 					}
 					else{
-						soldiers[s1.getLeader().getID()].remove(s1);
+						soldiers[s1.getLeaderColor().ordinal()].remove(s1);
 						s1=null;
-						soldiers[s2.getLeader().getID()].remove(s2);
+						soldiers[s2.getLeaderColor().ordinal()].remove(s2);
 						s2=null;
 						return 4;
 					}
@@ -374,20 +380,20 @@ public class CastlesMap {
 					int amount= s1.getValue()-(s2.getValue()+def);
 					if(amount>0){
 						s1.setValue(amount);
-						soldiers[s2.getLeader().getID()].remove(s2);
+						soldiers[s2.getLeaderColor().ordinal()].remove(s2);
 						s2=null;
 						return 2;
 					}
 					else if(amount<0){
 						s2.setValue(amount);
-						soldiers[s1.getLeader().getID()].remove(s1);
+						soldiers[s1.getLeaderColor().ordinal()].remove(s1);
 						s1=null;
 						return 3;
 					}
 					else{
-						soldiers[s1.getLeader().getID()].remove(s1);
+						soldiers[s1.getLeaderColor().ordinal()].remove(s1);
 						s1=null;
-						soldiers[s2.getLeader().getID()].remove(s2);
+						soldiers[s2.getLeaderColor().ordinal()].remove(s2);
 						s2=null;
 						return 4;
 					}
@@ -422,12 +428,15 @@ public class CastlesMap {
 			}
 			return temp;
 		}
+		/* TODO This will not work
+		 * Since the Building class extends RallyPoint, "r instanceof RallyPoint"
+		 * will return true for all Building objects */
 		if(r instanceof RallyPoint){
 			int num[]=new int[6];
 			int total[]=new int[6];
 			for(Soldier s: onPoint){
-				num[s.getLeader().getID()]++;
-				total[s.getLeader().getID()]+= s.getValue();
+				num[s.getLeaderColor().ordinal()]++;
+				total[s.getLeaderColor().ordinal()]+= s.getValue();
 			}
 			int max=0;
 			int maxid=-1;
@@ -441,9 +450,9 @@ public class CastlesMap {
 				return -2;
 			}
 			for(Soldier s: onPoint){
-				if(s.getLeader().getID()!=maxid){
+				if(s.getLeaderColor().ordinal()!=maxid){
 					onPoint.remove(s);
-					soldiers[s.getLeader().getID()].remove(s);
+					soldiers[s.getLeaderColor().ordinal()].remove(s);
 					s=null;
 				}
 			}
@@ -458,19 +467,19 @@ public class CastlesMap {
 				max-=onPoint.get(0).getValue();
 				if(max>0){
 					Soldier temp=onPoint.remove(0);
-					soldiers[temp.getLeader().getID()].remove(temp);
+					soldiers[temp.getLeaderColor().ordinal()].remove(temp);
 				}
 			}
 			return 5;
 		}
 		else{
-			int def=((Building)r).getDefenseValue();
-			int teamID=((Building)r).getTeam().getID();
+			int def=((Building)r).defenseValue;
+			int teamID=((Building)r).getTeamColor().ordinal();
 			int num[]=new int[6];
 			int total[]=new int[6];
 			for(Soldier s: onPoint){
-				num[s.getLeader().getID()]++;
-				total[s.getLeader().getID()]+= s.getValue();
+				num[s.getLeaderColor().ordinal()]++;
+				total[s.getLeaderColor().ordinal()]+= s.getValue();
 			}
 			total[teamID]+=def;
 			int max=0;
@@ -485,9 +494,9 @@ public class CastlesMap {
 				return -2;
 			}
 			for(Soldier s: onPoint){
-				if(s.getLeader().getID()!=maxid){
+				if(s.getLeaderColor().ordinal()!=maxid){
 					onPoint.remove(s);
-					soldiers[s.getLeader().getID()].remove(s);
+					soldiers[s.getLeaderColor().ordinal()].remove(s);
 					s=null;
 				}
 			}
@@ -502,25 +511,13 @@ public class CastlesMap {
 				max-=onPoint.get(0).getValue();
 				if(max>0){
 					Soldier temp=onPoint.remove(0);
-					soldiers[temp.getLeader().getID()].remove(temp);
+					soldiers[temp.getLeaderColor().ordinal()].remove(temp);
 				}
 			}
 			return 5;
 		}
 	}
-	/**
-	 * 
-	 * @param r: A rally point
-	 * @return	Returns all soldiers on r
-	 */
-	public ArrayList<Soldier> getSoldiersAt(RallyPoint r){
-		ArrayList<Soldier> temp = new ArrayList<Soldier>();
-		RallyPoint newR = graphElements.get(r.ID);
-		for(Soldier s: newR.onPoint){
-			temp.add(s);
-		}
-		return temp;
-	}
+	
 	/**
 	 * 
 	 * @param A: a Team
@@ -533,13 +530,14 @@ public class CastlesMap {
 		}
 		return temp;
 	}
+	
 	/**
 	 * 
 	 * @param From: The ID of where the soldiers is coming from
 	 * @param To:	the ID of where the soldiers is going to
 	 * @return	the path of RallyPoint IDs
 	 */
-	public ArrayList<String> getPath(String From,String To){
+	public ArrayList<String> getPath(String From, String To) {
 		Vertex f=graph.getVertex(From);
 		Vertex t=graph.getVertex(To);
 		return CastlesMapGraph.getPath(pathIDsMap, f, t);
