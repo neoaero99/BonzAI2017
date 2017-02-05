@@ -4,8 +4,7 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.PriorityQueue;
 
-import Castles.Objects.RallyPoint;
-import Castles.Objects.Soldier;
+import Castles.Objects.*;
 import Castles.api.*;
 import Castles.util.graph.Vertex;
 import Castles.util.linkedlist.DualLinkList;
@@ -26,12 +25,12 @@ public class DaneAI extends AI {
 	private ArrayList<RallyPoint> cStructs,uStructs,eStructs;
 	private ArrayList<Troops> troops;
 	private ArrayList<Path> currentMovements;
-	public DaneAI(){
-		
-	}
+
+	public DaneAI(){	}
 	
 	public Action action(Turn turn) {
 		this.turn = turn;
+		Team MyTeam = turn.getMyTeam();
 		++turnNumber;
 		if(taunt || turnNumber == 1){
 			return new ShoutAction(taunts[(int)(Math.random()*taunts.length)]);
@@ -43,27 +42,29 @@ public class DaneAI extends AI {
 		eStructs = new ArrayList<>();
 		troops = new ArrayList<>();
 		PriorityQueue<Path> possibleMoves = new PriorityQueue<>();
-		for(RallyPoint p: map.getAllElements()){
-			if(p.isControledBy(MyTeam)){
+		for(RallyPoint p: turn.getAllElements()){
+			if(p instanceof RallyPoint) continue;
+			Building b = (Building)p;
+			if(b.isControledBy(MyTeam.getColor())){
 				cStructs.add(p);
 				continue;
 			}
-			if(!p.isControled()){
+			if(!b.isControled()){
 				uStructs.add(p);
 				continue;
 			}
 			eStructs.add(p);
 		}
 		
-		for(Soldier s: map.getSoldiers(turn.getMyTeam())){
+		for(Soldier s: turn.getSoldiers(turn.getMyTeam())){
 			troops.add(new Troops(s.getValue(), s.getRallyPoint()));
 		}
 		//second turn send all my troops to the nearest castle
 		if(turnNumber == 2){
-			Soldier s = map.getSoldierAt(cStructs.get(0));
-			s = map.splitSoliders(s, 210, map.createPath(
-					cStructs.get(0)), map.getClosestCastle(cStructs.get(0)));
-			move.addMovement(s, map.getClosestCastle(cStructs.get(0)));
+			Soldier s = turn.getSoldierAt(cStructs.get(0));
+			s = map.splitSoliders(s, 210, turn.createPath(
+					cStructs.get(0)), turn.getClosestCastle(cStructs.get(0)));
+			move.addMovement(s, turn.getClosestCastle(cStructs.get(0)));
 			return move;
 		}
 		
@@ -75,7 +76,7 @@ public class DaneAI extends AI {
 		}
 		
 		for(Path p : currentMovements){
-			move.addMovement(map.getSoldierAt(p.from), p.to, p.soldiersCommited);
+			move.addMovement(turn.getSoldierAt(p.from), p.to, p.soldiersCommited);
 		}
 		
 		return move;
@@ -84,9 +85,9 @@ public class DaneAI extends AI {
 		/***********************************************************************
 		 * Methods We need to add											   *
 		 * 	CastlesMap.getSoldierAt(RallyPoint)								   *
-		 * 	RallyPoint.getControlingTeam()        							   *
-		 * 	RallyPoint.isControledBy(a team)								   *
-		 *  RallyPoint.isControled()										   *
+		 * 	Building.getControlingTeam()        							   *
+		 * 	Building.isControledBy(a team)								       *
+		 *  Building.isControled()										       *
 		 * 	CastlesMap.getClosestCastle(RallyPoint)							   *
 		 * 	CastlesMap.getClosestVillage(RallyPoint)						   *
 		 * 	CastlesMap.updateSoldiers(); THIS SHOULD BE PRIVATE				   *
@@ -102,11 +103,11 @@ public class DaneAI extends AI {
 		PriorityQueue<Path> pm = new PriorityQueue<>();
 		//YAY!!!! ORDER N^2 ALGORITHM
 		for(RallyPoint owned : cStructs){
-			if(!(getSoldierCount(owned).value > map.VILLAGE_INIT)) continue;
+			if(!(getSoldierCount(owned).value > turn.VILLAGE_INIT)) continue;
 			for(RallyPoint unowned : uStructs){
-				if(getSoldierCount(owned) > map.getSoldierAt(unowned) + 1){
+				if(getSoldierCount(owned) > turn.getSoldierAt(unowned) + 1){
 					DualLinkList<RallyPoint> temp = createPath(owned, unowned);
-					pm.add(new Path(temp, temp.size(),unowned,owned,map.getSoldierAt(unowned) +1));
+					pm.add(new Path(temp, temp.size(),unowned,owned,turn.getSoldierAt(unowned) +1));
 				}
 			}
 			for(RallyPoint eowned : eStructs){
@@ -114,7 +115,7 @@ public class DaneAI extends AI {
 				int count = getSoldierAt(eowned);
 				count += getTroopGain(eowned) * temp.size();
 				if(getSoldierCount(owned) > count + 1){
-					pm.add(new Path(temp, temp.size(),eowned,owned,map.getSoldierAt(eowned) +1));
+					pm.add(new Path(temp, temp.size(),eowned,owned,turn.getSoldierAt(eowned) +1));
 				}
 			}
 		}
@@ -123,16 +124,16 @@ public class DaneAI extends AI {
 	
 	private int getTroopGain(RallyPoint p){
 		if(p instanceof Castle){
-			return CastlesMap.CASTE_SOLDIER_GAIN;
+			return turn.CASTLE_PER_TURN;
 		}else if(p instanceof Village){
-			return CastlesMap.VILLAGE_SOLDIER_GAIN;
+			return turn.VILLAGE_PER_TURN;
 		}else{
 			return 0;
 		}
 	}
 	
 	private int getSoldierCount(RallyPoint p){
-		int count = map.getSoldierAt(p);
+		int count = turn.getSoldierAt(p);
 		for(Path path: currentMovements){
 			if(p == path.from){
 				count -= path.soldiersCommited;
@@ -142,8 +143,7 @@ public class DaneAI extends AI {
 	}
 	
 	private int getEnemySoldierCount(RallyPoint p){
-		int count = map.getSoldierAt(p);
-		
+		int count = turn.getSoldierAt(p);
 	}
 	
 	private class Troops{

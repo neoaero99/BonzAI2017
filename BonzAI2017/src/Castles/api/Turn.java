@@ -27,6 +27,11 @@ public class Turn {
 	final ArrayList<Team> teams;
 	final ArrayList<Boolean> success;
 	final int turnNumber;
+	public static final int CASTLE_PER_TURN = 10;
+	public static final int VILLAGE_PER_TURN = 5;
+	public static final int CASTLE_INIT = 20;
+	public static final int VILLAGE_INIT = 10;
+	
 
 	final ArrayList<ShoutAction> shoutActions;
 	

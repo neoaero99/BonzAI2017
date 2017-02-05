@@ -62,6 +62,16 @@ public class Building extends RallyPoint {
 		soldiers -= 1;
 	}
 	
+	public boolean isControled(){
+		if(myTeam == null) return false;
+		return true;
+	}
+	
+	public boolean isControledBy(Castles.api.Color team){
+		if(myTeam.getColor() == team) return true;
+		return false;
+	}
+	
 	public Castles.api.Color getColor() {
 		return myTeam == null ? null : myTeam.getColor();
 	}
