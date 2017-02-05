@@ -102,15 +102,14 @@ public class AIClient implements Runnable {
 				case "TERMINATE":
 					AIClient.out.println("ACK");
 					AIClient.out.flush();
+					scanner.close();
 					return;
 					
 				default:
-					err.println("Unexpected Message Recieved");
+					//err.println("Unexpected Message Recieved");
 					break;
 			}
-			scanner.close();
 		}
-		
 	}
 	
 	/**
@@ -150,6 +149,7 @@ public class AIClient implements Runnable {
 		catch(Exception e) {
 			// if anything happened in our initialization, that would be bad,
 			// so we should tell the host
+			e.printStackTrace();
 			AIClient.out.println("NAK");
 			AIClient.out.flush();
 			

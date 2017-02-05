@@ -17,18 +17,22 @@ import Castles.util.linkedlist.DualLinkList;
  */
 @Agent(name = "DaneAI")
 public class DaneAI extends AI {
+	
 	private final String[] taunts = {"Your Mother Was a Hampster", "Your Father smelt of Elderberries"};
 	private final boolean taunt = true;
 	private int turnNumber = 0;
 	private Turn turn;
 	private CastlesMap map;
 	private ArrayList<RallyPoint> cStructs,uStructs,eStructs;
+	
 	private ArrayList<Troops> troops;
 	private ArrayList<Path> currentMovements;
 
 	public DaneAI(){	}
+
 	
 	public Action action(Turn turn) {
+
 		this.turn = turn;
 		Team MyTeam = turn.getMyTeam();
 		++turnNumber;
@@ -88,15 +92,21 @@ public class DaneAI extends AI {
 		 * 	Building.getControlingTeam()        							   *
 		 * 	Building.isControledBy(a team)								       *
 		 *  Building.isControled()										       *
+		 * 	CastlesMap.getSoldierAt(RallyPoint)	Done							   *
+		 * 	RallyPoint.getControlingTeam()      in Building, not RallyPoint, RallyPoints are not controlled  							   *
+		 * 	RallyPoint.isControledBy(a team)	Ditto /\							   *
+		 *  RallyPoint.isControled()			Ditto							   *
 		 * 	CastlesMap.getClosestCastle(RallyPoint)							   *
 		 * 	CastlesMap.getClosestVillage(RallyPoint)						   *
 		 * 	CastlesMap.updateSoldiers(); THIS SHOULD BE PRIVATE				   *
-		 *  CastlesMap.createPath(From, To)									   *
-		 *  CastlesMap.getSoldiers(a team)									   *
-		 *  Soldier.getRallyPoint()											   *
+		 *  CastlesMap.createPath(From, To)		Done							   *
+		 *  CastlesMap.getSoldiers(a team)		Done						   *
+		 *  Soldier.getRallyPoint()				Done							   *
 		 *  Put the inital Values in CastlesMap as static finals			   *
 		 *  Put the per turn values in the Castles map as static finals        *
 		 ***********************************************************************/
+		return new ShoutAction("");
+	
 	}
 	
 	private PriorityQueue<Path> getPossibleMoves(){

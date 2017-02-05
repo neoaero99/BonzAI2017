@@ -25,6 +25,10 @@ public class SegEdge extends Node {
 		
 		waypointIDs = new String[weight];
 		
+		for (int idx = 0; idx < weight; ++idx) {
+			waypointIDs[idx] = String.format("%s:%s", ID, idx);
+		}
+		
 		first = f;
 		second = s;
 		first.addConnection(this);
@@ -72,6 +76,22 @@ public class SegEdge extends Node {
 		return node != null && (node == first || node == second);
 	}
 	
+	/**
+	 * TODO
+	 * 
+	 * @param rID
+	 * @return
+	 */
+	public int indexOf(String rID) {
+		for (int idx = 0; idx < waypointIDs.length; ++idx) {
+			if (rID.equals(waypointIDs[idx])) {
+				return idx;
+			}
+		}
+		
+		return -1;
+	}
+	
 	protected String[] wayPointIDs() {
 		return waypointIDs.clone();
 	}
@@ -94,7 +114,7 @@ public class SegEdge extends Node {
 		char firstConnect = (first == null) ? '(' : '<';
 		char secondConnect = (second == null) ? ')' : '>';
 		
-		return String.format("%c %d %c", firstConnect, getWeight(),
+		return String.format("%c %s %d %c", firstConnect, ID, getWeight(),
 				secondConnect);
 	}
 }
