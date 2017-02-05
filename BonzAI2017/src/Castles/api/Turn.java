@@ -240,8 +240,12 @@ public class Turn {
 	 * 				ID
 	 */
 	public ArrayList<SoldierData> getSoldiersAt(String ID) {
-		// TODO
-		return null;
+		ArrayList<SoldierData> data = new ArrayList<SoldierData>();
+		RallyPoint r =map.getPosition(ID);
+		for(Soldier s: r.onPoint){
+			data.add(new SoldierData(s));
+		}
+		return data;
 	}
 	
 	/**
@@ -256,8 +260,9 @@ public class Turn {
 	 * 					color
 	 */
 	public List<PositionData> getPositionsControlledBy(Color teamColor) {
-		// TODO
-		return null;
+		HashMap<String, PositionData> step1 = teamPositions.get(teamColor);
+		Collection<PositionData> step2=step1.values();
+		return new ArrayList<PositionData>(step2);
 	}
 	
 	/**
@@ -270,8 +275,9 @@ public class Turn {
 	 * 					given color
 	 */
 	public List<SoldierData> getSoldiersControlledBy(Color teamColor) {
-		// TODO
-		return null;
+		HashMap<String, SoldierData> step1 = teamSoldiers.get(teamColor);
+		Collection<SoldierData> step2=step1.values();
+		return new ArrayList<SoldierData>(step2);
 	}
 	
 	/**
