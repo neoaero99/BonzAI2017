@@ -27,7 +27,6 @@ public class CastlesMap {
 	private CastlesMapGraph graph;
 	private HashMap<IDPair, ArrayList<String>> pathIDsMap;
 	private final HashMap<String, RallyPoint> graphElements;
-
 	
 	private boolean[] players;
 	
@@ -521,20 +520,6 @@ public class CastlesMap {
 	
 	/**
 	 * 
-	 * @param r: A rally point
-	 * @return	Returns all soldiers on r
-	 */
-	public ArrayList<Soldier> getSoldiersAt(RallyPoint r){
-		ArrayList<Soldier> temp = new ArrayList<Soldier>();
-		RallyPoint newR = graphElements.get(r.ID);
-		for(Soldier s: newR.onPoint){
-			temp.add(s);
-		}
-		return temp;
-	}
-	
-	/**
-	 * 
 	 * @param A: a Team
 	 * @return	All Soldiers in team A
 	 */
@@ -552,7 +537,7 @@ public class CastlesMap {
 	 * @param To:	the ID of where the soldiers is going to
 	 * @return	the path of RallyPoint IDs
 	 */
-	public ArrayList<String> getPath(String From, String To){
+	public ArrayList<String> getPath(String From, String To) {
 		Vertex f=graph.getVertex(From);
 		Vertex t=graph.getVertex(To);
 		return CastlesMapGraph.getPath(pathIDsMap, f, t);

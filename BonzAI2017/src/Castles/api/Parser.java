@@ -66,7 +66,7 @@ public class Parser {
 					Team newTeam = new Team(Castles.api.Color.values()[teams.size()], teams.size());
 					teams.add(newTeam);
 					// Create the player's initial castle
-					r = new Castle(Integer.parseInt(row[0]), Integer.parseInt(row[1]), row[2], newTeam.getColor());
+					r = new Castle(Integer.parseInt(row[0]), Integer.parseInt(row[1]), row[2], newTeam.getColor(), 10, 5);
 					// Create the player's initial soldier group
 					Soldier iniTeamGroup = new Soldier(newTeam.getColor(), 5, r.ID);
 					iniSoldiers.add(iniTeamGroup);

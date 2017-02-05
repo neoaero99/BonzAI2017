@@ -21,7 +21,7 @@ import bonzai.ShoutAction;
  **/
 public class Turn {
 	
-	final CastlesMap map;
+	private final CastlesMap map;
 	// Data used for AI queries
 	private final HashMap<Color, HashMap<String, SoldierData>> teamSoldiers;
 	private final HashMap<Color, HashMap<String, PositionData>> teamPositions;
