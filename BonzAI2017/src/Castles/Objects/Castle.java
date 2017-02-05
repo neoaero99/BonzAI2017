@@ -8,7 +8,7 @@ public class Castle extends Building {
 		super(x, y, id, c, 5, 3);
 	}
 	public Castle(int x, int y,String newID){
-		super(x,y,0,0,newID,null,0);
+		super(x,y,newID,null,0,0);
 	}
 	
 	public Castle(int x, int y, String id, Color c, int defVal, int soldSpawnRate) {

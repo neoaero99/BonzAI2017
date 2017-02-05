@@ -541,15 +541,14 @@ public class Turn {
 			} else {
 				failedTeams.add(teams.get(teamID));
 				// Test scoring
-				teamScoreAdditions[teamID] += 1;
+				
 			}
 
 			teamID++;
 		}
 
 		// TODO apply any earned points onto this new Turn.
-		newMap.updateTeamScores(teamScoreAdditions);
-		
+				
 		newMap.moveSoldiers();
 		
 		/**
@@ -589,9 +588,14 @@ public class Turn {
 				if (s != null) {
 					newMap.addSoldiers(s);
 				}
+				Color c =b.getTeamColor();
+				if(c!=null){
+						int ID =c.ordinal();
+						teamScoreAdditions[ID]+=b.defenseValue;
+				}
 			}
 		}
-		
+		newMap.updateTeamScores(teamScoreAdditions);
 		return new Turn(this, teamID, newMap, failedTeams);
 	}
 	
