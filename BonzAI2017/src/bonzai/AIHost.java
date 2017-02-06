@@ -8,7 +8,9 @@ import java.util.List;
 import java.util.Scanner;
 import java.util.concurrent.atomic.AtomicReference;
 
+import Castles.Objects.SoldierState;
 import Castles.api.MoveAction;
+import Castles.api.UpdateAction;
 
 public class AIHost {
 	private final Process process;
@@ -56,10 +58,10 @@ public class AIHost {
 	 * @param actions the list of actions that occured during the last turn
 	 */
 	public void apply(List<Action> actions) {
-		if(actions.size() == 0) return;
 		if (isAlive) {
 			//tells the AI how many actions to expect
 			out.printf("APPLY %d\n", actions.size());
+			
 			//sends each action individually
 			for (Action a : actions){
 				out.printf("%s\n", AIHost.toString(a));
@@ -166,22 +168,41 @@ public class AIHost {
 		switch(arguments.next()) {
 
 			case "MOVE":
-				MoveAction out = new MoveAction();
-				String[] move = new String[3];
-				int i = 0;
-				while(arguments.hasNext()){
-					String temp = arguments.next();
-					if(!temp.equals("[") && !temp.equals("]")){
-						move[i++] = temp;
-					}
-					if(i == 3){
-						i = 0;
-						out.addMovement(move[0], move[1], Integer.parseInt(move[2]));
-					}
+				int sdx = arguments.nextInt();
+				int splitAmt = arguments.nextInt();
+				// build the set of position IDs
+				int pathSize = arguments.nextInt();
+				ArrayList<String> pathIDs = new ArrayList<String>();
+				
+				for (int idx = 0; idx < pathSize; ++idx) {
+					pathIDs.add( arguments.next() );
 				}
+				
 				arguments.close();
-				//MOVE actions are not yet implemented
-				return out;
+				return new MoveAction(sdx, splitAmt, pathIDs);
+			
+			case "SOLDIER":
+				String posID = arguments.next();
+				sdx = arguments.nextInt();
+				String stateName = arguments.next();
+				SoldierState state = SoldierState.STANDBY;
+				// parse the soldier state based on its name
+				if (stateName.equals("MOVING")) {
+					state = SoldierState.MOVING;
+					
+				} else if (stateName.equals("CONFLICT")) {
+					state = SoldierState.CONFLICT;
+					
+				} else if (stateName.equals("DEFENDING")) {
+					state = SoldierState.DEFENDING;
+					
+				} else if (stateName.equals("SIEGING")) {
+					state = SoldierState.SIEGING;
+				}
+				
+				arguments.close();
+				return new UpdateAction(posID, sdx, state);
+				
 			case "SHOUT":
 				args = arguments.nextLine();
 				arguments.close();
@@ -218,14 +239,12 @@ public class AIHost {
 		
 		//again, ShoutActions should work, use them to debug the communication
 		//between the AI and the game
-		if(action instanceof ShoutAction) {
-			ShoutAction shout = (ShoutAction)action;
-			return String.format("SHOUT %s", shout.getMessage());
-		}
-		if(action instanceof MoveAction){
+		if (action instanceof Action) {
 			return action.toString();
+			
+		} else {
+			return "NONE";
 		}
-		return "NONE";
 	}
 	
 	public static AIHost spawn(String timestamp, bonzai.Scenario scenario, bonzai.Jar me, List<bonzai.Jar> jars, int id) throws IOException {

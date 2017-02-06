@@ -469,7 +469,7 @@ public class CastlesMapGraph {
 	/**
 	 * @return	A copy of this graph
 	 */
-	public CastlesMapGraph clone() {
+	protected CastlesMapGraph clone() {
 		
 		ArrayList<Vertex> vertexCopies = new ArrayList<Vertex>();
 		ArrayList<SegEdge> edgeCopies = new ArrayList<SegEdge>();
@@ -480,7 +480,7 @@ public class CastlesMapGraph {
 		ArrayList<Vertex> vertices = vertexList();
 		for (Vertex v : vertices) {
 			Vertex vertexCopy = new Vertex(v.ID);
-			// TODO update Soldier path references
+			
 			vertexCopies.add(vertexCopy);
 			OldToNewVertex.put(v.hashCode(), vertexCopy);
 		}

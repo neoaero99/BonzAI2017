@@ -1,5 +1,10 @@
 import bonzai.*;
+
+import java.util.ArrayList;
+import java.util.Random;
+
 import Castles.Objects.RallyPoint;
+import Castles.Objects.SoldierState;
 import Castles.api.*;
 import Castles.util.graph.Vertex;
 
@@ -18,7 +23,9 @@ import Castles.util.graph.Vertex;
 //game can tell your AI apart from the rest
 @Agent(name = "MeanAI")
 public class CompetitorAI extends AI {
+	
 	public CompetitorAI(){}
+	
 	/**
 	 * @param Turn the current state of the map that your AI will act upon
 	 * 
@@ -30,10 +37,18 @@ public class CompetitorAI extends AI {
 	 * 		   with the inputed game state
 	 */
 	public Action action(Turn turn) {
-		MoveAction move = new MoveAction();
 		//put your AI's stuff here
+		Random generator = new Random( System.currentTimeMillis() );
+		int val = generator.nextInt(3);
 		
-		return  new ShoutAction("I am shouting!");
+		if (val == 2) {
+			return new MoveAction(0, 0, new ArrayList<String>());
+			
+		} else if (val == 1) {
+			return new UpdateAction("[ID]", 0, SoldierState.STANDBY);	
+		}
+		
+		return new ShoutAction("I am shouting!");
 	}
 	
 }

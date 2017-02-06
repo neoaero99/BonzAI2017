@@ -1,83 +1,65 @@
 package Castles.Objects;
 
-import bonzai.Team;
+import Castles.api.Color;
 
 public class Building extends RallyPoint {
 	
-							   // the ID of the building
-	private final int defenseValue;        // how strong is the castle?
-	private int soldiers;                  // the number of soldiers in the castle
-	private int counter;                   // 
-	private final int captureValue;        // number of turns to capture building
-	private int soldierCreationRate;       // number of soldiers being produced (more details needed!)
-	private Team myTeam;
+	public final int defenseValue;         // how strong is the castle?
+	public final int soldierCreationRate;  // number of soldiers being produced (more details needed!)
 	
-	public Building(int newDefenseValue, int newCaptureValue, int newID){
-		super(0,0,""+newID);
-		defenseValue = newDefenseValue;
-		captureValue = newCaptureValue;
-		soldierCreationRate = 0;
-		myTeam= null;
-	}                    // Determine which team is which
+	private Color myTeamColor;
 	
-	public Building(int x, int y, int newDefenseValue, int newCaptureValue, String newID, Team newTeam, int rate){
-		super(x,y,newID);
-		defenseValue = newDefenseValue;
-		captureValue = newCaptureValue;
-		soldierCreationRate = rate;
-		myTeam=newTeam;
+	public Building(int x, int y, String id, Color teamColor, int defValue, int soldSpawnRate) {
+		super(x, y, id);
+		
+		myTeamColor = teamColor;
+		defenseValue = defValue;
+		soldierCreationRate = soldSpawnRate;
 	}
 	
-	/**************************
-	 *     Defense Stuff      *
-	 **************************/
-	
-	public int getDefenseValue(){
-		return defenseValue;
+	public Color getTeamColor() {
+		return myTeamColor;
 	}
 	
-	/**************************
-	 *     Soldier Stuff      *
-	 **************************/
-	
-	protected void setSoldierCount(int soldierCount){
-		soldiers = soldierCount;
-	}
-	
-	public int getSoldierCount(){
-		return soldiers;
-	}
-	
-	/*
-	 * Increments soldier count by one.
+	/**
+	 * Adds reinforcements to this building if it is controlled by an AI. If
+	 * their is no one occupying this position, then a new soldier is created
+	 * in the Standby state with no given path: this soldier is returned by
+	 * this method. If an ally soldier is on this position, then that
+	 * soldier's number increases instead. If a building is occupied by enemy
+	 * soldiers, then no reinforcements will spawn.
+	 * 
+	 * @return	A new soldier, if it was created, or null
 	 */
-	protected void incrementSoldier(){
-		soldiers += 1;
+	public Soldier reinforce() {
+				
+		if (myTeamColor != null) {
+			/* Add the reinforcements to an already existing soldier group or add a
+			 * new soldier group. */
+			if (onPoint.size() > 0 && onPoint.get(0).getLeaderColor().equals(myTeamColor)) {
+				Soldier occupant = onPoint.get(0);
+				occupant.setValue(occupant.getValue() + soldierCreationRate);
+				return null;
+				
+			} else {
+				// Create a new soldier and return it to be added to the map
+				Soldier newSoldier = new Soldier(myTeamColor, soldierCreationRate, ID);
+				return newSoldier;
+			}
+		}
+		
+		return null;
 	}
 	
-	/*
-	 * Decrements soldier count by one.
-	 */
-	protected void decrementSoldier(){
-		soldiers -= 1;
-	}
-	
-	public Castles.api.Color getColor() {
-		return myTeam == null ? null : myTeam.getColor();
-	}
-	
-	public RallyPoint copy(){
-		return new Building(super.getPosition().getX(),super.getPosition().getY(),defenseValue,captureValue,ID,myTeam,soldierCreationRate);
-	}
-	public Team getTeam(){
-		return myTeam;
+	@Override
+	public RallyPoint copy() {
+		Building copy = new Building(getPosition().getX(), getPosition().getY(),
+				ID, myTeamColor, defenseValue, soldierCreationRate);
+		
+		return copy;
 	}
 
-	public void setTeam(Team leader) {
-		myTeam=leader;
-		
-	}
-	public int getRate(){
-		return soldierCreationRate;
+	public void setTeamColor(Color teamColor) {
+		myTeamColor = teamColor;
 	}
 }

@@ -1,4 +1,4 @@
-package Castles.util.animator;
+package DavidMohrhardt.animator;
 
 import java.awt.image.BufferedImage;
 import java.awt.image.ColorModel;
@@ -8,9 +8,17 @@ import java.util.HashMap;
 
 import javax.imageio.ImageIO;
 
-public class SpriteBuilder {
-
-	// Types Needed by the SSC parser
+/**
+ * @author David Mohrhardt
+ * @version 0.01
+ * 
+ * This is the animator package.
+ * 
+ * This file is the SpriteBuilder.  The SpriteBuilder is essentially a parser for reading sprite
+ * scripts and loading the sprite sheet into the program itself.
+ * 
+ */
+class SpriteBuilder {
 
 	private BufferedImage sprite_sheet;
 
@@ -21,10 +29,15 @@ public class SpriteBuilder {
 	private int size_y;
 	private int padding_x;
 	private int padding_y;
-	
+
 	HashMap<String, FrameData> actions = new HashMap<String, FrameData>();
 
-	// Constructor
+	/**
+	 * SpriteBuilder(String spritePath, String spriteScript)
+	 * 
+	 * @param spritePath The path to the sprite sheet.
+	 * @param spriteScript The path to the script for the sprite sheet.
+	 */
 	public SpriteBuilder(String spritePath, String spriteScript) {
 		sprite_sheet = null;
 
@@ -54,8 +67,8 @@ public class SpriteBuilder {
 
 		String action_name = null;
 		FrameData action_data = null;
-		
-		
+
+
 		// Read the script and parse the information;
 		try {
 			sprite_script = new FileReader(spriteScript);
@@ -66,41 +79,41 @@ public class SpriteBuilder {
 				if (line.charAt(0) == '*') {
 					continue;
 				}
-				
+
 				data = line.substring(line.lastIndexOf(":="), line.lastIndexOf(';'));
 				switch (data_read) {
 				case (0):
 					name = data;
-					break;
+				break;
 				case (1):
 					num_of_actions = Integer.parseInt(data);
-					break;
+				break;
 				case (2):
 					size_x = Integer.parseInt(data);
-					break;
+				break;
 				case (3):
 					size_y = Integer.parseInt(data);
-					break;
+				break;
 				case (4):
 					padding_x = Integer.parseInt(data);
-					break;
+				break;
 				case (5):
 					padding_y = Integer.parseInt(data);
-					break;
+				break;
 				}
-				
+
 				++data_read;
-				
+
 				// Read the action data
 				if (data_read >= 6) {
 					switch (data_read % 2) {
 					case (0):
 						action_name = data;
-						break;
+					break;
 					case (1):
 						action_data = new FrameData(action_name, data_read - 6, Integer.parseInt(data));
-						actions.put(action_name, action_data);
-						break;
+					actions.put(action_name, action_data);
+					break;
 					}
 				}
 			}
@@ -112,9 +125,10 @@ public class SpriteBuilder {
 		}
 	}
 
-	/*
+	/**
+	 * getSpriteSheet()
 	 * 
-	 * Returns the SpriteSheet
+	 * @return BufferedImage return the loaded sprite sheet.
 	 */
 	public BufferedImage getSpriteSheet() {
 		ColorModel cm = sprite_sheet.getColorModel();
@@ -122,28 +136,67 @@ public class SpriteBuilder {
 		WritableRaster raster = sprite_sheet.copyData(null);
 		return new BufferedImage(cm, raster, isAlphaPremultiplied, null);
 	}
-	
+
+	/**
+	 * getName()
+	 * 
+	 * @return String The name of this sprite as interpreted by the parser.
+	 */
 	public String getName() {
 		String name_copy = name;
 		return name_copy;
 	}
 	
+	/**
+	 * getNumberOfActions()
+	 * 
+	 * @return int The number of actions in the sprite sheet.
+	 */
+	public int getNumberOfActions() {
+		return num_of_actions;
+	}
+
+	/**
+	 * getSizeX()
+	 * 
+	 * @return int The size of one frame in pixels on the x-axis
+	 */
 	public int getSizeX() {
 		return size_x;
 	}
-	
+
+	/**
+	 * getSizeY()
+	 * 
+	 * @return int The size of one frame in pixels on the y-axis
+	 */
 	public int getSizeY() {
 		return size_y;
 	}
-	
+
+	/**
+	 * getPaddingX()
+	 * 
+	 * @return int The size of the padding between frames in the X-axis
+	 */
 	public int getPaddingX() {
 		return padding_x;
 	}
-	
+
+	/**
+	 * getPaddingY()
+	 * 
+	 * @return int The size of the padding between frames in the Y-axis
+	 */
 	public int getPaddingY() {
 		return padding_y;
 	}
-	
+
+	/**
+	 * getActions()
+	 * 
+	 * @return The hash map of the action and it's respective frame data.
+	 */
 	@SuppressWarnings("unchecked")
 	public HashMap<String, FrameData> getActions() {
 		return (HashMap<String, FrameData>) actions.clone();
