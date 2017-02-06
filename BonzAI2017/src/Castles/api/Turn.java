@@ -39,8 +39,7 @@ public class Turn {
 	// The current team that is acting.
 	// For each client, this will ALWAYS be their teamId
 	// This decides the context that isValid() will be run for.
-	// Example, If I'm on team 1, I can move team 1's things.  If I'm on team 2, I cant
-
+	// Example, If I'm on team 1, I can move team 1's things.  If I'm on team 2, I can't
 	//making this a class so all the pathfinding stuff is in one place
 	Pathfinding pathfinding;
 
@@ -138,9 +137,9 @@ public class Turn {
 		this(teamNumber, turn.turnNumber + 1, map);
 		this.MAX_TURNS = turn.MAX_TURNS;
 
-		for (Team t : failedActions) {
+		//for (Team t : failedActions) {
 			//success.set(t.getID(), false);
-		}
+		//}
 	}
 	
 	/**
@@ -237,8 +236,12 @@ public class Turn {
 	 * 				ID
 	 */
 	public ArrayList<SoldierData> getSoldiersAt(String ID) {
-		// TODO
-		return null;
+		ArrayList<SoldierData> data = new ArrayList<SoldierData>();
+		RallyPoint r =map.getPosition(ID);
+		for(Soldier s: r.onPoint){
+			data.add(new SoldierData(s));
+		}
+		return data;
 	}
 	
 	/**
@@ -253,8 +256,9 @@ public class Turn {
 	 * 					color
 	 */
 	public List<PositionData> getPositionsControlledBy(Color teamColor) {
-		// TODO
-		return null;
+		HashMap<String, PositionData> step1 = teamPositions.get(teamColor);
+		Collection<PositionData> step2=step1.values();
+		return new ArrayList<PositionData>(step2);
 	}
 	
 	/**
@@ -267,8 +271,9 @@ public class Turn {
 	 * 					given color
 	 */
 	public List<SoldierData> getSoldiersControlledBy(Color teamColor) {
-		// TODO
-		return null;
+		HashMap<String, SoldierData> step1 = teamSoldiers.get(teamColor);
+		Collection<SoldierData> step2=step1.values();
+		return new ArrayList<SoldierData>(step2);
 	}
 	
 	/**
@@ -512,7 +517,6 @@ public class Turn {
 			if (isValid(teams.get(teamID), action)) {
 				if (action instanceof ShoutAction) {
 					shoutActions.add((ShoutAction)action);
-					
 				} else if (action instanceof MoveAction) {
 					MoveAction move = (MoveAction)action;
 					List<String> path = move.getPathIDs();
@@ -538,15 +542,13 @@ public class Turn {
 			} else {
 				failedTeams.add(teams.get(teamID));
 				// Test scoring
-				teamScoreAdditions[teamID] += 1;
 			}
 
 			teamID++;
 		}
 
 		// TODO apply any earned points onto this new Turn.
-		newMap.updateTeamScores(teamScoreAdditions);
-		
+				
 		newMap.moveSoldiers();
 		
 		/**
@@ -586,9 +588,14 @@ public class Turn {
 				if (s != null) {
 					newMap.addSoldiers(s);
 				}
+				Color c =b.getTeamColor();
+				if(c!=null){
+						int ID =c.ordinal();
+						teamScoreAdditions[ID]+=b.defenseValue;
+				}
 			}
 		}
-		
+		newMap.updateTeamScores(teamScoreAdditions);
 		return new Turn(this, teamID, newMap, failedTeams);
 	}
 	
