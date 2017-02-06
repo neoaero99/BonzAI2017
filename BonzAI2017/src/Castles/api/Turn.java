@@ -198,9 +198,6 @@ public class Turn {
 		System.out.printf("%s\n\n\n", unclaimedPositions);
 	}
 	
-	
-	
-	
 	/*************************************************************************
 	 * 
 	 *						  ADD API METHODS HERE!!!!!!!!!
