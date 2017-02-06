@@ -39,8 +39,7 @@ public class Turn {
 	// The current team that is acting.
 	// For each client, this will ALWAYS be their teamId
 	// This decides the context that isValid() will be run for.
-	// Example, If I'm on team 1, I can move team 1's things.  If I'm on team 2, I cant
-
+	// Example, If I'm on team 1, I can move team 1's things.  If I'm on team 2, I can't
 	//making this a class so all the pathfinding stuff is in one place
 	Pathfinding pathfinding;
 
@@ -138,9 +137,9 @@ public class Turn {
 		this(teamNumber, turn.turnNumber + 1, map);
 		this.MAX_TURNS = turn.MAX_TURNS;
 
-		for (Team t : failedActions) {
+		//for (Team t : failedActions) {
 			//success.set(t.getID(), false);
-		}
+		//}
 	}
 	
 	/**
@@ -521,7 +520,6 @@ public class Turn {
 			if (isValid(teams.get(teamID), action)) {
 				if (action instanceof ShoutAction) {
 					shoutActions.add((ShoutAction)action);
-					
 				} else if (action instanceof MoveAction) {
 					MoveAction move = (MoveAction)action;
 					List<String> path = move.getPathIDs();
@@ -547,7 +545,6 @@ public class Turn {
 			} else {
 				failedTeams.add(teams.get(teamID));
 				// Test scoring
-				
 			}
 
 			teamID++;
