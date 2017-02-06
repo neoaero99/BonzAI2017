@@ -155,6 +155,7 @@ public class Soldier extends JComponent {
 	}
 
 	public String getPositionID() {
+		System.out.println("-----------Position: " + posID);
 		return posID;
 	}
 	

@@ -13,6 +13,7 @@ import java.util.Map;
 
 import javax.imageio.ImageIO;
 
+import Castles.Game;
 import Castles.Objects.*;
 import Castles.api.CastlesMap;
 //import Castles.api.Color;
@@ -250,9 +251,20 @@ public class CastlesRenderer extends bonzai.Renderer {
 	}
 
 	public static void renderSoldiers(Graphics2D g, CastlesMap map) {
-		//get soldiers
+		gridHeight = map.getHeight();
+		gridWidth = map.getWidth();
+		
+		ArrayList<Soldier>[] soldierList;
+		soldierList = map.getSoldiers();
 		
 		
+		for (ArrayList<Soldier> soldier: soldierList){
+			for(Soldier newSoldier: soldier){
+				RallyPoint r = map.getPosition(newSoldier.getPositionID());
+				drawToScale(g, soldierImage, r.getPosition().getX(), r.getPosition().getY(), 0, 1, 0);
+				
+			}
+		}
 	}
 
 	public static void renderBuildings(Graphics2D g, CastlesMap map) {
