@@ -164,7 +164,9 @@ public class Turn {
 			ArrayList<SoldierData> soldierSet = t.getSoldiersAt("P0");
 			SoldierData s0 = soldierSet.get(0);
 			
-			actions.add(new MoveAction());
+			MoveAction a = new MoveAction();
+			a.addMove(0, s0.size, "P0", "V0");
+			actions.add(a);
 			
 			Turn nextT = t.apply(actions);
 			nextT.outputState();

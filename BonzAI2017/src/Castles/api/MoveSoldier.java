@@ -10,11 +10,15 @@ public class MoveSoldier {
 	public String startID, endID;
 	
 	/**
-	 * @param sIdx	The index of the soldier in the list of the soldier's on
-	 * 				the position
-	 * @param sAmt	The partition of the soldier set to set on the given path
-	 * @param sID	The initial position of the soldiers
-	 * @param eID	The end position of the soldiers
+	 * @param sIdx	The index of soldier on the list of soldiers on the
+	 * 				position, with which the soldier is associated
+	 * @param sAmt	The amount of soldiers, which will be given the new path:
+	 * 				this field must be a positive integer that is less than
+	 * 				or equal to the number of soldiers in the soldier group,
+	 * 				which is located at the starting position
+	 * @param sID	The position, where the target soldier is
+	 * @param eID	The ending position of the new path for a partition of the
+	 * 				target soldier group
 	 */
 	public MoveSoldier(int sIdx, int sAmt, String sID, String eID) {
 		soldierIdx = sIdx;

@@ -42,10 +42,14 @@ public class CompetitorAI extends AI {
 		int val = generator.nextInt(3);
 		
 		if (val == 2) {
-			return new MoveAction(0, 0, new ArrayList<String>());
+			MoveAction a = new MoveAction();
+			a.addMove(0, 2, "P0", "P1");
+			return a;
 			
 		} else if (val == 1) {
-			return new UpdateAction("[ID]", 0, SoldierState.STANDBY);	
+			MoveAction a = new MoveAction();
+			a.addUpdate(0, "P0", SoldierState.STANDBY);
+			return a;	
 		}
 		
 		return new ShoutAction("I am shouting!");

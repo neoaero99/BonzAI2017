@@ -11,7 +11,6 @@ import java.util.concurrent.atomic.AtomicReference;
 import Castles.Objects.SoldierState;
 import Castles.api.MoveAction;
 import Castles.api.MoveSoldier;
-import Castles.api.UpdateAction;
 
 public class AIHost {
 	private final Process process;
@@ -175,13 +174,13 @@ public class AIHost {
 				for (int idx = 0; idx < moveNum; ++idx) {
 					String sym = arguments.next();
 					
-					if (sym == "M") {
+					if (sym == "PATH") {
 						// Parse a soldier move action
 						action.addMove(arguments.nextInt(),
 								arguments.nextInt(), arguments.next(),
 								arguments.next());
 						
-					} else if (sym == "U") {
+					} else if (sym == "STATE") {
 						// Parse an update soldier action
 						int sIdx = arguments.nextInt();
 						String pID = arguments.next();

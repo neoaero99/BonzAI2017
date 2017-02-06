@@ -3,7 +3,7 @@ package Castles.api;
 import Castles.Objects.SoldierState;
 
 /**
- * A data holder class for a soldier update action.
+ * A data holder class for updating a soldier's state.
  * 
  * @author Joshua Hooker
  */
