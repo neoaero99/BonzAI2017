@@ -40,7 +40,7 @@ public class DanAI extends AI {
 		int i=(int)Math.random()*otherData.size();
 		PositionData go=otherData.get(i);
 		List<String> path=turn.getPath(data.ID,go.ID);
-		return new MoveAction(0,max,path);
+		return new MoveAction();
 	}
 
 }

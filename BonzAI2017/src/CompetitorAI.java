@@ -5,25 +5,18 @@ import bonzai.*;
 
 @Agent(name ="Captain No-Beard")
 public class CompetitorAI extends AI {
+	Team myTeam;
 	@Override
 	public Action action(Turn turn) {
-
-		//put your AI's stuff here
-		Random generator = new Random( System.currentTimeMillis() );
-		int val = generator.nextInt(3);
-		
-		if (val == 2) {
-			MoveAction a = new MoveAction();
-			a.addMove(0, 2, "P0", "P1");
-			return a;
-			
-		} else if (val == 1) {
-			MoveAction a = new MoveAction();
-			a.addUpdate(0, "P0", SoldierState.STANDBY);
-			return a;	
-=======
-		Team myTeam=turn.getMyTeam();
-		List<PositionData> myPositions =turn.getPositionsControlledBy(myTeam.getColor());
+			Team myTeam=turn.getMyTeam();
+		if(myTeam==null){
+			return new ShoutAction("No team? BUG!");
+		}
+		Color t=myTeam.getColor();
+		if(t==null){
+			return new ShoutAction("No color? BUG!");
+		}
+		List<PositionData> myPositions =turn.getPositionsControlledBy(t);
 		int max=-1;
 		PositionData data=null;
 		for(PositionData p:myPositions){
@@ -34,31 +27,30 @@ public class CompetitorAI extends AI {
 			}
 			if(temp>max){
 				data=p;
+				max=temp;
 			}
+		}
+		if(data==null){
+			return new ShoutAction("Data is wrong");
 		}
 		if(max<=0){
 			return new ShoutAction("I be Captain No-Beard!");
-/**
 		}
 		List<Team> teams=turn.getAllTeams();
+		teams.remove(myTeam);
 		Team otherTeam=null;
-		while(true){
-			int i=(int)Math.random()*teams.size();
-			if(!teams.get(i).equals(myTeam)){
-				otherTeam=teams.get(i);
-				break;
-			}
-		}
+		int i=(int)Math.random()*teams.size();
+		otherTeam=teams.get(i);
 		if(otherTeam==null){
 			return new ShoutAction("Captain No-Beard wins my default! No other Challengers!");
 		}
+		MoveAction movements= new MoveAction();
 		List<PositionData> otherData=turn.getPositionsControlledBy(otherTeam.getColor());
-		int i=(int)Math.random()*otherData.size();
-		PositionData go=otherData.get(i);
-		List<String> path=turn.getPath(data.ID,go.ID);
-		return new MoveAction(0,max,path);
+		int x=(int)Math.random()*otherData.size();
+		PositionData go=otherData.get(x);
+		movements.addMove(0, max, data.ID, go.ID);
+		return movements;
 	}
-*/
 }
 
 //import bonzai.*;
