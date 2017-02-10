@@ -26,7 +26,7 @@ public class SegEdge extends Node {
 		waypointIDs = new String[weight];
 		
 		for (int idx = 0; idx < weight; ++idx) {
-			waypointIDs[idx] = String.format("%s:%s", ID, idx);
+			waypointIDs[idx] = String.format("%s:%s", ID, idx + 1);
 		}
 		
 		first = f;
