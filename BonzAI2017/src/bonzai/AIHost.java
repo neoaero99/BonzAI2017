@@ -10,7 +10,7 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import Castles.Objects.SoldierState;
 import Castles.api.MoveAction;
-import Castles.api.UpdateAction;
+import Castles.api.MoveSoldier;
 
 public class AIHost {
 	private final Process process;
@@ -168,40 +168,44 @@ public class AIHost {
 		switch(arguments.next()) {
 
 			case "MOVE":
-				int sdx = arguments.nextInt();
-				int splitAmt = arguments.nextInt();
-				// build the set of position IDs
-				int pathSize = arguments.nextInt();
-				ArrayList<String> pathIDs = new ArrayList<String>();
+				MoveAction action = new MoveAction();
+				int moveNum = arguments.nextInt();
 				
-				for (int idx = 0; idx < pathSize; ++idx) {
-					pathIDs.add( arguments.next() );
+				for (int idx = 0; idx < moveNum; ++idx) {
+					String sym = arguments.next();
+					
+					if (sym == "PATH") {
+						// Parse a soldier move action
+						action.addMove(arguments.nextInt(),
+								arguments.nextInt(), arguments.next(),
+								arguments.next());
+						
+					} else if (sym == "STATE") {
+						// Parse an update soldier action
+						int sIdx = arguments.nextInt();
+						String pID = arguments.next();
+						String stateName = arguments.next();
+						SoldierState state = SoldierState.STANDBY;
+						// parse the soldier state based on its name
+						if (stateName.equals("MOVING")) {
+							state = SoldierState.MOVING;
+							
+						} else if (stateName.equals("CONFLICT")) {
+							state = SoldierState.CONFLICT;
+							
+						} else if (stateName.equals("DEFENDING")) {
+							state = SoldierState.DEFENDING;
+							
+						} else if (stateName.equals("SIEGING")) {
+							state = SoldierState.SIEGING;
+						}
+						
+						action.addUpdate(sIdx,  pID,  state);
+					}
 				}
 				
 				arguments.close();
-				return new MoveAction(sdx, splitAmt, pathIDs);
-			
-			case "SOLDIER":
-				String posID = arguments.next();
-				sdx = arguments.nextInt();
-				String stateName = arguments.next();
-				SoldierState state = SoldierState.STANDBY;
-				// parse the soldier state based on its name
-				if (stateName.equals("MOVING")) {
-					state = SoldierState.MOVING;
-					
-				} else if (stateName.equals("CONFLICT")) {
-					state = SoldierState.CONFLICT;
-					
-				} else if (stateName.equals("DEFENDING")) {
-					state = SoldierState.DEFENDING;
-					
-				} else if (stateName.equals("SIEGING")) {
-					state = SoldierState.SIEGING;
-				}
-				
-				arguments.close();
-				return new UpdateAction(posID, sdx, state);
+				return action;
 				
 			case "SHOUT":
 				args = arguments.nextLine();

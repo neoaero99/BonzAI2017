@@ -37,15 +37,13 @@ public class Turn {
 
 	private final ArrayList<ShoutAction> shoutActions;
 	private final ArrayList<MoveAction> moveActions;
-	private final ArrayList<UpdateAction> updateActions;
 
 	private String errorMessage = "";
 
 	// The current team that is acting.
 	// For each client, this will ALWAYS be their teamId
 	// This decides the context that isValid() will be run for.
-	// Example, If I'm on team 1, I can move team 1's things.  If I'm on team 2, I cant
-
+	// Example, If I'm on team 1, I can move team 1's things.  If I'm on team 2, I can't
 	//making this a class so all the pathfinding stuff is in one place
 	Pathfinding pathfinding;
 
@@ -73,7 +71,6 @@ public class Turn {
 		
 		shoutActions = new ArrayList<ShoutAction>();
 		moveActions = new ArrayList<MoveAction>();
-		updateActions = new ArrayList<UpdateAction>();
 
 		List<Team> teams = map.getTeams();
 		success = new ArrayList<Boolean>();
@@ -143,9 +140,9 @@ public class Turn {
 		this(teamNumber, turn.turnNumber + 1, map);
 		this.MAX_TURNS = turn.MAX_TURNS;
 
-		for (Team t : failedActions) {
+		//for (Team t : failedActions) {
 			//success.set(t.getID(), false);
-		}
+		//}
 	}
 	
 	/**
@@ -172,7 +169,9 @@ public class Turn {
 			ArrayList<SoldierData> soldierSet = t.getSoldiersAt("P0");
 			SoldierData s0 = soldierSet.get(0);
 			
-			actions.add(new MoveAction(0, s0.size, path0));
+			MoveAction a = new MoveAction();
+			a.addMove(0, s0.size, "P0", "V0");
+			actions.add(a);
 			
 			Turn nextT = t.apply(actions);
 			nextT.outputState();
@@ -202,9 +201,6 @@ public class Turn {
 		
 		System.out.printf("%s\n\n\n", unclaimedPositions);
 	}
-	
-	
-	
 	
 	/*************************************************************************
 	 * 
@@ -245,8 +241,12 @@ public class Turn {
 	 * 				ID
 	 */
 	public ArrayList<SoldierData> getSoldiersAt(String ID) {
-		// TODO
-		return null;
+		ArrayList<SoldierData> data = new ArrayList<SoldierData>();
+		RallyPoint r =map.getPosition(ID);
+		for(Soldier s: r.onPoint){
+			data.add(new SoldierData(s));
+		}
+		return data;
 	}
 	
 	/**
@@ -261,8 +261,9 @@ public class Turn {
 	 * 					color
 	 */
 	public List<PositionData> getPositionsControlledBy(Color teamColor) {
-		// TODO
-		return null;
+		HashMap<String, PositionData> step1 = teamPositions.get(teamColor);
+		Collection<PositionData> step2=step1.values();
+		return new ArrayList<PositionData>(step2);
 	}
 	
 	/**
@@ -275,8 +276,9 @@ public class Turn {
 	 * 					given color
 	 */
 	public List<SoldierData> getSoldiersControlledBy(Color teamColor) {
-		// TODO
-		return null;
+		HashMap<String, SoldierData> step1 = teamSoldiers.get(teamColor);
+		Collection<SoldierData> step2=step1.values();
+		return new ArrayList<SoldierData>(step2);
 	}
 	
 	/**
@@ -397,88 +399,78 @@ public class Turn {
 			
 		} else if (action instanceof MoveAction) {
 			MoveAction move = (MoveAction)action;
-			List<String> pathIDs = move.getPathIDs();
-			/* A path must contain the starting position, occupied by soldiers,
-			 * and an ending position */
-			if (pathIDs == null || pathIDs.size() < 2) {
-				errorMessage = String.format("The path must be of length 2 or greater.");
+			
+			for (int idx = 0; idx < move.numOfActions(); ++idx) {
+				Object obj = move.get(idx);
 				
-			} else {
-				RallyPoint prev = map.getPosition(pathIDs.get(0));
-				
-				if (prev == null) {
-					errorMessage = String.format("Position %s is not valid.",
-							pathIDs.get(0));
+				if (obj instanceof MoveSoldier) {
+					// Check a soldier path update action
+					MoveSoldier ms = (MoveSoldier)obj;
+					RallyPoint r = map.getPosition(ms.endID);
 					
-				} else {
-					Soldier target = prev.getOccupant(move.getSoldierIdx());
-					
-					if (target == null) {
-						errorMessage = String.format("No soldier on %s at %d.",
-								prev.ID, move.getSoldierIdx());
+					if (r != null) {
+						r = map.getPosition(ms.startID);
 						
-					} else if (target.getLeaderColor() != team.getColor()) {
-						errorMessage = String.format("AI %s cannot move soldier on %s.",
-								team.getColor(), target.getLeaderColor());
-						
-					} else if (target.getValue() > move.getSplitAmount()) {
-						errorMessage = String.format("Cannot split off %d soldiers from a group of size %d.",
-								target.getValue(), move.getSplitAmount());
-					
-					} else {
-						/* The positions in the path must exist and form a chain of
-						 * adjacent positions */
-						for (int idx = 1; idx < pathIDs.size(); ++idx) {
-							RallyPoint curr = map.getPosition(pathIDs.get(idx));
+						if (r != null) {
+							Soldier s = r.getOccupant(ms.soldierIdx);
 							
-							if (curr == null) {
-								errorMessage = String.format("Position %s is invalid.",
-										pathIDs.get(idx));
-								return false;
+							if (s != null) {
+								int sa = ms.splitAmt;
 								
-							} else if (!map.areAdjacent(prev.ID, curr.ID)) {
-								errorMessage = String.format("%s and %s are not adjacent.",
-										pathIDs.get(idx - 1), pathIDs.get(idx)); 
-								return false;
+								if (sa > 0 && sa <= s.getValue()) {
+									errorMessage = "";
+									continue;
+									
+								} else {
+									errorMessage = String.format("Split amount %d is invalid", sa);
+								}
+								
+								
+							} else {
+								errorMessage = String.format("No soldier on position %s", ms.startID);
 							}
+							
+						} else {
+							errorMessage = String.format("No position %s", ms.endID);
 						}
 						
-						errorMessage = "";
-						return true;
+					} else {
+						errorMessage = String.format("No position %s", ms.startID);
 					}
-				}
-			}
-			
-		} else if (action instanceof UpdateAction) {
-			UpdateAction update = (UpdateAction)action;
-			/* The position must exist and have a soldier group and you can
-			 * only command soldiers to move or halt */
-			RallyPoint r = map.getPosition(update.getSrcID());
-			
-			if (r != null) {
-				Soldier target = r.getOccupant(update.getSoldierIdx());
-				
-				if (target == null) {
-					errorMessage = String.format("There is not soldier on %s at position %d.",
-							update.getSrcID(), update.getSoldierIdx());
 					
-				} else if (target.getLeaderColor() != team.getColor()) {
-					errorMessage = String.format("AI %s cannot move a soldier on %s.",
-							target.getLeaderColor(), team.getColor());
 					
-				} else if (!(update.getState() == SoldierState.MOVING ||
-						update.getState() == SoldierState.STANDBY)) {
+				} else if (obj instanceof UpdateSoldier) {
+					// Check a soldier state update action
+					UpdateSoldier us = (UpdateSoldier)obj;
+					RallyPoint r = map.getPosition(us.posID);
 					
-					errorMessage = String.format("%s is an invalid state.", update.getState());
+					if (r != null) {
+						Soldier s = r.getOccupant(us.soldierIdx);
+						
+						if (s != null) {
+							
+							if (us.newState == SoldierState.STANDBY || us.newState == SoldierState.MOVING) {
+								errorMessage = "";
+								continue;
+								
+							} else {
+								errorMessage = String.format("Invalid state %s", us.newState);
+							}
+							
+						} else {
+							errorMessage = String.format("No soldiers at position %s", r.ID);
+						}
+							
+					} else {
+						errorMessage = String.format("No position %s", us.posID);
+					}
 					
 				} else {
-					errorMessage = "";
-					return true;
+					// Invalid action
+					errorMessage = "Invalid soldier action";
 				}
 				
-			} else {
-				errorMessage = String.format("%s is not a valid position.",
-						update.getSrcID());
+				return false;
 			}
 			
 		} else {
@@ -520,41 +512,48 @@ public class Turn {
 			if (isValid(teams.get(teamID), action)) {
 				if (action instanceof ShoutAction) {
 					shoutActions.add((ShoutAction)action);
-					
 				} else if (action instanceof MoveAction) {
 					MoveAction move = (MoveAction)action;
-					List<String> path = move.getPathIDs();
-					RallyPoint src = newMap.getPosition(path.get(0));
-					/* Split off a group of soldiers and give them the path
-					 * specified by the move action */
-					Soldier s = src.getOccupant(move.getSoldierIdx());
-					newMap.splitSoliders(s, move.getSplitAmount(),
-							new ArrayList<String>(path));
+					
+					for (int idx = 0; idx < move.numOfActions(); ++idx) {
+						Object obj = move.get(idx);
+						
+						if (obj instanceof MoveSoldier) {
+							// Update the path of a soldier
+							MoveSoldier ms = (MoveSoldier)obj;
+							ArrayList<String> path = new ArrayList<String>( getPath(ms.startID, ms.endID) );
+							RallyPoint src = newMap.getPosition(ms.startID);
+							Soldier target = src.getOccupant(ms.soldierIdx);
+							
+							if (target.getValue() == ms.splitAmt) {
+								target.setPath(path);
+								
+							} else {
+								newMap.splitSoliders(target, ms.splitAmt, path);
+							}
+							
+						} else {
+							// Update a soldier's state
+							UpdateSoldier us = (UpdateSoldier)obj;
+							RallyPoint r = newMap.getPosition(us.posID);
+							Soldier s = r.getOccupant(us.soldierIdx);
+							s.setState(us.newState);
+						}
+					}
 					
 					moveActions.add(move);
-					
-				} else if (action instanceof UpdateAction) {
-					UpdateAction update = (UpdateAction)action;
-					RallyPoint src = newMap.getPosition(update.getSrcID());
-					Soldier target = src.getOccupant(update.getSoldierIdx());
-					
-					target.setState(update.getState());
-					
-					updateActions.add((UpdateAction)action);
 				}
 				
 			} else {
 				failedTeams.add(teams.get(teamID));
 				// Test scoring
-				teamScoreAdditions[teamID] += 1;
 			}
 
 			teamID++;
 		}
 
 		// TODO apply any earned points onto this new Turn.
-		newMap.updateTeamScores(teamScoreAdditions);
-		
+				
 		newMap.moveSoldiers();
 		
 		/**
@@ -594,9 +593,14 @@ public class Turn {
 				if (s != null) {
 					newMap.addSoldiers(s);
 				}
+				Color c =b.getTeamColor();
+				if(c!=null){
+						int ID =c.ordinal();
+						teamScoreAdditions[ID]+=b.defenseValue;
+				}
 			}
 		}
-		
+		newMap.updateTeamScores(teamScoreAdditions);
 		return new Turn(this, teamID, newMap, failedTeams);
 	}
 	
@@ -619,13 +623,6 @@ public class Turn {
 	 */
 	public Collection<MoveAction> getMoveActions() {
 		return moveActions;
-	}
-	
-	/**
-	 * @return	The list of update actions performed this turn
-	 */
-	public Collection<UpdateAction> getUpdateActions() {
-		return updateActions;
 	}
 	
 	/**

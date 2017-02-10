@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 
 import Castles.Objects.Building;
+import Castles.Objects.*;
 import Castles.Objects.RallyPoint;
 import Castles.Objects.Soldier;
 
@@ -42,6 +43,7 @@ public class PositionData {
 	 */
 	public final int[] occupantSizes;
 	
+	public final String type;
 	/**
 	 * Fill the data of the Position with that of the given rally point.
 	 * 
@@ -54,6 +56,7 @@ public class PositionData {
 			occupant = null;
 			defVal = -9999;
 			occupantSizes = new int[] { 0 };
+			type= "!@#$%^&*()";
 			
 		} else {
 			ID = r.ID;
@@ -61,10 +64,20 @@ public class PositionData {
 			if (r instanceof Building) {
 				leader = ((Building)r).getTeamColor();
 				defVal = ((Building)r).defenseValue;
+				if(r instanceof Castle){
+					type = "Castle";
+				}
+				else if (r instanceof Village){
+					type = "Village";
+				}
+				else{
+					type = "Building";
+				}
 				
 			} else {
 				leader = null;
 				defVal = 0;
+				type="Rally Point";
 			}
 			
 			ArrayList<Soldier> occupants = r.getOccupants();

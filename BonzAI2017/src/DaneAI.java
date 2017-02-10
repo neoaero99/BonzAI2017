@@ -119,7 +119,7 @@ public class DaneAI extends AI {
 					break;
 				}
 			}
-			move.addMovement(bob, cStructs.get(0).ID, turn.getClosestCastle(cStructs.get(0).ID).ID);
+			move.addMove(bob, bob.size, cStructs.get(0).ID, turn.getClosestCastle(cStructs.get(0)).ID);
 			return move;
 		}
 		//get all of my soldiers
@@ -140,7 +140,13 @@ public class DaneAI extends AI {
 		
 		//add all moves
 		for(Path p : currentMovements){
-			move.addMovement(turn.getSoldierAt(p.from), p.to, p.from, p.soldiersCommited);
+			SoldierData JohnLucPicard = null;
+			for(SoldierData s : turn.getSoldiersAt(p.from.ID)){
+				if(s.state == SoldierState.STANDBY){
+					JohnLucPicard = s;
+				}
+			}
+			move.addMove(JohnLucPicard, p.soldiersCommited, p.to, p.from);
 		}
 		
 		

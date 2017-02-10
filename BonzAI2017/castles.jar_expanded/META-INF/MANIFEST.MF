@@ -1,0 +1,9 @@
+Manifest-Version: 1.0
+Ant-Version: Apache Ant 1.9.6
+Created-By: 1.8.0_101-b13 (Oracle Corporation)
+Main-Class: Castles.CastlesMain
+Class-Path: ../lib/fop-transcoder-allinone-1.1.jar ../lib/js.jar ../li
+ b/lib/jsch-0.1.53.jar ../lib/xalan-2.7.0.jar ../lib/xerces_2_5_0.jar 
+ ../lib/xml-apis-1.3.04.jar ../lib/xml-apis-ext-1.3.04.jar ../lib/xmlg
+ raphics-commons-2.0.jar
+

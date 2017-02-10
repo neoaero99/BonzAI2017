@@ -197,7 +197,7 @@ public class CastlesMap {
 	protected void updateTeamScores(int[] additions) {
 		for (int idx = 0; idx < teams.size(); ++idx) {
 			Team oldRef = teams.get(idx);
-			teams.set(idx, new Team(oldRef, oldRef.getScore() + additions[idx]));
+			teams.set(idx, new Team(oldRef, additions[idx]));
 		}
 	}
 	
@@ -402,6 +402,7 @@ public class CastlesMap {
 		}
 		
 	}
+	
 	/**
 	 * Deals with merging soldiers on the same point
 	 * @param onPoint the onpoint array for each node
