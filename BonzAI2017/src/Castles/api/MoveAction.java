@@ -2,6 +2,8 @@ package Castles.api;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import Castles.Objects.SoldierState;
 import bonzai.Action;
 
 /**
@@ -19,51 +21,68 @@ import bonzai.Action;
  */
 public class MoveAction implements Action {
 	
-	private int soldierIdx, splitAmount;
-	private List<String> pathIDs;
+	private ArrayList<Object> actions;
+	
+	/**
+	 * Initializes the list of actions.
+	 */
+	public MoveAction() {
+		actions = new ArrayList<Object>();
+	}
 	
 	/**
 	 * 
+	 * @param sIdx
+	 * @param sAmt
+	 * @param sID
+	 * @param eID
+	 */
+	public void addMove(int sIdx, int sAmt, String sID, String eID) {
+		actions.add(new MoveSoldier(sIdx, sAmt, sID, eID));
+	}
+	
+	/**
 	 * 
-	 * @param sdx
-	 * @param splitAmt
-	 * @param pathIDs
+	 * @param sIdx
+	 * @param pID
+	 * @param s
 	 */
-	public MoveAction(int sdx, int splitAmt, List<String> pathIDs) {
-		soldierIdx = sdx;
-		splitAmount = splitAmt;
-		this.pathIDs = new ArrayList<String>(pathIDs);
+	public void addUpdate(int sIdx, String pID, SoldierState s) {
+		actions.add(new UpdateSoldier(sIdx, pID, s));
 	}
 	
 	/**
+	 * 
+	 * @param idx
 	 * @return
 	 */
-	public List<String> getPathIDs() {
-		return new ArrayList<String>( pathIDs );
+	public Object get(int idx) {
+		return actions.get(idx);
 	}
 	
 	/**
-	 * @return
+	 * 
+	 * @param idx
 	 */
-	public int getSoldierIdx() {
-		return soldierIdx;
+	public void remove(int idx) {
+		actions.remove(idx);
 	}
-
+	
 	/**
+	 * 
 	 * @return
 	 */
-	public int getSplitAmount() {
-		return splitAmount;
+	public int numOfActions() {
+		return actions.size();
 	}
 
 	@Override
 	public String toString(){
-		String actionStr = String.format("MOVE %d %d %d", soldierIdx,
-				splitAmount, pathIDs.size());
+		String actionStr = String.format("MOVE %d", actions.size());
 		
-		for (int idx = 0; pathIDs != null && idx < pathIDs.size(); ++idx) {
-			// Append each ID of the position in the path
-			actionStr += " " + pathIDs.get(idx);
+		for (Object a : actions) {
+			// Append each action on the string
+			actionStr += " " + a;
 		}
 		
 		return actionStr;

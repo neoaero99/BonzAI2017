@@ -402,6 +402,7 @@ public class CastlesMap {
 		}
 		
 	}
+	
 	/**
 	 * Deals with merging soldiers on the same point
 	 * @param onPoint the onpoint array for each node
