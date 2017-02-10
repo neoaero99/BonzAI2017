@@ -1,0 +1,9 @@
+sprite_sheet    :=redsoldier.png;
+size_x          :=100;
+size_y          :=100;
+padding_x       :=0;
+padding_y       :=0;
+num_rows        :=1;
+action          :=March;
+columns         :=2;
+END

@@ -1,0 +1,22 @@
+# this is a comment describing the map
+# BONZAI CONFIDENTIAL
+
+name: Infinite Loop
+size: 25, 25 
+theme: plains
+playercount: 3
+players:
+    <1, 1, 64>
+    <24, 1, 180>
+    <12, 23, -60>
+repeaters:
+    <12, 1, 90>
+    <6, 11, -28>
+    <19, 11, 205>
+    <12, 14, -45>
+    <6, 5, 72>
+    <18, 5, 192>
+targets:
+    <24, 24>
+    <1, 24>
+walls:
