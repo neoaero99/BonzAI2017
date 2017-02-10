@@ -1,34 +1,76 @@
+
 import bonzai.*;
-
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.PriorityQueue;
-
+import java.util.*;
 import Castles.Objects.*;
 import Castles.api.*;
-import Castles.util.graph.Vertex;
 import Castles.util.linkedlist.DualLinkList;
 
 
 /**
+ * Dane's Test AI for the 2017 BonzAI Brawl,
+ * What this AI does:
+ * 	~10% chance of just taunting the whole time
+ * 
+ * Actual Strategy:
+ *  Throw away turn 1
+ *  Rush a Castle turn 2 to maximize points
+ *  On each other turn:
+ *  	For each of my buildings, compare the soldiers that building
+ *  	contains against the defense value + soldier per turn of all
+ *  	other buildings.  If the AI has enough soldiers to capture 
+ *  	the point, it will send the troops to the building to capture it.
+ *  	Uses a priority queue to sort the viable actions to which is the
+ *  	most efficient in terms of turns to target
+ *  
+ *  	if there isn't any viable moves in a turn, just one can never go
+ *  	wrong with some taunts, everyone loves dem taunts anyways.
+ *  	
+ * Things Tested By this AI:
+ * 		Shout Action
+ * 		Move action moving troops from one struct to another
+ * 		Multiple moves per move action
+ * 		The various querying methods in turn and the data wrapper classes
+ * 			Full List: 
+ * 				getClosest*(), getSoldiersAt(), getPath(), getMyTurn,
+ * 				getSoldiersControledBy(), PositionData.isOwned, PositionData.isOwnedBy,
+ * 				Soldier States, possible more
+ * 	
+ * 
  * 
  * @author Dane Jensen
  *
  */
-@Agent(name = "DaneAI")
+@Agent(name = "ManticoreAI")
 public class DaneAI extends AI {
 	
-	private final String[] taunts = {"Your Mother Was a Hampster", "Your Father smelt of Elderberries"};
-	private final boolean taunt = true;
+	private final String[] taunts = {
+			"Your Mother Was a Hampster", 
+			"Your Father smelt of Elderberries", 
+			"Make Castles Great Again!!!",
+			"404, Your score not found",
+			"Loading next move....",
+			"I AM MANTICORE!!!!!!!",
+			"Bad move, sad"
+			};
+	private final boolean taunt;
+	private final boolean test = true;
 	private int turnNumber = 0;
 	private Turn turn;
-	private CastlesMap map;
-	private ArrayList<RallyPoint> cStructs,uStructs,eStructs;
+	private ArrayList<PositionData> cStructs,uStructs,eStructs;
 	
-	private ArrayList<Troops> troops;
+	private ArrayList<SoldierData> troops;
 	private ArrayList<Path> currentMovements;
 
-	public DaneAI(){	}
+	@SuppressWarnings("unused")
+	public DaneAI(){
+		//decides if today is a good day to taunt
+		int rand = (int)(Math.random() * 99);
+		if(rand%42 == 0 || rand%69 == 0 || rand%17 == 0 || test){
+			taunt = true;
+		}else{
+			taunt = false;
+		}
+	}
 
 	
 	public Action action(Turn turn) {
@@ -36,145 +78,151 @@ public class DaneAI extends AI {
 		this.turn = turn;
 		Team MyTeam = turn.getMyTeam();
 		++turnNumber;
-		if(taunt || turnNumber == 1){
+		//on turn one, assert my dominance with a taunt,
+		//or if I just feel like taunting today
+		if(turnNumber == 1 || taunt){
 			return new ShoutAction(taunts[(int)(Math.random()*taunts.length)]);
 		}
-		map = turn.getMap();
-		MoveAction move = new MoveAction();
+		MoveAction move = new MoveAction(); //the move for the turn
+		//Data Structures to sort the state of all buildings
+		//on the map
 		cStructs = new ArrayList<>();
 		uStructs = new ArrayList<>();
 		eStructs = new ArrayList<>();
+		//a list of my troops
 		troops = new ArrayList<>();
+		//a queue for every move I can make
 		PriorityQueue<Path> possibleMoves = new PriorityQueue<>();
-		for(RallyPoint p: turn.getAllElements()){
-			if(p instanceof RallyPoint) continue;
-			Building b = (Building)p;
-			if(b.isControledBy(MyTeam.getColor())){
+		
+		//sort the buildings on the map for the current state
+		for(PositionData p: turn.getAllElements()){
+			if(p.ID.contains("R")) continue;
+			if(p.isControledBy(MyTeam.getColor())){
 				cStructs.add(p);
 				continue;
 			}
-			if(!b.isControled()){
+			if(!p.isControled()){
 				uStructs.add(p);
 				continue;
 			}
 			eStructs.add(p);
 		}
 		
-		for(Soldier s: turn.getSoldiers(turn.getMyTeam())){
-			troops.add(new Troops(s.getValue(), s.getRallyPoint()));
-		}
+		
 		//second turn send all my troops to the nearest castle
 		if(turnNumber == 2){
-			Soldier s = turn.getSoldierAt(cStructs.get(0));
-			s = map.splitSoliders(s, 210, turn.createPath(
-					cStructs.get(0)), turn.getClosestCastle(cStructs.get(0)));
-			move.addMovement(s, turn.getClosestCastle(cStructs.get(0)));
+			ArrayList<SoldierData> s = turn.getSoldiersAt(cStructs.get(0).ID);
+			SoldierData bob = null;
+			for(SoldierData glen : s){
+				if(glen.state == SoldierState.STANDBY){
+					bob = glen;
+					break;
+				}
+			}
+			move.addMovement(bob, cStructs.get(0).ID, turn.getClosestCastle(cStructs.get(0).ID).ID);
 			return move;
 		}
+		//get all of my soldiers
+		for(SoldierData s: turn.getSoldiersControlledBy(MyTeam.getColor())){
+			troops.add(s);
+		}
 		
+		//get all moves I can make in a turn
 		for(int size = 0; size < 1;){
 			possibleMoves = getPossibleMoves();
 			size = possibleMoves.size();
 			if(size == 0) break;
 			currentMovements.add(possibleMoves.poll());
 		}
-		
-		for(Path p : currentMovements){
-			move.addMovement(turn.getSoldierAt(p.from), p.to, p.soldiersCommited);
+		if(currentMovements.size() == 0){
+			return new ShoutAction(taunts[(int)(Math.random()*taunts.length)]);
 		}
 		
-		return move;
+		//add all moves
+		for(Path p : currentMovements){
+			move.addMovement(turn.getSoldierAt(p.from), p.to, p.from, p.soldiersCommited);
+		}
 		
-		//TODO
-		/***********************************************************************
-		 * Methods We need to add											   *
-		 * 	CastlesMap.getSoldierAt(RallyPoint)								   *
-		 * 	Building.getControlingTeam()        							   *
-		 * 	Building.isControledBy(a team)								       *
-		 *  Building.isControled()										       *
-		 * 	CastlesMap.getSoldierAt(RallyPoint)	Done							   *
-		 * 	RallyPoint.getControlingTeam()      in Building, not RallyPoint, RallyPoints are not controlled  							   *
-		 * 	RallyPoint.isControledBy(a team)	Ditto /\							   *
-		 *  RallyPoint.isControled()			Ditto							   *
-		 * 	CastlesMap.getClosestCastle(RallyPoint)							   *
-		 * 	CastlesMap.getClosestVillage(RallyPoint)						   *
-		 * 	CastlesMap.updateSoldiers(); THIS SHOULD BE PRIVATE				   *
-		 *  CastlesMap.createPath(From, To)		Done							   *
-		 *  CastlesMap.getSoldiers(a team)		Done						   *
-		 *  Soldier.getRallyPoint()				Done							   *
-		 *  Put the inital Values in CastlesMap as static finals			   *
-		 *  Put the per turn values in the Castles map as static finals        *
-		 ***********************************************************************/
-		return new ShoutAction("");
+		
+		
+		
+		
+		return move;
+
 	
 	}
 	
-	private PriorityQueue<Path> getPossibleMoves(){
+	@SuppressWarnings("unchecked")
+	private PriorityQueue<Path> getPossibleMoves() throws ClassCastException{
 		PriorityQueue<Path> pm = new PriorityQueue<>();
 		//YAY!!!! ORDER N^2 ALGORITHM
-		for(RallyPoint owned : cStructs){
-			if(!(getSoldierCount(owned).value > turn.VILLAGE_INIT)) continue;
-			for(RallyPoint unowned : uStructs){
-				if(getSoldierCount(owned) > turn.getSoldierAt(unowned) + 1){
-					DualLinkList<RallyPoint> temp = createPath(owned, unowned);
-					pm.add(new Path(temp, temp.size(),unowned,owned,turn.getSoldierAt(unowned) +1));
+		for(PositionData owned : cStructs){
+			if(!(getSoldierCount(owned) > Turn.VILLAGE_INIT)) continue;
+			//finds the list of turns I can use for un-owned buildings
+			//from each owned buildings
+			for(PositionData unowned : uStructs){
+				if(getSoldierCount(owned) > getSoldierCount(unowned) + 1){
+					DualLinkList<String> temp = (DualLinkList<String>) turn.getPath(owned.ID, unowned.ID);
+					pm.add(new Path(temp, temp.size(),unowned,owned,getSoldierCount(unowned) +1));
 				}
 			}
-			for(RallyPoint eowned : eStructs){
-				DualLinkList<RallyPoint> temp = createPath(owned, eowned);
-				int count = getSoldierAt(eowned);
+			
+			//finds the list of turns I can use for un-owned buildings
+			//from each owned building
+			for(PositionData eowned : eStructs){
+				DualLinkList<String> temp = (DualLinkList<String>) turn.getPath(owned.ID, eowned.ID);
+				int count = getSoldierCount(eowned);
 				count += getTroopGain(eowned) * temp.size();
 				if(getSoldierCount(owned) > count + 1){
-					pm.add(new Path(temp, temp.size(),eowned,owned,turn.getSoldierAt(eowned) +1));
+					pm.add(new Path(temp, temp.size(),eowned,owned, getSoldierCount(eowned) +1));
 				}
 			}
 		}
 		return pm;
 	}
 	
-	private int getTroopGain(RallyPoint p){
-		if(p instanceof Castle){
-			return turn.CASTLE_PER_TURN;
-		}else if(p instanceof Village){
-			return turn.VILLAGE_PER_TURN;
-		}else{
+	private int getTroopGain(PositionData p){
+		char type = p.ID.charAt(0);
+		switch(type){
+		case 'C':
+			return Turn.CASTLE_PER_TURN;
+		case 'V':
+			return Turn.VILLAGE_PER_TURN;
+		default:
 			return 0;
 		}
 	}
 	
-	private int getSoldierCount(RallyPoint p){
-		int count = turn.getSoldierAt(p);
+	private int getSoldierCount(PositionData p){
+		ArrayList<SoldierData> soldiers = turn.getSoldiersAt(p.ID);
+		SoldierData Josh = null;
+		int count = 0;
+		for(SoldierData david : soldiers){
+			if(david.state == SoldierState.STANDBY){
+				Josh = david;
+				break;
+			}
+		}
+		count = Josh.size;
 		for(Path path: currentMovements){
-			if(p == path.from){
+			if(p.ID.equals(path.from)){
 				count -= path.soldiersCommited;
 			}
 		}
 		return count;
 	}
 	
-	private int getEnemySoldierCount(RallyPoint p){
-		int count = turn.getSoldierAt(p);
-	}
-	
-	private class Troops{
-		int strength;
-		RallyPoint location;
-		public Troops(int strength, RallyPoint location){
-			this.strength = strength;
-			this.location = location;
-		}
-	}
-	
 	private class Path implements Comparable<Path>{
-		DualLinkList<RallyPoint> p = new DualLinkList<>();
+		@SuppressWarnings("unused")
+		DualLinkList<String> p = new DualLinkList<>();
 		int length;
-		RallyPoint to,from;
+		PositionData to,from;
 		int soldiersCommited;
-		public Path(DualLinkList<RallyPoint> p, int length, RallyPoint to, RallyPoint from, int comitted){
-			this.p = p;
+		public Path(DualLinkList<String> temp, int length, PositionData unowned, PositionData owned, int comitted){
+			this.p = temp;
 			this.length = length;
-			this.to = to;
-			this.from = from;
+			this.to = unowned;
+			this.from = owned;
 			this.soldiersCommited = comitted;
 		}
 		

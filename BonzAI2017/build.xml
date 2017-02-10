@@ -97,7 +97,7 @@
 		<compile source = "ais/SimpleAI/" files = "**">
 			<external><classpath refid = "castles.classpath"/></external>
 		</compile>
-		<build-ai jar = "ais/SimpleAI.jar" source = "./ais/SimpleAI/" main = "" />
+		<build jar = "ais/SimpleAI.jar" source = "./ais/SimpleAI/" main = "" />
 	</target>
 	
 	<!-- Run Target(s) -->

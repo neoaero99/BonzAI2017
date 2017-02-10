@@ -51,34 +51,29 @@ public class Building extends RallyPoint {
 		return null;
 	}
 	
-<<<<<<< HEAD
 	/*
 	 * Decrements soldier count by one.
 	 */
 	protected void decrementSoldier(){
-		soldiers -= 1;
+		//soldiers -= 1;
 	}
 	
 	public boolean isControled(){
-		if(myTeam == null) return false;
+		if(myTeamColor == null) return false;
 		return true;
 	}
 	
 	public boolean isControledBy(Castles.api.Color team){
-		if(myTeam.getColor() == team) return true;
+		if(myTeamColor == team) return true;
 		return false;
 	}
 	
-	public Castles.api.Color getColor() {
-		return myTeam == null ? null : myTeam.getColor();
-=======
 	@Override
 	public RallyPoint copy() {
 		Building copy = new Building(getPosition().getX(), getPosition().getY(),
 				ID, myTeamColor, defenseValue, soldierCreationRate);
 		
 		return copy;
->>>>>>> 19d97d04aec9d99ca763713245d917d20af18159
 	}
 
 	public void setTeamColor(Color teamColor) {
