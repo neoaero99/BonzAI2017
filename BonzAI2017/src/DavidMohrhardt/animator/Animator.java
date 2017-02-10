@@ -5,7 +5,7 @@ import java.util.ArrayList;
 
 /**
  * @author David Mohrhardt
- * @version 0.01
+ * @version 0.02
  * 
  * This is the animator package.
  * 
@@ -37,6 +37,12 @@ public class Animator {
 	}
 
 
+	/**
+	 * startActionAnimation(String Action)
+	 * 
+	 * @param action The action that is to be animate as dictated by the script.
+	 * @return The first frame of the action that is to be animated
+	 */
 	public BufferedImage startActionAnimation(String action) {
 		current_frame = 0;
 		current_action = action;
@@ -47,15 +53,14 @@ public class Animator {
 	/**
 	 * getNextFrame()
 	 * 
-	 * @return The next frame.
+	 * @return The next frame of the current action.
 	 */
 	public BufferedImage getNextFrame() {
 		++current_frame;
 		
-		if ( !sprite.checkIndex(current_frame) ) {
+		if ( !sprite.checkIndex(current_action, current_frame) ) {
 			current_frame = 0;
 		}
-
 
 		return sprite.getFrame(current_action, current_frame);
 	}
@@ -74,6 +79,24 @@ public class Animator {
 
 		return sprite.getFrame(current_action, current_frame);
 	}
+	
+	/**
+	 * getSpriteSizeX()
+	 * 
+	 * @return The size of a single frame of the sprite in pixels on the X-axis
+	 */
+	public int getSpriteSizeX() {
+		return sprite.getSizeX();
+	}
+	
+	/**
+	 * getSpriteSizeY()
+	 * 
+	 * @return The size of a single frame of the sprite in pixels on the Y-axis
+	 */
+	public int getSpriteSizeY() {
+		return sprite.getSizeY();
+	}
 
 	// Debugging information
 	/**
@@ -88,6 +111,17 @@ public class Animator {
 		}
 
 		return false;
+	}
+	
+	/**
+	 * debugSprite(int i)
+	 * 
+	 * @param i The integer value that indicates what information the debugger should print out.  
+	 * 0 = All Information of the Sprite.  
+	 * 1 = General Information of the Sprite.
+	 */
+	public void debugSprite(int i) {
+		sprite.debugSprite(i);
 	}
 
 }
