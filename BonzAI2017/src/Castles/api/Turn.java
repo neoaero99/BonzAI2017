@@ -168,6 +168,16 @@ public class Turn {
 			
 			ArrayList<SoldierData> soldierSet = t.getSoldiersAt("P0");
 			SoldierData s0 = soldierSet.get(0);
+			int soldiersNum = 0;
+			
+			List<PositionData> positions = t.getPositionsControlledBy(Color.RED);
+			System.out.println(positions.size());
+			
+			for (PositionData pd : positions) {
+				for (int sNum : pd.occupantSizes) {
+					System.out.printf("%d\n", sNum);
+				}
+			}
 			
 			MoveAction a = new MoveAction();
 			a.addMove(0, s0.size, "P0", "V0");
@@ -475,6 +485,8 @@ public class Turn {
 				return false;
 			}
 			
+			return true;
+			
 		} else {
 			errorMessage = "Invalid action given.";
 		}
@@ -533,6 +545,8 @@ public class Turn {
 							} else {
 								newMap.splitSoliders(target, ms.splitAmt, path);
 							}
+							
+							target.setState(SoldierState.MOVING);
 							
 						} else {
 							// Update a soldier's state

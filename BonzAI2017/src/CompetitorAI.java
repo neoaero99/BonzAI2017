@@ -11,6 +11,7 @@ import bonzai.*;
 
 @Agent(name ="Captain No-Beard")
 public class CompetitorAI extends AI {
+
 	Team myTeam;
 	@Override
 	public Action action(Turn turn) {
@@ -38,8 +39,10 @@ public class CompetitorAI extends AI {
 		if(t==null){
 			return new ShoutAction("No color? BUG!");
 		}
+
 		int max=-1;
 		PositionData data=null;
+		
 		for(PositionData p:myPositions){
 			int [] sizes=p.occupantSizes;
 			int temp=0;
@@ -58,6 +61,18 @@ public class CompetitorAI extends AI {
 			return new ShoutAction("I be Captain No-Beard!");
 
 		}
+
+
+		List<Team> teams=turn.getAllTeams();
+		teams.remove(myTeam);
+		Team otherTeam=null;
+		int i=(int)Math.random()*teams.size();
+		otherTeam=teams.get(i);
+		if(otherTeam==null){
+			return new ShoutAction("Captain No-Beard wins my default! No other Challengers!");
+		}
+		MoveAction movements= new MoveAction();
+		List<PositionData> otherData=turn.getPositionsControlledBy(otherTeam.getColor());
 		int x=(int)Math.random()*otherData.size();
 		PositionData go=otherData.get(x);
 		movements.addMove(0, max, data.ID, go.ID);
@@ -65,6 +80,7 @@ public class CompetitorAI extends AI {
 	}
 	
 }
+
 
 //import bonzai.*;
 //
