@@ -138,6 +138,10 @@ class Sprite {
 					
 					case (1):
 						action_data = new FrameData(action_name, data_read - 7, Integer.parseInt(data));
+						if (actions.containsKey(action_name)) {
+							System.out.println("ERROR: Duplicate Action Specified in sprite script file!  Skipping the action");
+							break;
+						}
 					    actions.put(action_name, action_data);
 					break;
 					}

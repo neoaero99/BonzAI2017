@@ -268,7 +268,9 @@ public class Turn {
 	public List<PositionData> getPositionsControlledBy(Color teamColor) {
 		HashMap<String, PositionData> step1 = teamPositions.get(teamColor);
 		Collection<PositionData> step2=step1.values();
-		return new ArrayList<PositionData>(step2);
+		ArrayList<PositionData> step3=new ArrayList<PositionData>();
+		step3.addAll(step2);
+		return step3;
 	}
 	
 	/**
@@ -427,7 +429,7 @@ public class Turn {
 									continue;
 									
 								} else {
-									errorMessage = String.format("Split amount %d is invalid", sa);
+									ms.splitAmt=s.getValue();
 								}
 								
 								
@@ -610,7 +612,7 @@ public class Turn {
 			}
 		}
 		newMap.updateTeamScores(teamScoreAdditions);
-		return new Turn(this, teamID, newMap, failedTeams);
+		return new Turn(this, currentTeam, newMap, failedTeams);
 	}
 	
 	/**

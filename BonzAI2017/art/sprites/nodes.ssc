@@ -1,0 +1,13 @@
+sprite_sheet    :=nodes.png;
+size_x          :=256;
+size_y          :=256;
+padding_x       :=0;
+padding_y       :=0;
+num_rows        :=3;
+action          :=Blue;
+columns         :=1;
+action          :=Neutral;
+columns         :=1;
+action          :=Red;
+columns         :=1;
+END

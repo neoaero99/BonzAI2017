@@ -201,8 +201,9 @@ public class CastlesMap {
 		}
 	}
 	
+	@SuppressWarnings("unchecked")
 	public List<Team> getTeams() {
-		return teams;
+		return (List<Team>) teams.clone();
 	}
 	
 	public ArrayList<Soldier>[] getSoldiers(){
