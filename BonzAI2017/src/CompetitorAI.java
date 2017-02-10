@@ -7,6 +7,21 @@ import bonzai.*;
 public class CompetitorAI extends AI {
 	@Override
 	public Action action(Turn turn) {
+
+		//put your AI's stuff here
+		Random generator = new Random( System.currentTimeMillis() );
+		int val = generator.nextInt(3);
+		
+		if (val == 2) {
+			MoveAction a = new MoveAction();
+			a.addMove(0, 2, "P0", "P1");
+			return a;
+			
+		} else if (val == 1) {
+			MoveAction a = new MoveAction();
+			a.addUpdate(0, "P0", SoldierState.STANDBY);
+			return a;	
+=======
 		Team myTeam=turn.getMyTeam();
 		List<PositionData> myPositions =turn.getPositionsControlledBy(myTeam.getColor());
 		int max=-1;
@@ -23,6 +38,7 @@ public class CompetitorAI extends AI {
 		}
 		if(max<=0){
 			return new ShoutAction("I be Captain No-Beard!");
+/**
 		}
 		List<Team> teams=turn.getAllTeams();
 		Team otherTeam=null;
@@ -42,7 +58,7 @@ public class CompetitorAI extends AI {
 		List<String> path=turn.getPath(data.ID,go.ID);
 		return new MoveAction(0,max,path);
 	}
-
+*/
 }
 
 //import bonzai.*;
