@@ -252,7 +252,14 @@ public class CastlesMap {
 				
 				if (oldPosID != null) {
 					getPosition(oldPosID).removeOccupant(s);
-					getPosition(s.getPositionID()).addOccupant(s);
+					RallyPoint r = getPosition(s.getPositionID());
+					
+					if (r != null) {
+						r.addOccupant(s);
+						
+					} else {
+						System.out.println("ERROR");
+					}
 				}
 			}
 		}
