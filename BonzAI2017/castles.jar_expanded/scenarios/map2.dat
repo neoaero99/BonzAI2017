@@ -1,0 +1,22 @@
+# this is a comment describing the map
+# BONZAI CONFIDENTIAL
+
+name: Tri fork
+size: 25, 25 
+theme: mars
+playercount: 3
+players:
+    <1, 1, 240>
+    <24, 1, 0>
+    <12, 23, 120>
+repeaters:
+    <12, 1, 270>
+    <6, 11, 152>
+    <19, 11, 25>
+    <12, 14, 135>
+    <6, 5, 252>
+    <18, 5, 12>
+targets:
+    <24, 24>
+    <1, 24>
+walls:
