@@ -25,6 +25,9 @@ public class MoveAction implements Action {
 	
 	/**
 	 * Initializes the list of actions.
+	 * @param path 
+	 * @param max 
+	 * @param i 
 	 */
 	public MoveAction() {
 		actions = new ArrayList<Object>();

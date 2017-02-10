@@ -1,0 +1,9 @@
+sprite_sheet    :=buildings.png;
+size_x          :=256;
+size_y          :=256;
+padding_x       :=0;
+padding_y       :=0;
+num_rows        :=1;
+action          :=Village;
+columns         :=1;
+END

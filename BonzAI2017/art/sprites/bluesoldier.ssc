@@ -1,0 +1,64 @@
+**
+* This is the .ssc or Sprite Script File extension.
+*
+* This is a file type that is designed to work with a custom
+* sprite loader and animator for bonzai brawl 2017.  Just script
+* out the information you want for your animation here and the
+* sprite loader will handle the rest!
+*
+* USAGE:
+* The order in which the parser will read the file is as follows
+*   NAMES:            EXPLANATION:
+*   sprite_sheet      (Name of sprite sheet)
+*   size_x            (width of a single frame)
+*   size_y            (height of a single frame)
+*   padding_x         (the x-axis padding between individual frames)
+*   padding_y         (the y-axis padding between rows)
+*   num_rows          (the number of actions that are in the sprite sheet)
+*
+* These next few lines are repeatable up to the defined number of rows.
+*   action            (the name of the action that the row represents)
+*   columns           (the number of frames that are used in this action)
+*   ... // Next action
+*
+* To terminate the read process use the string END on its own line.
+*
+* THE INFORMATION MUST BE PRESENTED IN THE ORDER DICTATED ABOVE!
+*
+* <<<<<<<<<<<<<<<<<<<<IMPORTANT USAGE INFORMATION BELOW>>>>>>>>>>>>>>>>>>>>>>>>>
+* Due to the way that the animations are parsed, all the frames of a single animation
+* must be in the same row on the sprite sheet going from left to right.  Another animation
+* can go below in a separate row.  The parser will read the data from right to left
+* and top to bottom in order so it is important that your script list the actions
+* in order from top to bottom.
+*
+* The names are for human readability.  You do not need to include them.
+* you do, however need to include the ":=" as the parser will look for that
+* string to find were it will begin reading it's next piece of data.
+*
+* You must also include the ";" at the end of a statement to indicate when data
+* reading should finish.  Also the next piece of data needs to be on the next line.
+*
+* Finally, any lines that begin with a "*" will be ignored.  These lines are
+* useful for commenting.
+*
+* Here is an example of the scripting:
+* sprite_sheet    :=bluesoldier.png;
+* size_x          :=100;
+* size_y          :=100;
+* padding_x       :=0;
+* padding_y       :=0;
+* num_rows        :=2;
+* action          :=March;
+* columns         :=2;
+* END
+**
+sprite_sheet    :=bluesoldier.png;
+size_x          :=100;
+size_y          :=100;
+padding_x       :=0;
+padding_y       :=0;
+num_rows        :=1;
+action          :=March;
+columns         :=2;
+END

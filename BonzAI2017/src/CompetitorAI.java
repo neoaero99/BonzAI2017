@@ -11,6 +11,7 @@ import bonzai.*;
 
 @Agent(name ="Captain No-Beard")
 public class CompetitorAI extends AI {
+	Team myTeam;
 	@Override
 	public Action action(Turn turn) {
 
@@ -30,6 +31,13 @@ public class CompetitorAI extends AI {
 		}
 		Team myTeam=turn.getMyTeam();
 		List<PositionData> myPositions =turn.getPositionsControlledBy(myTeam.getColor());
+		if(myTeam==null){
+			return new ShoutAction("No team? BUG!");
+		}
+		Color t=myTeam.getColor();
+		if(t==null){
+			return new ShoutAction("No color? BUG!");
+		}
 		int max=-1;
 		PositionData data=null;
 		for(PositionData p:myPositions){
@@ -40,30 +48,20 @@ public class CompetitorAI extends AI {
 			}
 			if(temp>max){
 				data=p;
+				max=temp;
 			}
+		}
+		if(data==null){
+			return new ShoutAction("Data is wrong");
 		}
 		if(max<=0){
 			return new ShoutAction("I be Captain No-Beard!");
 
-		}/*
-		List<Team> teams=turn.getAllTeams();
-		Team otherTeam=null;
-		while(true){
-			int i=(int)Math.random()*teams.size();
-			if(!teams.get(i).equals(myTeam)){
-				otherTeam=teams.get(i);
-				break;
-			}
 		}
-		if(otherTeam==null){
-			return new ShoutAction("Captain No-Beard wins my default! No other Challengers!");
-		}
-		List<PositionData> otherData=turn.getPositionsControlledBy(otherTeam.getColor());
-		int i=(int)Math.random()*otherData.size();
-		PositionData go=otherData.get(i);
-		List<String> path=turn.getPath(data.ID,go.ID);
-		return new MoveAction(0,max,path);*/
-		return null;
+		int x=(int)Math.random()*otherData.size();
+		PositionData go=otherData.get(x);
+		movements.addMove(0, max, data.ID, go.ID);
+		return movements;
 	}
 	
 }
