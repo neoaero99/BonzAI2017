@@ -38,12 +38,15 @@ public class CastlesRenderer extends bonzai.Renderer {
 	//These data structures hold the art assets for each game object.
 //**************************************************************************************************
 
+
 	static File[] selectorFiles = {
 			new File("art/sprites/ART2016/turn_red.png"),
+
 			new File("art/sprites/ART2016/turn_yellow.png"),
 			new File("art/sprites/ART2016/turn_blue.png"),
 			new File("art/sprites/ART2016/turn_green.png"),
 			new File("art/sprites/ART2016/turn_orange.png"),
+
 			new File("art/sprites/ART2016/turn_purple.png")
 			};
 	
@@ -51,16 +54,19 @@ public class CastlesRenderer extends bonzai.Renderer {
 	static File rallyPointFile = new File("art/sprites/ART2016/target_lake.png");
 	static File soldierFile = new File("art/sprites/ART2016/fox_base.png");
 	static File castleFile = new File("art/sprites/ART2016/repeater.png");
+
 	static File[] playerFiles = {  
 			new File("art/sprites/ART2016/fox_red.png"), 
 			new File("art/sprites/ART2016/fox_yellow.png"), 
 			new File("art/sprites/ART2016/fox_blue.png"),
 			new File("art/sprites/ART2016/fox_green.png"),
 			new File("art/sprites/ART2016/fox_orange.png"),
+
 			new File("art/sprites/ART2016/fox_purple.png")
 			};
 //
 	static File wallFile 		= new File("art/sprites/wall.png");
+
 //	static File discoveryFile 	= new File("art/sprites/discovery.png");
 //	static File cloudFile 		= new File("art/sprites/cloud.png");
 //	
