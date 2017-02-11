@@ -2,6 +2,7 @@ package Castles.api;
 
 import java.awt.Graphics2D;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -77,7 +78,8 @@ public class Turn {
 			ArrayList<Soldier> soldiers = map.getSoldiers(t);
 			
 			for (Soldier s : soldiers) {
-				SoldierData data = new SoldierData(s);
+				SoldierData data = getSoldierData(s);
+				
 				soldierGroups.put(data.posID, data);
 			}
 			
@@ -163,7 +165,6 @@ public class Turn {
 			
 			ArrayList<SoldierData> soldierSet = t.getSoldiersAt("P0");
 			SoldierData s0 = soldierSet.get(0);
-			int soldiersNum = 0;
 			
 			List<PositionData> positions = t.getPositionsControlledBy(Color.RED);
 			System.out.println(positions.size());
@@ -178,8 +179,23 @@ public class Turn {
 			a.addMove(0, s0.size, "P0", "V0");
 			actions.add(a);
 			
+			for (RallyPoint r : t.map.getAllPositions()) {
+				System.out.printf("%s: %s\n", r.ID, r.getOccupants());
+			}
+			
 			Turn nextT = t.apply(actions);
 			nextT.outputState();
+			
+			for (RallyPoint r : nextT.map.getAllPositions()) {
+				System.out.printf("%s: %s\n", r.ID, r.getOccupants());
+			}
+			
+			nextT = nextT.apply(new ArrayList<Action>());
+			nextT.outputState();
+			
+			for (RallyPoint r : nextT.map.getAllPositions()) {
+				System.out.printf("%s: %s\n", r.ID, r.getOccupants());
+			}
 			
 		} catch (Exception Ex) {
 			Ex.printStackTrace();
@@ -205,6 +221,27 @@ public class Turn {
 		System.out.println();
 		
 		System.out.printf("%s\n\n\n", unclaimedPositions);
+	}
+	
+	/**
+	 * 
+	 * 
+	 * @param s
+	 * @return
+	 */
+	private SoldierData getSoldierData(Soldier s) {
+		RallyPoint r = map.getPosition(s.getPositionID());
+		
+		if (r != null) {
+			
+			for (int idx = 0; idx < r.getOccupants().size(); ++idx) {
+				if (s == r.getOccupant(idx)) {
+					return new SoldierData(s, idx);
+				}
+			}
+		}
+		
+		return null;
 	}
 	
 	/*************************************************************************
@@ -249,7 +286,7 @@ public class Turn {
 		ArrayList<SoldierData> data = new ArrayList<SoldierData>();
 		RallyPoint r =map.getPosition(ID);
 		for(Soldier s: r.onPoint){
-			data.add(new SoldierData(s));
+			data.add(getSoldierData(s));
 		}
 		return data;
 	}

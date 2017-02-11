@@ -34,6 +34,11 @@ public class SoldierData {
 	public final String posID;
 	
 	/**
+	 * The index of soldier on its position's list of soldiers
+	 */
+	public final int sIdx;
+	
+	/**
 	 * The path, which this soldier will move along, when in the MOVING state.
 	 */
 	public final List<String> path;
@@ -43,7 +48,9 @@ public class SoldierData {
 	 * 
 	 * @param s	The soldier group, which will have its data copied to this
 	 */
-	public SoldierData(Soldier s) {
+	public SoldierData(Soldier s, int sdx) {
+		sIdx = sdx;
+		
 		if (s == null) {
 			leader = null;
 			size = 0;
@@ -69,7 +76,7 @@ public class SoldierData {
 	
 	@Override
 	public String toString() {
-		return String.format("leader:%s state:%s size:%d pos:%s",
-				leader, state, size, posID);
+		return String.format("id=%d leader:%s state:%s size:%d pos:%s",
+				sIdx, leader, state, size, posID);
 	}
 }

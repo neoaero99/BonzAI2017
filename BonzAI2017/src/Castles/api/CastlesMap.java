@@ -95,6 +95,8 @@ public class CastlesMap {
 				addSoldiers( s.copy() );
 			}
 		}
+		
+		System.out.println();
 	}
 	
 	/**
@@ -255,12 +257,7 @@ public class CastlesMap {
 					getPosition(oldPosID).removeOccupant(s);
 					RallyPoint r = getPosition(s.getPositionID());
 					
-					if (r != null) {
-						r.addOccupant(s);
-						
-					} else {
-						System.out.println("ERROR");
-					}
+					r.addOccupant(s);
 				}
 			}
 		}
