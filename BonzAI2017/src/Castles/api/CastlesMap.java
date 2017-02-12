@@ -216,13 +216,22 @@ public class CastlesMap {
 	 * @param s the soldier to add
 	 */
 	protected void addSoldiers(Soldier s) {
+		
 		if (s != null) {
 			// Add to team soldiers list
 			soldiers[s.getLeaderColor().ordinal()].add(s);
 			// Add to the initial position
+			try {
 			getPosition(s.getPositionID()).addOccupant(s);
+			} catch (Exception Ex) {
+				if (Ex instanceof NullPointerException) {
+					System.err.println(s.getPositionID());
+					System.err.printf("PLIST: %s\n", graphElements.keySet());
+				}
+				
+				throw Ex;
+			}
 		}
-
 	}
 	
 	/**
@@ -253,8 +262,8 @@ public class CastlesMap {
 				
 				if (oldPosID != null) {
 					getPosition(oldPosID).removeOccupant(s);
-					RallyPoint r = getPosition(s.getPositionID());
 					
+					RallyPoint r = getPosition(s.getPositionID());
 					r.addOccupant(s);
 				}
 			}
@@ -263,6 +272,7 @@ public class CastlesMap {
 	
 	/**
 	 * Splits the passed soldiers into two groups
+	 * 
 	 * @param s the first solder
 	 * @param num the number of soldier being split
 	 * @param path the path the split is going on, with 0 the starting point

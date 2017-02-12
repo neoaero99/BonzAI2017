@@ -6,7 +6,6 @@ import bonzai.Action;
 import bonzai.Team;
 import Castles.api.*;
 
-
 /**
  * A representation of a state of the game board
  */

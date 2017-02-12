@@ -511,18 +511,15 @@ public class Turn {
 					errorMessage = "Invalid soldier action";
 				}
 				
-				System.out.printf("ERROR: %s\n", errorMessage);
 				return false;
 			}
 			
-			System.out.println("ACCEPTED!");
 			return true;
 			
 		} else {
 			errorMessage = "Invalid action given.";
 		}
 		
-		System.out.println("Invalid Action!");
 		return false;
 	}
 
@@ -556,8 +553,10 @@ public class Turn {
 		for (Action action : actions) {
 			//TODO Actions are Handled here
 			if (isValid(teams.get(teamID), action)) {
+				
 				if (action instanceof ShoutAction) {
 					shoutActions.add((ShoutAction)action);
+					
 				} else if (action instanceof MoveAction) {
 					MoveAction move = (MoveAction)action;
 					
@@ -571,20 +570,17 @@ public class Turn {
 							RallyPoint src = newMap.getPosition(ms.startID);
 							Soldier target = src.getOccupant(ms.soldierIdx);
 							
+							System.out.printf("%s -> %s : %s\n", ms.startID, ms.endID, path);
+							
 							if (target.getValue() == ms.splitAmt) {
-								// Move the entire group
+								// Move the entire group	
 								target.setPath(path);
 								target.setState(SoldierState.MOVING);
 								
 							} else {
 								/* Split off a portion of the soldier group to move along
 								 * the given path */
-								Soldier s = newMap.splitSoliders(target, ms.splitAmt, path);
-								
-								if (s != null) {
-									newMap.addSoldiers(s);
-									s.setState(SoldierState.MOVING);
-								}
+								newMap.splitSoliders(target, ms.splitAmt, path);
 							}
 							
 						} else {
@@ -610,6 +606,20 @@ public class Turn {
 		// TODO apply any earned points onto this new Turn.
 				
 		newMap.moveSoldiers();
+		
+		/**
+		
+		for (ArrayList<Soldier> teamSoldiers : newMap.getSoldiers()) {
+			for (Soldier s : teamSoldiers) {
+				System.out.printf("%s - %s\n", s.getLeaderColor(), s.getPath());
+			}
+		}
+		
+		for (RallyPoint r : newMap.getAllPositions()) {
+			System.out.printf("%s - %s\n", r.ID, r.onPoint);
+		}
+		
+		/**/
 		
 		/**
 		 * Resolve any soldier conflicts and building occupations
@@ -655,6 +665,7 @@ public class Turn {
 				}
 			}
 		}
+		
 		newMap.updateTeamScores(teamScoreAdditions);
 		return new Turn(this, currentTeam, newMap, failedTeams);
 	}
