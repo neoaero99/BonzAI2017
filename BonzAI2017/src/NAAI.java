@@ -1,34 +1,61 @@
+import java.util.List;
 import java.util.Random;
 
 import Castles.api.MoveAction;
+import Castles.api.SoldierData;
 import Castles.api.Turn;
 import bonzai.AI;
 import bonzai.Action;
 import bonzai.Agent;
 import bonzai.ShoutAction;
 
+/**
+ * A simple AI used for testing the game.
+ * 
+ * @author Joshua Hooker
+ */
 @Agent(name = "NAAI")
 public class NAAI extends AI {
+	
+	private static final Random generator;
+	
+	static {
+		generator = new Random( System.currentTimeMillis() );
+	}
 
 	@Override
 	public Action action(Turn turn) {
-		Random generator = new Random( System.currentTimeMillis() );
-		
 		double prob = generator.nextDouble();
 		
-		if (prob >= 5.0) {
-			MoveAction ma = new MoveAction();
-			
-			if (turn.getMyTeam().getID() == 0) {
-				ma.addMove(0, 1, "P0", "P1");
-				
-			} else {
-				ma.addMove(0,  1, "P1", "P0");
-			}
-			
-			return ma;
+		/**
+		
+		List<SoldierData> soldiers = turn.getSoldiersControlledBy(turn.getMyTeam().getColor());
+		
+		System.out.printf("Group #: %d\n", soldiers.size());
+		
+		for (SoldierData s : soldiers) {
+			System.out.printf("%s\n", s);
 		}
 		
-		return new ShoutAction("...");
+		System.out.println();
+		
+		/**
+		
+		if (prob >= 0.1) {
+			return new ShoutAction("...");
+		}
+		
+		/**/
+		
+		MoveAction ma = new MoveAction();
+		
+		if (turn.getMyTeam().getID() == 0) {
+			ma.addMove(0, 1, "P0", "P1");
+			
+		} else {
+			ma.addMove(0, 1, "P1", "P0");
+		}
+		
+		return ma;
 	}
 }

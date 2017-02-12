@@ -2,6 +2,7 @@ package Castles.api;
 
 import java.awt.Graphics2D;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -77,7 +78,8 @@ public class Turn {
 			ArrayList<Soldier> soldiers = map.getSoldiers(t);
 			
 			for (Soldier s : soldiers) {
-				SoldierData data = new SoldierData(s);
+				SoldierData data = getSoldierData(s);
+				
 				soldierGroups.put(data.posID, data);
 			}
 			
@@ -163,7 +165,6 @@ public class Turn {
 			
 			ArrayList<SoldierData> soldierSet = t.getSoldiersAt("P0");
 			SoldierData s0 = soldierSet.get(0);
-			int soldiersNum = 0;
 			
 			List<PositionData> positions = t.getPositionsControlledBy(Color.RED);
 			System.out.println(positions.size());
@@ -178,8 +179,23 @@ public class Turn {
 			a.addMove(0, s0.size, "P0", "V0");
 			actions.add(a);
 			
+			for (RallyPoint r : t.map.getAllPositions()) {
+				System.out.printf("%s: %s\n", r.ID, r.getOccupants());
+			}
+			
 			Turn nextT = t.apply(actions);
 			nextT.outputState();
+			
+			for (RallyPoint r : nextT.map.getAllPositions()) {
+				System.out.printf("%s: %s\n", r.ID, r.getOccupants());
+			}
+			
+			nextT = nextT.apply(new ArrayList<Action>());
+			nextT.outputState();
+			
+			for (RallyPoint r : nextT.map.getAllPositions()) {
+				System.out.printf("%s: %s\n", r.ID, r.getOccupants());
+			}
 			
 		} catch (Exception Ex) {
 			Ex.printStackTrace();
@@ -205,6 +221,27 @@ public class Turn {
 		System.out.println();
 		
 		System.out.printf("%s\n\n\n", unclaimedPositions);
+	}
+	
+	/**
+	 * 
+	 * 
+	 * @param s
+	 * @return
+	 */
+	private SoldierData getSoldierData(Soldier s) {
+		RallyPoint r = map.getPosition(s.getPositionID());
+		
+		if (r != null) {
+			
+			for (int idx = 0; idx < r.getOccupants().size(); ++idx) {
+				if (s == r.getOccupant(idx)) {
+					return new SoldierData(s, idx);
+				}
+			}
+		}
+		
+		return null;
 	}
 	
 	/*************************************************************************
@@ -249,7 +286,7 @@ public class Turn {
 		ArrayList<SoldierData> data = new ArrayList<SoldierData>();
 		RallyPoint r =map.getPosition(ID);
 		for(Soldier s: r.onPoint){
-			data.add(new SoldierData(s));
+			data.add(getSoldierData(s));
 		}
 		return data;
 	}
@@ -422,16 +459,14 @@ public class Turn {
 							Soldier s = r.getOccupant(ms.soldierIdx);
 							
 							if (s != null) {
-								int sa = ms.splitAmt;
-								
-								if (sa > 0 && sa <= s.getValue()) {
-									errorMessage = "";
-									continue;
+								/* Clamp the split amount for the move action
+								 * within the valid range for the target
+								 * soldier group */
+								ms.splitAmt = Math.max(0, Math.min(ms.splitAmt,
+										s.getValue()));
 									
-								} else {
-									ms.splitAmt=s.getValue();
-								}
-								
+								errorMessage = "";
+								continue;
 								
 							} else {
 								errorMessage = String.format("No soldier on position %s", ms.startID);
@@ -444,7 +479,6 @@ public class Turn {
 					} else {
 						errorMessage = String.format("No position %s", ms.startID);
 					}
-					
 					
 				} else if (obj instanceof UpdateSoldier) {
 					// Check a soldier state update action
@@ -519,8 +553,10 @@ public class Turn {
 		for (Action action : actions) {
 			//TODO Actions are Handled here
 			if (isValid(teams.get(teamID), action)) {
+				
 				if (action instanceof ShoutAction) {
 					shoutActions.add((ShoutAction)action);
+					
 				} else if (action instanceof MoveAction) {
 					MoveAction move = (MoveAction)action;
 					
@@ -534,14 +570,18 @@ public class Turn {
 							RallyPoint src = newMap.getPosition(ms.startID);
 							Soldier target = src.getOccupant(ms.soldierIdx);
 							
+							System.out.printf("%s -> %s : %s\n", ms.startID, ms.endID, path);
+							
 							if (target.getValue() == ms.splitAmt) {
+								// Move the entire group	
 								target.setPath(path);
+								target.setState(SoldierState.MOVING);
 								
 							} else {
+								/* Split off a portion of the soldier group to move along
+								 * the given path */
 								newMap.splitSoliders(target, ms.splitAmt, path);
 							}
-							
-							target.setState(SoldierState.MOVING);
 							
 						} else {
 							// Update a soldier's state
@@ -566,6 +606,20 @@ public class Turn {
 		// TODO apply any earned points onto this new Turn.
 				
 		newMap.moveSoldiers();
+		
+		/**
+		
+		for (ArrayList<Soldier> teamSoldiers : newMap.getSoldiers()) {
+			for (Soldier s : teamSoldiers) {
+				System.out.printf("%s - %s\n", s.getLeaderColor(), s.getPath());
+			}
+		}
+		
+		for (RallyPoint r : newMap.getAllPositions()) {
+			System.out.printf("%s - %s\n", r.ID, r.onPoint);
+		}
+		
+		/**/
 		
 		/**
 		 * Resolve any soldier conflicts and building occupations
@@ -611,6 +665,7 @@ public class Turn {
 				}
 			}
 		}
+		
 		newMap.updateTeamScores(teamScoreAdditions);
 		return new Turn(this, currentTeam, newMap, failedTeams);
 	}
