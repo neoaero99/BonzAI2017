@@ -17,10 +17,13 @@ public class AIJar implements bonzai.Jar {
 	public AIJar(File file) throws Exception {
 		URLClassLoader loader = URLClassLoader.newInstance(new URL[] { file.toURI().toURL() });
 		
-		try{
-			aiClass = loader.loadClass("CompetitorAI");
+		try {
+			// Actually load in the AI jar files in the ais/ directory
+			String fileWOEXT = file.getName().substring(0, file.getName().length() - 4);
+			aiClass = loader.loadClass(fileWOEXT);
+			
 		} catch (Exception e){
-			aiClass = loader.loadClass("competitor.CompetitorAI");
+			e.printStackTrace();
 		}
 		
 		// if they are not extending the AI class, throw and exception 

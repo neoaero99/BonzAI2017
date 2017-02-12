@@ -85,6 +85,11 @@ public class Soldier extends JComponent {
 	 * @author David Mohrhardt
 	 */
 	public Soldier(Color teamColor, int iniVal, String posID) {
+		
+		if (posID == null) {
+			throw new NullPointerException("Soldier position cannot be null!\n");
+		}
+		
 		leaderColor = teamColor;
 		value = iniVal;
 		state = SoldierState.STANDBY;
@@ -132,11 +137,20 @@ public class Soldier extends JComponent {
 	}
 	
 	public void setPath(ArrayList<String> path) {
+		
+		for (String ID : path) {
+			if (ID == null) {
+				System.err.println(path);
+				throw new NullPointerException("Path cannont contain a null value!");
+			}
+		}
+		
 		given_path = path;
 	}
 	
+	@SuppressWarnings("unchecked")
 	public ArrayList<String> getPath() {
-		return given_path;
+		return (ArrayList<String>) given_path.clone();
 	}
 	
 	/**
@@ -148,6 +162,13 @@ public class Soldier extends JComponent {
 		if (state == SoldierState.MOVING && given_path.size() > 1) {
 			String oldID = given_path.remove(0);
 			posID = given_path.get(0);
+			
+			if (given_path.size() == 1) {
+				// The soldier has reached its destination
+				given_path.remove(0);
+				state = SoldierState.STANDBY;
+			}
+			
 			return oldID;
 		}
 		
@@ -168,6 +189,20 @@ public class Soldier extends JComponent {
 		temp.state = state;
 		
 		return temp;
+	}
+	
+	@Override
+	public boolean equals(Object obj) {
+		
+		if (obj instanceof Soldier) {
+			Soldier s = (Soldier)obj;
+			// Check if each field between this and the given soldier are equivalent
+			return s.posID == this.posID && s.getLeaderColor() == this.leaderColor
+				&& s.getState() == this.state && s.getValue() == this.value
+				&& s.getPath().equals(this.given_path);
+		}
+		
+		return false;
 	}
 	
 	@Override

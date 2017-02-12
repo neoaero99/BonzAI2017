@@ -174,13 +174,13 @@ public class AIHost {
 				for (int idx = 0; idx < moveNum; ++idx) {
 					String sym = arguments.next();
 					
-					if (sym == "PATH") {
+					if (sym.equals("PATH")) {
 						// Parse a soldier move action
 						action.addMove(arguments.nextInt(),
 								arguments.nextInt(), arguments.next(),
 								arguments.next());
 						
-					} else if (sym == "STATE") {
+					} else if (sym.equals("STATE")) {
 						// Parse an update soldier action
 						int sIdx = arguments.nextInt();
 						String pID = arguments.next();

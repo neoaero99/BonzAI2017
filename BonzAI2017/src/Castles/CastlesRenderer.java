@@ -19,9 +19,9 @@ import Castles.api.CastlesMap;
 //import Castles.api.Color;
 import Castles.api.Turn;
 import Castles.util.graph.SegEdge;
-import Castles.util.linkedlist.DualLinkList;
 import bonzai.Action;
 import bonzai.Position;
+import bonzai.Renderer;
 import bonzai.Team;
 import bonzai.ShoutAction;
 
@@ -29,8 +29,9 @@ import bonzai.ShoutAction;
  * Handle rendering the actual game objects on the screen. 
  */
 @SuppressWarnings("unused")
-public class CastlesRenderer extends bonzai.Renderer {
-
+public class CastlesRenderer extends Renderer {
+	// The scale value for rendering position images
+	static final float posImgSF = 0.003f;
 	static HashMap<String,BufferedImage> backgroundImages = new HashMap<String,BufferedImage>();
 	static BufferedImage backgroundImage;	//The current background image
 
@@ -40,29 +41,29 @@ public class CastlesRenderer extends bonzai.Renderer {
 
 
 	static File[] selectorFiles = {
-			new File("art/sprites/ART2016/turn_red.png"),
+			new File("art/sprites/turn_red.png"),
 
-			new File("art/sprites/ART2016/turn_yellow.png"),
-			new File("art/sprites/ART2016/turn_blue.png"),
-			new File("art/sprites/ART2016/turn_green.png"),
-			new File("art/sprites/ART2016/turn_orange.png"),
+			new File("art/sprites/turn_yellow.png"),
+			new File("art/sprites/turn_blue.png"),
+			new File("art/sprites/turn_green.png"),
+			new File("art/sprites/turn_orange.png"),
 
-			new File("art/sprites/ART2016/turn_purple.png")
+			new File("art/sprites/turn_purple.png")
 			};
 	
-	static File villageFile = new File("art/sprites/ART2016/landmark_mountain.png");
-	static File rallyPointFile = new File("art/sprites/ART2016/target_lake.png");
-	static File soldierFile = new File("art/sprites/ART2016/fox_base.png");
-	static File castleFile = new File("art/sprites/ART2016/repeater.png");
+	static File villageFile = new File("art/sprites/landmark_mountain.png");
+	static File rallyPointFile = new File("art/sprites/target_lake.png");
+	static File soldierFile = new File("art/sprites/cloud.png");
+	static File castleFile = new File("art/sprites/repeater.png");
 
 	static File[] playerFiles = {  
-			new File("art/sprites/ART2016/fox_red.png"), 
-			new File("art/sprites/ART2016/fox_yellow.png"), 
-			new File("art/sprites/ART2016/fox_blue.png"),
-			new File("art/sprites/ART2016/fox_green.png"),
-			new File("art/sprites/ART2016/fox_orange.png"),
+			new File("art/sprites/fox_red.png"), 
+			new File("art/sprites/fox_yellow.png"), 
+			new File("art/sprites/fox_blue.png"),
+			new File("art/sprites/fox_green.png"),
+			new File("art/sprites/fox_orange.png"),
 
-			new File("art/sprites/ART2016/fox_purple.png")
+			new File("art/sprites/fox_purple.png")
 			};
 //
 	static File wallFile 		= new File("art/sprites/wall.png");
@@ -243,8 +244,6 @@ public class CastlesRenderer extends bonzai.Renderer {
 			RallyPoint r1 = map.getPosition(p.first.ID);
 			RallyPoint r2 = map.getPosition(p.second.ID);
 			
-			g.translate(0.5f, 0.5f);
-			
 			//get the x,y coords of the two rally points
 			int x1 = r1.getPosition().getX();
 			int y1 = r1.getPosition().getY();
@@ -253,25 +252,56 @@ public class CastlesRenderer extends bonzai.Renderer {
 			
 			g.setColor(Color.PINK);
 			g.drawLine(x1, y1 - gridHeight, x2, y2 - gridHeight);
-			
-			g.translate(-0.5f, -0.5f);
 		}
 		
 		g.setStroke(origin);
 	}
 
 	public static void renderSoldiers(Graphics2D g, CastlesMap map) {
-		gridHeight = map.getHeight();
-		gridWidth = map.getWidth();
 		
 		ArrayList<Soldier>[] soldierList;
 		soldierList = map.getSoldiers();
 		
-		
 		for (ArrayList<Soldier> soldier: soldierList){
 			for(Soldier newSoldier: soldier){
 				RallyPoint r = map.getPosition(newSoldier.getPositionID());
-				drawToScale(g, soldierImage, r.getPosition().getX(), r.getPosition().getY(), 0, 1, 0);
+				int sIdx = r.onPoint.indexOf(newSoldier);
+				
+				if (sIdx >= 0 && sIdx < 4) { // Only render the first four soldiers on a point
+					Position rp = r.getPosition();
+					int halfPIW = (int)(posImgSF * castleImage.getWidth() / 2.0),
+						halfPIH = (int)(posImgSF * castleImage.getHeight() / 2.0),
+						px, py;
+					
+					if (sIdx == 0) {
+						// Render at the top-left corner of the position
+						px = rp.getX() - halfPIW;
+						py = rp.getY() - halfPIH;
+						
+					} else if (sIdx == 1) {
+						// Render at the top-right corner of the position
+						px = rp.getX() + halfPIW;
+						py = rp.getY() - halfPIH;
+						
+					} else if (sIdx == 2) {
+						// Render at the bottom-left corner of the position
+						px = rp.getX() - halfPIW;
+						py = rp.getY() + halfPIH;
+						
+					} else {
+						// Render at the bottom-right corner of the position
+						px = rp.getX() + halfPIW;
+						py = rp.getY() + halfPIH;
+					}
+					
+					float soldierImgSF = 0.002f;
+					double halfImgWidth = soldierImgSF * soldierImage.getWidth() / 2.0,
+							halfImgHeight = soldierImgSF * soldierImage.getHeight() / 2.0;
+					
+					//g.translate(-halfImgWidth, -halfImgHeight);
+					drawToScale(g, soldierImage, px, py, 0, soldierImgSF, 0);
+					//g.translate(halfImgWidth, halfImgHeight);
+				}
 				
 			}
 		}
@@ -285,17 +315,17 @@ public class CastlesRenderer extends bonzai.Renderer {
 			char c = name.charAt(0);
 			switch(c){
 			case 'V':
-				drawToScale(g,villageImage,r.getPosition().getX(),r.getPosition().getY(),0,1,0);
+				drawToScale(g,villageImage,r.getPosition().getX(),r.getPosition().getY(),0,1.5f*posImgSF,0);
 				break;
 			case 'C':
-				drawToScale(g,castleImage,r.getPosition().getX(),r.getPosition().getY(),0,1,0);
+				drawToScale(g,castleImage,r.getPosition().getX(),r.getPosition().getY(),0,posImgSF,0);
 				break;
 			case 'P':
 				int i = r.ID.charAt(1) - 48;
-				drawToScale(g,playerImages.get(Castles.api.Color.values()[i]),r.getPosition().getX(),r.getPosition().getY(),0,1,0);
+				drawToScale(g,playerImages.get(Castles.api.Color.values()[i]),r.getPosition().getX(),r.getPosition().getY(),0,posImgSF,0);
 				break;
 			default:
-				drawToScale(g,rallyPointImage,r.getPosition().getX(),r.getPosition().getY(),0,1,0);
+				drawToScale(g,rallyPointImage,r.getPosition().getX(),r.getPosition().getY(),0,1.5f*posImgSF,0);
 				break;
 			}
 		}
@@ -419,13 +449,12 @@ public class CastlesRenderer extends bonzai.Renderer {
 		int dy = img.getHeight();
 		
 		//get the dimentions of a grid space
-		/*int gx = bx/gridWidth;
-		int gy = by/gridHeight;*/
-		int gx = 1;
-		int gy = 1;
+		int gx = (int)(scaleFactor * dx);
+		int gy = (int)(scaleFactor * dy);
 		
-		g.drawImage((Image)img, (int)(gx * x), (int)(gy * y) - gridHeight, (int)gx, (int)gy, null);
-		
+		g.translate(-gx / 2.0, -gy / 2.0);
+		g.drawImage(img, x, y - gridHeight, gx, gy, null);
+		g.translate(gx / 2.0, gy / 2.0);
 	}
 
 	// TODO Tweak transformation (possibly add in custom transform functions?)

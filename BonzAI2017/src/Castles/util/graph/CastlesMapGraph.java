@@ -284,7 +284,21 @@ public class CastlesMapGraph {
 			if ( (idp.first.equals(v0.ID) && idp.second.equals(v1.ID)) ||
 					(idp.first.equals(v1.ID) && idp.second.equals(v0.ID)) ) {
 				
-				return pathsMap.get(idp);
+				ArrayList<String> path = pathsMap.get(idp);
+				
+				// Reverse the path if the start and end vertices are switched
+				if (path != null && !path.get(0).equals(v0.ID)) {
+					ArrayList<String> reverse = new ArrayList<String>();
+					
+					for (int idx = path.size() - 1; idx >= 0; --idx) {
+						reverse.add(path.get(idx));
+					}
+					
+					return reverse;
+					
+				} else {
+					return path;
+				}
 			}
 		}
 		

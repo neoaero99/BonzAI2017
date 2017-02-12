@@ -46,8 +46,6 @@ public class AIClient implements Runnable {
 		this.game = scenario.instantiate(jars);
 	}
 	
-
-	
 	@Override
 	public void run() {
 		//tell the AIHost that we are ready to begin.
@@ -66,8 +64,9 @@ public class AIClient implements Runnable {
 				case "APPLY":
 					List<Action> actions = new LinkedList<>();
 					
-					for (int i = 0; i != Integer.parseInt(arguments); ++i)
+					for (int i = 0; i != Integer.parseInt(arguments); ++i) {
 						actions.add(AIHost.toAction(scanner.nextLine()));
+					}
 
 					AIClient.out.println("ACK");
 					AIClient.out.flush();
