@@ -3,8 +3,8 @@ package Castles;
 import java.util.*;
 
 import bonzai.Action;
+import bonzai.Team;
 import Castles.api.*;
-
 
 /**
  * A representation of a state of the game board
@@ -67,8 +67,8 @@ public class Game {
 	/**
 	 *
 	 **/
-	public boolean isValid(Action action) {
-		return turn().isValid(action);
+	public boolean isValid(Team t, Action action) {
+		return turn().isValid(t, action);
 	}
 
 	// Apply a list of actions

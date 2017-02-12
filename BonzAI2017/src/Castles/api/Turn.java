@@ -1,19 +1,17 @@
 package Castles.api;
 
+import java.awt.Graphics2D;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 
-
+import Castles.CastlesRenderer;
 import Castles.Objects.*;
-import Castles.util.graph.Vertex;
-import Castles.util.linkedlist.DualLinkList;
 import bonzai.Action;
-import bonzai.Identifiable;
 import bonzai.Position;
-import bonzai.Positionable;
 import bonzai.Team;
 import bonzai.ShoutAction;
 
@@ -23,23 +21,25 @@ import bonzai.ShoutAction;
  * those entities at this turn.
  **/
 public class Turn {
-	final CastlesMap map;
-	final ArrayList<Team> teams;
+	
+	private final CastlesMap map;
+	// Data used for AI queries
+	private final HashMap<Color, HashMap<String, SoldierData>> teamSoldiers;
+	private final HashMap<Color, HashMap<String, PositionData>> teamPositions;
+	private final HashMap<String, PositionData> unclaimedPositions;
+	
 	final ArrayList<Boolean> success;
 	final int turnNumber;
 
-	final ArrayList<ShoutAction> shoutActions;
-	
-	// How long the Repeaters can go before being rotated again
-	private final int cooldownAmount = 3;
+	private final ArrayList<ShoutAction> shoutActions;
+	private final ArrayList<MoveAction> moveActions;
 
 	private String errorMessage = "";
 
 	// The current team that is acting.
 	// For each client, this will ALWAYS be their teamId
 	// This decides the context that isValid() will be run for.
-	// Example, If I'm on team 1, I can move team 1's things.  If I'm on team 2, I cant
-
+	// Example, If I'm on team 1, I can move team 1's things.  If I'm on team 2, I can't
 	//making this a class so all the pathfinding stuff is in one place
 	Pathfinding pathfinding;
 
@@ -60,19 +60,55 @@ public class Turn {
 		this.currentTeam = teamNumber;
 		this.turnNumber = turnNumber;
 
-		//Clone the old map (so we can retain history)
-		this.map = new CastlesMap(map);
-		this.shoutActions = new ArrayList<>();
+		this.map = map;
+		teamSoldiers = new HashMap<Color, HashMap<String, SoldierData>>();
+		teamPositions = new HashMap<Color, HashMap<String, PositionData>>();
+		unclaimedPositions = new HashMap<String, PositionData>();
+		
+		shoutActions = new ArrayList<ShoutAction>();
+		moveActions = new ArrayList<MoveAction>();
 
-		teams = new ArrayList<>();
-		success = new ArrayList<>();
-		/*for (Emitter e : this.map.getEmitters()) {
-			teams.add(e.getTeam());
-			success.add(true);
-		}*/
-
-		//util = new TurnUtil(this);
-
+		List<Team> teams = map.getTeams();
+		success = new ArrayList<Boolean>();
+		
+		for (Team t : teams) {
+			/* Associate each group of soldiers with their team color and with
+			 * their position */
+			HashMap<String, SoldierData> soldierGroups = new HashMap<String, SoldierData>();
+			ArrayList<Soldier> soldiers = map.getSoldiers(t);
+			
+			for (Soldier s : soldiers) {
+				SoldierData data = getSoldierData(s);
+				
+				soldierGroups.put(data.posID, data);
+			}
+			
+			teamSoldiers.put(t.getColor(), soldierGroups);
+			teamPositions.put(t.getColor(), new HashMap<String, PositionData>());
+		}
+		
+		ArrayList<RallyPoint> elements = map.getAllPositions();
+		
+		for (RallyPoint r : elements) {
+			/* Associated claimed positions with the color of the team, which
+			 * owns the position and then with the positions ID. Unclaimed
+			 * positions are simply associated with their ID. */
+			PositionData p = new PositionData(r);
+			
+			if (r instanceof Building) {
+				Building b = (Building)r;
+				
+				if (b.getTeamColor() != null) {
+					teamPositions.get(b.getTeamColor()).put(p.ID, p);
+					
+				} else {
+					unclaimedPositions.put(p.ID, p);
+				}
+				
+			} else {
+				unclaimedPositions.put(p.ID, p);
+			}
+		}
 	}
 
 	/**
@@ -101,47 +137,253 @@ public class Turn {
 		this(teamNumber, turn.turnNumber + 1, map);
 		this.MAX_TURNS = turn.MAX_TURNS;
 
-		for (Team t : failedActions) {
-			success.set(t.getID(), false);
+		//for (Team t : failedActions) {
+			//success.set(t.getID(), false);
+		//}
+	}
+	
+	/**
+	 * Testing the Turn class and AI API
+	 * 
+	 * @param args	Unused
+	 */
+	public static void main(String[] args) {
+		
+		try {
+			CastlesMap map = Parser.parseFile("scenarios/testmap.dat");
+			ArrayList<Team> teams = (ArrayList<Team>) map.getTeams();
+			
+			ArrayList<String> path0 = new ArrayList<String>();
+			path0.add("P0");
+			path0.add("C0");
+			path0.add("V0");
+			
+			Turn t = new Turn(0, 1, map);
+			t.outputState();
+			
+			ArrayList<Action> actions = new ArrayList<Action>();
+			
+			ArrayList<SoldierData> soldierSet = t.getSoldiersAt("P0");
+			SoldierData s0 = soldierSet.get(0);
+			
+			List<PositionData> positions = t.getPositionsControlledBy(Color.RED);
+			System.out.println(positions.size());
+			
+			for (PositionData pd : positions) {
+				for (int sNum : pd.occupantSizes) {
+					System.out.printf("%d\n", sNum);
+				}
+			}
+			
+			MoveAction a = new MoveAction();
+			a.addMove(0, s0.size, "P0", "V0");
+			actions.add(a);
+			
+			for (RallyPoint r : t.map.getAllPositions()) {
+				System.out.printf("%s: %s\n", r.ID, r.getOccupants());
+			}
+			
+			Turn nextT = t.apply(actions);
+			nextT.outputState();
+			
+			for (RallyPoint r : nextT.map.getAllPositions()) {
+				System.out.printf("%s: %s\n", r.ID, r.getOccupants());
+			}
+			
+			nextT = nextT.apply(new ArrayList<Action>());
+			nextT.outputState();
+			
+			for (RallyPoint r : nextT.map.getAllPositions()) {
+				System.out.printf("%s: %s\n", r.ID, r.getOccupants());
+			}
+			
+		} catch (Exception Ex) {
+			Ex.printStackTrace();
 		}
 	}
-
+	
 	/**
-	 * Returns the map object for the current turn
-	 * 
-	 * @return - the map object
+	 * Outputs the data associated with the Turn to the console.
 	 */
-	public CastlesMap getMap() {
-		return map;
+	private void outputState() {
+		Collection<HashMap<String, SoldierData>> soldierGroups = teamSoldiers.values();
+		
+		for (HashMap<String, SoldierData> groups : soldierGroups) {
+			System.out.printf("%s\n", groups);
+		}
+		System.out.println();
+		
+		Collection<HashMap<String, PositionData>> claimed = teamPositions.values();
+		
+		for (HashMap<String, PositionData> positions : claimed) {
+			System.out.printf("%s\n", positions);
+		}
+		System.out.println();
+		
+		System.out.printf("%s\n\n\n", unclaimedPositions);
 	}
-
-	/**
-	 * Returns a Collection of Positionables that represent a 
-	 * valid path between points A and B. The path is not
-	 * guaranteed to be a shortest, longest, best, or worst path.
-	 * There are also no guarantees that each Repeater on this 
-	 * path is controllable at the current time by your AI.
-	 * 
-	 * @param a - the start point for the path-generator
-	 * @param b - the end point for the path-generator 
-	 * @return - a Collection of Positionable objects (usually Repeaters)
-	 * that can be chained together to form a Lazer path. 
-	 */
-	/*public Collection<Positionable> getPath(Rotatable a, Traversable b) {
-		return Pathfinding.getPath(a, b,this.getMyTeam(), map );
-	}*/
 	
 	/**
-	 * Returns a Collection of all team objects on the map
 	 * 
-	 * @return - a Collection of Teams
+	 * 
+	 * @param s
+	 * @return
 	 */
-	/*public Collection<Team> getAllTeams() {
-		return teams;
-	}*/
+	private SoldierData getSoldierData(Soldier s) {
+		RallyPoint r = map.getPosition(s.getPositionID());
+		
+		if (r != null) {
+			
+			for (int idx = 0; idx < r.getOccupants().size(); ++idx) {
+				if (s == r.getOccupant(idx)) {
+					return new SoldierData(s, idx);
+				}
+			}
+		}
+		
+		return null;
+	}
+	
+	/*************************************************************************
+	 * 
+	 *						  ADD API METHODS HERE!!!!!!!!!
+	 *
+	 */
+	
+	/**
+	 * Returns the position with the given ID value, if one exists. If no
+	 * position exits with the given ID, null is returned.
+	 * 
+	 * @param ID	The unique identifier of a position in the map
+	 * @return		The position associated with the given ID, if it exists in
+	 * 				the map
+	 */
+	public PositionData getPosition(String ID) {
+		Collection<HashMap<String, PositionData>> claimedPositions = teamPositions.values();
+		// Check each list of positions owned by teams for the position
+		for (HashMap<String, PositionData> positionsSet : claimedPositions) {
+			PositionData pos = positionsSet.get(ID);
+			
+			if (pos != null) {
+				return pos;
+			}
+		}
+		// Finally, check the unclaimed positions
+		return unclaimedPositions.get(ID);
+	}
+	
+	/**
+	 * Returns a list of soldiers, which occupy the position with the given ID.
+	 * If the position with the given ID is unoccupied, an empty set is
+	 * returned. If no position with the given ID exists, then null is
+	 * returned.
+	 * 
+	 * @param ID	The ID of a position on the map
+	 * @return		The list of soldiers occupying the position with the given
+	 * 				ID
+	 */
+	public ArrayList<SoldierData> getSoldiersAt(String ID) {
+		ArrayList<SoldierData> data = new ArrayList<SoldierData>();
+		RallyPoint r =map.getPosition(ID);
+		for(Soldier s: r.onPoint){
+			data.add(getSoldierData(s));
+		}
+		return data;
+	}
+	
+	/**
+	 * Returns a set of positions controlled by the team of the given color. If
+	 * the given color is null, then a list of uncontrolled positions will be
+	 * returned.
+	 * 
+	 * @param teamColor	The color of the team controlling positions, of which
+	 * 					will by queried, or null to query for uncontrolled
+	 * 					positions
+	 * @return			A list of positions controlled by the team of the given
+	 * 					color
+	 */
+	public List<PositionData> getPositionsControlledBy(Color teamColor) {
+		HashMap<String, PositionData> step1 = teamPositions.get(teamColor);
+		Collection<PositionData> step2=step1.values();
+		ArrayList<PositionData> step3=new ArrayList<PositionData>();
+		step3.addAll(step2);
+		return step3;
+	}
+	
+	/**
+	 * Returns a set of soldiers, which are controlled by the team with the
+	 * given color. If no team with the given color exists, then an empty
+	 * list is returned.
+	 * 
+	 * @param teamColor	The color of the team, whose soldier data to get
+	 * @return			The list of soldiers associated with the team with the
+	 * 					given color
+	 */
+	public List<SoldierData> getSoldiersControlledBy(Color teamColor) {
+		HashMap<String, SoldierData> step1 = teamSoldiers.get(teamColor);
+		Collection<SoldierData> step2=step1.values();
+		return new ArrayList<SoldierData>(step2);
+	}
+	
+	/**
+	 * Returns a list of IDs corresponding to positions, which form a path from
+	 * the position with startID to the position with endID. The path includes
+	 * the starting and ending IDs.
+	 * 
+	 * @param startID	The ID of a vertex on the map
+	 * @param endID		The ID of another vertex on the map
+	 * @return			The path between the two vertices of given IDs
+	 */
+	public List<String> getPath(String startID, String endID) {
+		return map.getPath(startID, endID);
+	}
+	
+	/*************************************************************************/
 	
 	
-	/*
+	
+	
+	/**
+	 * Returns your AI's Team object
+	 * 
+	 * @return - your AI's Team object
+	 */
+	public Team getMyTeam() {
+		for (Team t : getAllTeams()) {
+			if (t.getID() == currentTeam) {
+				return t;
+			}
+		}
+		return null;
+	}
+	
+	/**
+	 * @return	The list of all teams
+	 */
+	public List<Team> getAllTeams() {
+		return map.getTeams();
+	}
+	
+	/**
+	 * If isValid() returns false, this method returns
+	 * a String containing a more detailed error message
+	 * 
+	 * @return - a String explaining why a move is invalid
+	 */
+	public String getIsValidError() {
+		return errorMessage;
+	}
+	
+	/**
+	 * Who really knows ...
+	 * 
+	 * @param i
+	 * @return
+	 */
+	public Position getEntity(int i) {
+		return map.getEntity(i);
+	}
+	
 	/**
 	 * Returns whether this is the first turn or not
 	 * 
@@ -169,42 +411,6 @@ public class Turn {
 	public int getTurnsRemaining() {
 		return MAX_TURNS - turnNumber;
 	}
-	
-	/**
-	 * Get a list of the ShoutActions performed on this turn.
-	 * This has LITERALLY ZERO USE TO YOUR CODE, but if you want to
-	 * make an AI that evaluates the humor level of other teams'
-	 * shouts, be our guest. :D
-	 * 
-	 * @return a Collection of the ShoutActions performed on this turn
-	 */
-	public Collection<ShoutAction> getShoutActions() {
-		return shoutActions;
-	}
-	
-	/**
-	 * Returns your AI's Team object
-	 * 
-	 * @return - your AI's Team object
-	 */
-	public Team getMyTeam() {
-		for (Team t : getAllTeams()) {
-			if (t.getID() == currentTeam) {
-				return t;
-			}
-		}
-		return null;
-	}
-
-	//TODO
-	/**
-	 * find a the teams list
-	 * @return
-	 */
-	public List<Team> getAllTeams() {
-		
-		return map.getTeams();
-	}
 
 	/**
 	 * Test if a given Action is a valid one if it were applied on this Turn object.
@@ -222,23 +428,99 @@ public class Turn {
 	 * @return - true if the Action is valid for the current gamestate,
 	 * 			 false otherwise
 	 */
-	public boolean isValid(Action action) {
+	public boolean isValid(Team team, Action action) {
 		//TODO 2017: This is important for us and competitors.
-		if (action instanceof ShoutAction) {
+		
+		if (team == null) {
+			errorMessage = "Team argument cannot be null.";
+			
+		} else if (action == null) {
+			errorMessage = "Action argument cann be null";
+			
+		} else if (action instanceof ShoutAction) {
+			errorMessage = "";
 			return true;
+			
+		} else if (action instanceof MoveAction) {
+			MoveAction move = (MoveAction)action;
+			
+			for (int idx = 0; idx < move.numOfActions(); ++idx) {
+				Object obj = move.get(idx);
+				
+				if (obj instanceof MoveSoldier) {
+					// Check a soldier path update action
+					MoveSoldier ms = (MoveSoldier)obj;
+					RallyPoint r = map.getPosition(ms.endID);
+					
+					if (r != null) {
+						r = map.getPosition(ms.startID);
+						
+						if (r != null) {
+							Soldier s = r.getOccupant(ms.soldierIdx);
+							
+							if (s != null) {
+								/* Clamp the split amount for the move action
+								 * within the valid range for the target
+								 * soldier group */
+								ms.splitAmt = Math.max(0, Math.min(ms.splitAmt,
+										s.getValue()));
+									
+								errorMessage = "";
+								continue;
+								
+							} else {
+								errorMessage = String.format("No soldier on position %s", ms.startID);
+							}
+							
+						} else {
+							errorMessage = String.format("No position %s", ms.endID);
+						}
+						
+					} else {
+						errorMessage = String.format("No position %s", ms.startID);
+					}
+					
+				} else if (obj instanceof UpdateSoldier) {
+					// Check a soldier state update action
+					UpdateSoldier us = (UpdateSoldier)obj;
+					RallyPoint r = map.getPosition(us.posID);
+					
+					if (r != null) {
+						Soldier s = r.getOccupant(us.soldierIdx);
+						
+						if (s != null) {
+							
+							if (us.newState == SoldierState.STANDBY || us.newState == SoldierState.MOVING) {
+								errorMessage = "";
+								continue;
+								
+							} else {
+								errorMessage = String.format("Invalid state %s", us.newState);
+							}
+							
+						} else {
+							errorMessage = String.format("No soldiers at position %s", r.ID);
+						}
+							
+					} else {
+						errorMessage = String.format("No position %s", us.posID);
+					}
+					
+				} else {
+					// Invalid action
+					errorMessage = "Invalid soldier action";
+				}
+				
+				return false;
+			}
+			
+			return true;
+			
+		} else {
+			errorMessage = "Invalid action given.";
 		}
 		
 		return false;
-	}
-
-	/**
-	 * If isValid() returns false, this method returns
-	 * a String containing a more detailed error message
-	 * 
-	 * @return - a String explaining why a move is invalid
-	 */
-	public String getIsValidError() {
-		return errorMessage;
 	}
 
 	/**
@@ -251,174 +533,190 @@ public class Turn {
 	 */
 	public Turn apply(List<Action> actions) {
 		
-		
 		//TODO 2017: This is where we applied each action from the playing ai's. This is an example of our process. 
-		// Most of the game logic goes here. 
+		// Most of the game logic goes here.
 		
-		
-		int oldID = this.currentTeam;
-
-		//Clone the map. All actions are applied to this new clone.
-		CastlesMap map = new CastlesMap(this.map);
-
-		//This is used to store the RotateActions.
-		//Maps ID's of targeted Entities (Repeaters or Emitters)
-		//to the team ID that wants to perform them
-		HashMap<Integer, Team> rotationsToPerform = new HashMap<>();
-
-		//Store the desired rotation at [teamNum] of this array.
-		//Thus, if team 3 wanted to rotate something, their chosen rotation
-		//will be at rotationsDesired[3]. If they didn't choose to rotate
-		//something, then the array will contain null at that index.
-		Float [] rotationsDesired = new Float [teams.size()];
+		/**
+		 * Clones soldiers and graph elements into the new map.
+		 */
+		CastlesMap newMap = new CastlesMap(map);
 
 		// Store the teams whose action failed
-		LinkedList<Team> failedTeams = new LinkedList<>();
+		LinkedList<Team> failedTeams = new LinkedList<Team>();
+		List<Team> teams = newMap.getTeams();
+		int[] teamScoreAdditions = new int[teams.size()];
+		int teamID = 0;
 		
-
-		//Parse the list of all actions for validity and move collisions
-		//Reduce the list to only the moves that actually need to be performed
-		currentTeam = 0;
+		/**
+		 * Resolve all actions
+		 */
 		for (Action action : actions) {
 			//TODO Actions are Handled here
-			if (isValid(action)) {
+			if (isValid(teams.get(teamID), action)) {
 				
 				if (action instanceof ShoutAction) {
 					shoutActions.add((ShoutAction)action);
-				}
-				
-			} else {
-				//TODO Write code for an invalid action
-				shoutActions.add(null);
-			}
-
-			currentTeam++;
-		}
-
-		//Apply all valid RotateActions to the game state.
-		for (int id : rotationsToPerform.keySet()) {
-
-			/*Rotatable r = (Rotatable)map.getEntity(id);
-
-			if (r instanceof Emitter) {
-
-				LinkedList<Emitter> emitters = (LinkedList<Emitter>)map.getEmitters();
-
-				//Create a new Emitter object to replace the old one. The new Emitter is set to have the new rotation.
-				// Okay to not use LazersMap.replace as emitters have the lowest id's
-				emitters.set(r.getID(), new Emitter((Emitter)r, rotationsDesired[rotationsToPerform.get(id).getID()], map));
-
-			} else {
-				//Create a new Repeater object to replace the old one (as there is no setRotation method)
-				Team teamRotating = rotationsToPerform.get(id);
-
-				if (teamRotating == null) {	//Two teams tried to move the same Repeater
-					map.replace(id, new Repeater((Repeater)r, r.getRotation(), null, cooldownAmount + 1, map));
-				} else {
-					//Some team is performing a RotateAction on Repeater r.
-
-
-					map.replace(id, new Repeater((Repeater)r, rotationsDesired[teamRotating.getID()], teamRotating, cooldownAmount + 1, map));
-				}
-			}*/
-		}
-		
-		//map.calculateParentsTargetsAndOwners();
-
-		//Generate the new Turn object. We apply any earned points onto this new Turn.
-		Turn newTurn = new Turn(this, oldID, map, failedTeams);
-		
-		
-		for (Team team : this.getAllTeams()) {
-			currentTeam = team.getID();
-			int multiplier = 1;
-
-			//Only score if something was moved
-			boolean validPoints = false;
-
-			//To prevent infinite loops if a circular path is found
-			LinkedList<Positionable> visited = new LinkedList<>();
-
-			//Positionable current = newTurn.getUtil().updateEntity(util.getMyEmitter());
-			//Team myTeam = ((Emitter) current).getTeam();
-			/*
-			//Traverse the path of the Emitter/Repeater chain until we hit a Wall or Target.
-			while (current != null && !visited.contains(current) && current instanceof Rotatable) {				
-				if (current instanceof Repeater) {
-					Repeater r = (Repeater) current;
-
-					//If the current team has control, or if no one has control
-					if (myTeam.equals(r.getOwner())) {
-						visited.add(current);
-
-						multiplier *= 2;
-					} else { 
-						//The person does not have control of this Repeater. They should not get points, as their lazer isn't emitting.
-						validPoints = false;
-						break;
+					
+				} else if (action instanceof MoveAction) {
+					MoveAction move = (MoveAction)action;
+					
+					for (int idx = 0; idx < move.numOfActions(); ++idx) {
+						Object obj = move.get(idx);
+						
+						if (obj instanceof MoveSoldier) {
+							// Update the path of a soldier
+							MoveSoldier ms = (MoveSoldier)obj;
+							ArrayList<String> path = new ArrayList<String>( getPath(ms.startID, ms.endID) );
+							RallyPoint src = newMap.getPosition(ms.startID);
+							Soldier target = src.getOccupant(ms.soldierIdx);
+							
+							System.out.printf("%s -> %s : %s\n", ms.startID, ms.endID, path);
+							
+							if (target.getValue() == ms.splitAmt) {
+								// Move the entire group	
+								target.setPath(path);
+								target.setState(SoldierState.MOVING);
+								
+							} else {
+								/* Split off a portion of the soldier group to move along
+								 * the given path */
+								newMap.splitSoliders(target, ms.splitAmt, path);
+							}
+							
+						} else {
+							// Update a soldier's state
+							UpdateSoldier us = (UpdateSoldier)obj;
+							RallyPoint r = newMap.getPosition(us.posID);
+							Soldier s = r.getOccupant(us.soldierIdx);
+							s.setState(us.newState);
+						}
 					}
-
-					//Prevent ais from getting points by moving through an opponent's emitter
-				} else if (current instanceof Emitter && !current.getPosition().equals(util.getMyEmitter().getPosition())) {
-					validPoints = false;
-					break;
+					
+					moveActions.add(move);
 				}
-
-				validPoints = validPoints || rotationsToPerform.containsKey(((Identifiable)current).getID());
-				current = ((Rotatable)current).getTarget();
-			}
-			*/
-			//The lazer's path traveled to a Target this turn. See if it is a valid hit.
-			//"Valid" is defined as "this team performed a valid rotation action this turn on some Rotatable
-			//that is within the path from Emitter to Target" (including rotation actions on the Emitter itself).
-			//We also only want to calculate points if the team has not hit the target before.
-			/*if ((current instanceof Target) && validPoints) {
-				//Refresh the target in case another team hit it this turn
-				//Due to dangling references from getTarget, the hit array won't be accurate
-				//I'm not sure how to better explain this, just trust me
-				Target hitTarget = (Target)newTurn.getUtil().updateEntity((Target)current);
-
-				//Don't calculate points if a team has hit the target before
-				if (hitTarget.isDiscoveredByTeam(team)) {
-					break;
-				}
-
-				//Get the number of points the target was worth last turn
-				int points = ((Target) map.updateEntity(hitTarget)).getPointValue();
-
-				//Increment the players points total
-				newTurn.addPoints(team.getID(), points * multiplier);
 				
-				//Update the next turn's target with the correct hit records
-				newTurn.map.replace(hitTarget, new Target(hitTarget, team.getID()));
-			}*/
+			} else {
+				failedTeams.add(teams.get(teamID));
+				// Test scoring
+			}
+
+			teamID++;
 		}
-		//TODO uncomment everything
-		this.currentTeam = oldID;
 
-		return newTurn;
+		// TODO apply any earned points onto this new Turn.
+				
+		newMap.moveSoldiers();
+		
+		/**
+		
+		for (ArrayList<Soldier> teamSoldiers : newMap.getSoldiers()) {
+			for (Soldier s : teamSoldiers) {
+				System.out.printf("%s - %s\n", s.getLeaderColor(), s.getPath());
+			}
+		}
+		
+		for (RallyPoint r : newMap.getAllPositions()) {
+			System.out.printf("%s - %s\n", r.ID, r.onPoint);
+		}
+		
+		/**/
+		
+		/**
+		 * Resolve any soldier conflicts and building occupations
+		 */
+		ArrayList<RallyPoint> rally = newMap.getAllPositions();
+		for (RallyPoint r: rally) {
+			newMap.mergeSoldiers(r.onPoint, r);
+			
+			/* Determine if the remaining soldiers on a position can capture an
+			 * unclaimed or enemy position. */
+			if (r instanceof Building) {
+				Building b = (Building)r;
+				ArrayList<Soldier> occupants = r.getOccupants();
+				
+				if (occupants.size() > 0) {
+					Color leaderColor = occupants.get(0).getLeaderColor();
+					
+					if (b.getTeamColor() == null || b.getTeamColor() != leaderColor) {
+						int occupantSize = 0;
+						
+						for (Soldier s : occupants) {
+							occupantSize += s.getValue();
+						}
+						/* The total number of soldiers must be greater than
+						 * the defense value of the position in order to
+						 * capture it */
+						if (occupantSize > b.defenseValue) {
+							b.setTeamColor(leaderColor);
+						}
+					}
+				}
+				
+				// Apply reinforcements for claimed positions
+				Soldier s = b.reinforce();
+				
+				if (s != null) {
+					newMap.addSoldiers(s);
+				}
+				Color c =b.getTeamColor();
+				if(c!=null){
+						int ID =c.ordinal();
+						teamScoreAdditions[ID]+=b.defenseValue;
+				}
+			}
+		}
+		
+		newMap.updateTeamScores(teamScoreAdditions);
+		return new Turn(this, currentTeam, newMap, failedTeams);
 	}
-
-	private Object getUtil() {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
+	
 	/**
-	 * Returns all rally points, buildings (i.e. castles, villages) in
-	 * the map.
+	 * Get a list of the ShoutActions performed on this turn.
+	 * This has LITERALLY ZERO USE TO YOUR CODE, but if you want to
+	 * make an AI that evaluates the humor level of other teams'
+	 * shouts, be our guest. :D
 	 * 
-	 * @return	A list of all rally points, buildings in the map
+	 * @return a Collection of the ShoutActions performed on this turn
 	 */
-	public ArrayList<RallyPoint> getAllNodes() {
-		ArrayList<RallyPoint> nodes = new ArrayList<RallyPoint>();
-		ArrayList<Vertex> vertexList = map.getGraph().vertexList();
-		
-		for (Vertex v : vertexList) {
-			// Pull all the elements from all the vertices in the graph
-			nodes.add(v.getElement());
+	public Collection<ShoutAction> getShoutActions() {
+		return shoutActions;
+	}
+	
+	/**
+	 * Returns a list of move actions performed on this turn.
+	 * 
+	 * @return	a Collection of move actions performed on this turn
+	 */
+	public Collection<MoveAction> getMoveActions() {
+		return moveActions;
+	}
+	
+	/**
+	 * Renders all the elements of the map, including the background for this
+	 * turn.
+	 * 
+	 * @param g	The graphics object used for rendering
+	 */
+	public void renderMap(Graphics2D g) {
+		if (g != null) {
+			CastlesRenderer.renderBackground(g, map);
+			CastlesRenderer.renderPaths(g, map);
+			CastlesRenderer.renderBuildings(g, map);
+			CastlesRenderer.renderSoldiers(g, map);
 		}
-		
-		return nodes;
+	}
+	
+	/**
+	 * @return	The width of the map
+	 */
+	public int getMapWidth() {
+		return map.getWidth();
+	}
+	
+	/**
+	 * @return	The height of the map
+	 */
+	public int getMapHeight() {
+		return map.getHeight();
 	}
 }

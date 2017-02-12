@@ -11,7 +11,7 @@ import Castles.Game;
 import bonzai.Team;
 
 public class CastlesScenario implements bonzai.Scenario {
-	public static final int NUM_TURNS = 50;
+	public static final int NUM_TURNS = 5;
 	
 	//TODO 2017: This is used in simulation. If the turns are not applied at the same time,
 	// change this to false. 
@@ -34,9 +34,6 @@ public class CastlesScenario implements bonzai.Scenario {
 		try {
 			//Get the map object we need to instantiate the game.
 			map = Parser.parseFile(file);
-			if(map.getGraph().vertexList().size() == 0 || map.getGraph().edgeList().size() == 0){
-				throw new IllegalStateException(map.getField("name") + "  " + map.getGraph().vertexList().size() + "  " + map.getGraph().edgeList().size());
-			}
 			CastlesRenderer.loadImages();
 //			String[] size = map.getField("size").split(", *");
 //			LazersRenderer.setMapSize(Integer.parseInt(size[0]), Integer.parseInt(size[1]));
@@ -58,9 +55,6 @@ public class CastlesScenario implements bonzai.Scenario {
 		
 			g.translate(700 / 2, 500 / 2);
 			g.scale(700 / 2, 500 / 2);
-			if(map.getGraph().vertexList().size() == 0 || map.getGraph().edgeList().size() == 0){
-				throw new IllegalStateException(map.getField("name") + "  " + map.getGraph().vertexList().size() + "  " + map.getGraph().edgeList().size());
-			}
 			
 			CastlesRenderer.render(g, map);
 			

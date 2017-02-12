@@ -11,7 +11,7 @@ import Castles.util.priorityq.MinComparator;
 import Castles.util.priorityq.PQEntry;
 
 /**
- * 
+ * A simple graph, which cannot be modified once it is created.
  * 
  * @author Joshua Hooker
  */
@@ -23,14 +23,22 @@ public class CastlesMapGraph {
 	private final HashMap<String, Vertex> vertices;
 	private final HashMap<String, SegEdge> edges;
 	
+	/**
+	 * Creates a graph with the given set of vertices and edges.
+	 * 
+	 * @param V	The set of vertices in the graph
+	 * @param E	The set of edges in the graph
+	 */
 	public CastlesMapGraph(ArrayList<Vertex> V, ArrayList<SegEdge> E) {
 		vertices = new HashMap<String, Vertex>();
 		edges = new HashMap<String, SegEdge>();
-		// Add all vertices and edges to the graph
+		
+		// Add all vertices to the graph
 		for (Vertex v : V) {
 			vertices.put(v.ID, v);
 		}
 		
+		// Add all edges to the graph
 		for (SegEdge e : E) {
 			edges.put(e.ID, e);
 		}
@@ -49,7 +57,7 @@ public class CastlesMapGraph {
 		ArrayList<SegEdge> edgeList = new ArrayList<SegEdge>();
 		
 		for (int idx = 0; idx < 11; ++idx) {
-			Vertex node = new Vertex(new RallyPoint(0, idx, Integer.toString(idx)));
+			Vertex node = new Vertex(Integer.toString(idx));
 			vertexList.add(node);
 		}
 		
@@ -99,7 +107,7 @@ public class CastlesMapGraph {
 				if (v0 == null && v.ID.equals(connections[idx][0])) {
 					v0 = v; 
 					
-				} else if (v1 == null && v.ID.equals(connections[idx][0])) {
+				} else if (v1 == null && v.ID.equals(connections[idx][1])) {
 					v1 = v;
 				}
 			}
@@ -119,28 +127,107 @@ public class CastlesMapGraph {
 			System.out.printf("%s -> %s\n", sp, SPPathsMap.get(sp));
 		}
 		
+		Vertex v0 = vertexList.get(0),
+			   v1 = vertexList.get(1),
+			   v3 = vertexList.get(3),
+			   v5 = vertexList.get(5);
+		SegEdge e5 = edgeList.get(5),
+				e6 = edgeList.get(6);
+		
+		System.out.printf("%s, %s : %b\n", v0, v1, g.areAdjacent(v0.ID, v1.ID));
+		System.out.printf("%s, %s : %b\n", v0, v3, g.areAdjacent(v0.ID, v3.ID));
+		System.out.printf("%s, %s : %b\n", v5, e5, g.areAdjacent(v5.ID, e5.wayPointIDs()[0]));
+		System.out.printf("%s, %s : %b\n", e5, e6, g.areAdjacent(e5.wayPointIDs()[0], e6.wayPointIDs()[0]));
+		
 		/**/
 		
-System.out.println("TEST");
-		
-System.out.println("TEST");
+		System.out.println("TEST");
 	}
 	
 	/**
+	 * TODO
 	 * 
-	 * @param vID
+	 * @param rID1
+	 * @param rID2
 	 * @return
+	 */
+	public boolean areAdjacent(String rID1, String rID2) {
+		Node n1 = getVertex(rID1);
+		Node n2 = getVertex(rID2);
+		
+		if (n1 == null) {
+			n1 = getEdge(rID1);
+		}
+		
+		if (n2 == null) {
+			n2 = getEdge(rID2);
+		}
+		
+		if (n1 == null || n2 == null) {
+			return false;
+		}
+		
+		if (n1 instanceof SegEdge && n2 instanceof SegEdge) {
+			SegEdge e1 = (SegEdge)n1;
+			SegEdge e2 = (SegEdge)n2;
+			
+			if (e1 == e2) {	// Are the way points on the same edge?
+				// Are the indices of the way points 1 apart?
+				return Math.abs(e1.indexOf(rID1) - e2.indexOf(rID2)) == 1;
+			}
+			
+		} else if (n1 instanceof Vertex && n2 instanceof SegEdge) {
+			return testEdgeVertexConnection((SegEdge)n2, rID2, (Vertex)n1);
+			
+		} else if (n1 instanceof SegEdge && n2 instanceof Vertex) {
+			return testEdgeVertexConnection((SegEdge)n1, rID1, (Vertex)n2);
+		}
+		
+		return false;
+	}
+	
+	/**
+	 * TODO
+	 * 
+	 * @param e
+	 * @param wayPointID
+	 * @param v
+	 * @return
+	 */
+	private boolean testEdgeVertexConnection(SegEdge e, String wayPointID, Vertex v) {
+		int idx = e.indexOf(wayPointID);
+		return (e.isConnected(v)) && ( (idx == 0 && e.first == v)
+									|| (idx == (e.getWeight() - 1) && e.second == v) );
+	}
+	
+	/**
+	 * Searches the graph for the vertex with the given ID value and returns
+	 * that vertex, or null if no such vertex exists.
+	 * 
+	 * @param eID	The ID of the vertex to find
+	 * @return		The vertex with the given ID or null if no such vertex
+	 * 				exists
 	 */
 	public Vertex getVertex(String vID) {
 		return vertices.get(vID);
 	}
 	
 	/**
+	 * Searches the graph for the edge with the given ID value and returns that
+	 * edge, or null if no such edge exists.
 	 * 
-	 * @param eID
-	 * @return
+	 * @param eID	The ID of the edge to find
+	 * @return		The edge with the given ID or null if no such edge exists
 	 */
 	public SegEdge getEdge(String eID) {
+		int idxOfColon = eID.indexOf(':');
+		
+		if (idxOfColon > 0) {
+			// The ID may be that of a way point associated with the edge
+			String superID = eID.substring(0, idxOfColon);
+			return edges.get(superID);
+		}
+		
 		return edges.get(eID);
 	}
 	
@@ -197,7 +284,21 @@ System.out.println("TEST");
 			if ( (idp.first.equals(v0.ID) && idp.second.equals(v1.ID)) ||
 					(idp.first.equals(v1.ID) && idp.second.equals(v0.ID)) ) {
 				
-				return pathsMap.get(idp);
+				ArrayList<String> path = pathsMap.get(idp);
+				
+				// Reverse the path if the start and end vertices are switched
+				if (path != null && !path.get(0).equals(v0.ID)) {
+					ArrayList<String> reverse = new ArrayList<String>();
+					
+					for (int idx = path.size() - 1; idx >= 0; --idx) {
+						reverse.add(path.get(idx));
+					}
+					
+					return reverse;
+					
+				} else {
+					return path;
+				}
 			}
 		}
 		
@@ -237,10 +338,34 @@ System.out.println("TEST");
 				 * the path and put the list into the map */
 				ArrayList<String> pathIDs = new ArrayList<String>();
 				
-				for (Node n : path) {
-					pathIDs.add(n.ID);
+				for (int nIdx = 0; nIdx < path.size(); ++nIdx) {
+					Node n = path.get(nIdx);
+					
+					if (n instanceof Vertex) {
+						pathIDs.add(((Vertex)n).ID);
+						
+					} else if (n instanceof SegEdge) {
+						SegEdge e = (SegEdge)n;
+						String[] wpIDs = e.wayPointIDs();
+						/* Depending on whether the prior vertex is the first
+						 * or second reference of this edge, the way points
+						 * need to be added in forward or reverse order
+						 * respectively */
+						if (nIdx > 0 && path.get(nIdx - 1) == e.first) {
+							for (int idx = 0; idx < wpIDs.length; ++idx) {
+								pathIDs.add(wpIDs[idx]);
+							}
+							
+						} else {
+							for (int idx = wpIDs.length - 1; idx >= 0; --idx) {
+								pathIDs.add(wpIDs[idx]);
+							}
+						}
+					}
+					
 				}
 				
+				//System.out.printf("%s\n", pathIDs);
 				pathIDsMap.put(endpoints, pathIDs);
 			}
 		}
@@ -345,9 +470,46 @@ System.out.println("TEST");
 				limbo = ((SegEdge)limbo).getOpposite(lastVertex);
 			}
 		}
+		
+		if (limbo != null) {
+			path.add(start);
+		}
 
 		//System.out.println("FINISHED!");
 
 		return path;
+	}
+	
+	/**
+	 * @return	A copy of this graph
+	 */
+	protected CastlesMapGraph clone() {
+		
+		ArrayList<Vertex> vertexCopies = new ArrayList<Vertex>();
+		ArrayList<SegEdge> edgeCopies = new ArrayList<SegEdge>();
+		
+		HashMap<Integer, Vertex> OldToNewVertex = new HashMap<Integer, Vertex>();
+		
+		// Copy the vertices and add them to a map
+		ArrayList<Vertex> vertices = vertexList();
+		for (Vertex v : vertices) {
+			Vertex vertexCopy = new Vertex(v.ID);
+			
+			vertexCopies.add(vertexCopy);
+			OldToNewVertex.put(v.hashCode(), vertexCopy);
+		}
+		
+		// Copy the edges and the connections between edges and vertices
+		ArrayList<SegEdge> edges = edgeList();
+		for (SegEdge e : edges) {
+			// Connect the new vertices with the new edge
+			Vertex first = OldToNewVertex.get( e.first.hashCode() );
+			Vertex second = OldToNewVertex.get( e.second.hashCode() );
+			
+			SegEdge edgeCopy = new SegEdge(e.getWeight(), first, second);
+			edgeCopies.add(edgeCopy);
+		}
+		
+		return new CastlesMapGraph(vertexCopies, edgeCopies);
 	}
 }

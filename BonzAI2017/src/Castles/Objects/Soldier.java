@@ -2,10 +2,11 @@ package Castles.Objects;
 
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
+import java.util.List;
 
 import javax.swing.JComponent;
-import Castles.util.graph.Node;
-import bonzai.*;
+
+import Castles.api.Color;
 
 /**
  * Class:	Soldier.java
@@ -48,30 +49,28 @@ import bonzai.*;
 
 public class Soldier extends JComponent {
 	
-	private static final long serialVersionUID = 3166707557130028703L;
-	// The shared sprite for the soldier
-	public static BufferedImage sprite;
-	// The combat value this unit has
-	public int value;
 	// The radius used in collision
-	public float radius;
+	public final static float radius;
 	
-	/**
-	 * So, I replaced your position reference to a node (which can be either
-	 * a vertex or edge), so that a soldier can reference the graph directly.
-	 * Also, all path generations return a linked list of edges, so I
-	 * modified your given_path as such.
-	 * 		- Joshua
-	 */
+	// The shared sprite for the soldier
+	private static BufferedImage sprite;
 	
-	// The position of the soldier on the map (on screen)
-	public Node position;
-	// An array list that holds the IDs of all nodes in the solider's current
-	public ArrayList<String> given_path;
+	private static final long serialVersionUID = 3166707557130028703L;
+	
+	private Color leaderColor;
+	// The combat value this unit has
+	private int value;
 	// The current status of the soldier (always defaults to standby)
-	public SoldierState state;
+	private SoldierState state;
 	
-	public Team leader;
+	// An array list that holds the IDs of all nodes in the solider's current
+	private ArrayList<String> given_path;
+	// The ID of the position where the soldier is on the map
+	private String posID;
+	
+	static {
+		radius = 0f;
+	}
 	
 	/**
 	 * Method:	Soldier(VectorND base_position)
@@ -85,13 +84,130 @@ public class Soldier extends JComponent {
 	 * 
 	 * @author David Mohrhardt
 	 */
-	public Soldier(Node base_position) {
-		value = 1;
-		radius = 0f;
-		position = base_position;
-		given_path = null;
+	public Soldier(Color teamColor, int iniVal, String posID) {
 		
+		if (posID == null) {
+			throw new NullPointerException("Soldier position cannot be null!\n");
+		}
+		
+		leaderColor = teamColor;
+		value = iniVal;
 		state = SoldierState.STANDBY;
+		
+		this.posID = posID;
+		given_path = new ArrayList<String>();
+	}
+	
+	public static void quickSort(List<Soldier> s){
+		if(s.size()<=1){
+			return;
+		}
+		int part=0;
+		int value=s.get(0).value;
+		for(int i=1;i<s.size();i++){
+			if(s.get(i).value>value){
+				part++;
+				Soldier temp=s.get(i);
+				s.remove(i);
+				s.add(0, temp);
+			}
+		}
+		quickSort(s.subList(0, part));
+		quickSort(s.subList(part+1, s.size()));
+	}
+	
+	public Color getLeaderColor() {
+		return leaderColor;
 	}
 
+	public int getValue() {
+		return value;
+	}
+
+	public void setValue(int value) {
+		this.value = Math.max(0, value);
+	}
+
+	public SoldierState getState() {
+		return state;
+	}
+
+	public void setState(SoldierState state) {
+		this.state = state;
+	}
+	
+	public void setPath(ArrayList<String> path) {
+		
+		for (String ID : path) {
+			if (ID == null) {
+				System.err.println(path);
+				throw new NullPointerException("Path cannont contain a null value!");
+			}
+		}
+		
+		given_path = path;
+	}
+	
+	@SuppressWarnings("unchecked")
+	public ArrayList<String> getPath() {
+		return (ArrayList<String>) given_path.clone();
+	}
+	
+	/**
+	 * 
+	 * @return	The ID of the previous position of the soldier, or null if the
+	 * 			soldier did not move
+	 */
+	public String updatePositionID() {
+		if (state == SoldierState.MOVING && given_path.size() > 1) {
+			String oldID = given_path.remove(0);
+			posID = given_path.get(0);
+			
+			if (given_path.size() == 1) {
+				// The soldier has reached its destination
+				given_path.remove(0);
+				state = SoldierState.STANDBY;
+			}
+			
+			return oldID;
+		}
+		
+		return null;
+	}
+
+	public String getPositionID() {
+		return posID;
+	}
+	
+	public Soldier copy(){
+		Soldier temp = new Soldier(leaderColor, value, posID);
+		
+		if (given_path != null) {
+			temp.given_path = new ArrayList<String>(given_path);
+		}
+		
+		temp.state = state;
+		
+		return temp;
+	}
+	
+	@Override
+	public boolean equals(Object obj) {
+		
+		if (obj instanceof Soldier) {
+			Soldier s = (Soldier)obj;
+			// Check if each field between this and the given soldier are equivalent
+			return s.posID == this.posID && s.getLeaderColor() == this.leaderColor
+				&& s.getState() == this.state && s.getValue() == this.value
+				&& s.getPath().equals(this.given_path);
+		}
+		
+		return false;
+	}
+	
+	@Override
+	public String toString() {
+		return String.format("leader:%s state:%s val:%d pos:%s",
+				leaderColor, state, value, posID);
+	}
 }

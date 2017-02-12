@@ -48,7 +48,6 @@ public class Position implements Comparable<Position> {
 		return this;
 	}
 	
-	//TODO: Wut
 	@Override
 	public int hashCode() {
 		int hash = 17;
@@ -67,6 +66,10 @@ public class Position implements Comparable<Position> {
 	@Override
 	public String toString() {
 		return String.format("[%d, %d]", x, y);
+	}
+	
+	public Position clone() {
+		return new Position(x, y);
 	}
 
 	@Override
