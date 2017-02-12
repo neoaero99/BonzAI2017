@@ -148,9 +148,13 @@ public class Soldier extends JComponent {
 		if (state == SoldierState.MOVING && given_path.size() > 1) {
 			String oldID = given_path.remove(0);
 			posID = given_path.get(0);
-			if(given_path.size()==1){
-				state=SoldierState.STANDBY;
+			
+			if (given_path.size() == 1) {
+				// The soldier has reached its destination
+				given_path.remove(0);
+				state = SoldierState.STANDBY;
 			}
+			
 			return oldID;
 		}
 		

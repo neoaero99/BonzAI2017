@@ -40,29 +40,29 @@ public class CastlesRenderer extends bonzai.Renderer {
 
 
 	static File[] selectorFiles = {
-			new File("art/sprites/ART2016/turn_red.png"),
+			new File("art/sprites/turn_red.png"),
 
-			new File("art/sprites/ART2016/turn_yellow.png"),
-			new File("art/sprites/ART2016/turn_blue.png"),
-			new File("art/sprites/ART2016/turn_green.png"),
-			new File("art/sprites/ART2016/turn_orange.png"),
+			new File("art/sprites/turn_yellow.png"),
+			new File("art/sprites/turn_blue.png"),
+			new File("art/sprites/turn_green.png"),
+			new File("art/sprites/turn_orange.png"),
 
-			new File("art/sprites/ART2016/turn_purple.png")
+			new File("art/sprites/turn_purple.png")
 			};
 	
-	static File villageFile = new File("art/sprites/ART2016/landmark_mountain.png");
-	static File rallyPointFile = new File("art/sprites/ART2016/target_lake.png");
-	static File soldierFile = new File("art/sprites/ART2016/fox_base.png");
-	static File castleFile = new File("art/sprites/ART2016/repeater.png");
+	static File villageFile = new File("art/sprites/landmark_mountain.png");
+	static File rallyPointFile = new File("art/sprites/target_lake.png");
+	static File soldierFile = new File("art/sprites/cloud.png");
+	static File castleFile = new File("art/sprites/repeater.png");
 
 	static File[] playerFiles = {  
-			new File("art/sprites/ART2016/fox_red.png"), 
-			new File("art/sprites/ART2016/fox_yellow.png"), 
-			new File("art/sprites/ART2016/fox_blue.png"),
-			new File("art/sprites/ART2016/fox_green.png"),
-			new File("art/sprites/ART2016/fox_orange.png"),
+			new File("art/sprites/fox_red.png"), 
+			new File("art/sprites/fox_yellow.png"), 
+			new File("art/sprites/fox_blue.png"),
+			new File("art/sprites/fox_green.png"),
+			new File("art/sprites/fox_orange.png"),
 
-			new File("art/sprites/ART2016/fox_purple.png")
+			new File("art/sprites/fox_purple.png")
 			};
 //
 	static File wallFile 		= new File("art/sprites/wall.png");
@@ -261,18 +261,14 @@ public class CastlesRenderer extends bonzai.Renderer {
 	}
 
 	public static void renderSoldiers(Graphics2D g, CastlesMap map) {
-		gridHeight = map.getHeight();
-		gridWidth = map.getWidth();
 		
 		ArrayList<Soldier>[] soldierList;
 		soldierList = map.getSoldiers();
-		
 		
 		for (ArrayList<Soldier> soldier: soldierList){
 			for(Soldier newSoldier: soldier){
 				RallyPoint r = map.getPosition(newSoldier.getPositionID());
 				drawToScale(g, soldierImage, r.getPosition().getX(), r.getPosition().getY(), 0, 1, 0);
-				
 			}
 		}
 	}

@@ -95,8 +95,6 @@ public class CastlesMap {
 				addSoldiers( s.copy() );
 			}
 		}
-		
-		System.out.println();
 	}
 	
 	/**

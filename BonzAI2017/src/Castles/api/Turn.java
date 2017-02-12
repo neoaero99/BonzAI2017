@@ -459,16 +459,14 @@ public class Turn {
 							Soldier s = r.getOccupant(ms.soldierIdx);
 							
 							if (s != null) {
-								int sa = ms.splitAmt;
-								
-								if (sa > 0 && sa <= s.getValue()) {
-									errorMessage = "";
-									continue;
+								/* Clamp the split amount for the move action
+								 * within the valid range for the target
+								 * soldier group */
+								ms.splitAmt = Math.max(0, Math.min(ms.splitAmt,
+										s.getValue()));
 									
-								} else {
-									ms.splitAmt=s.getValue();
-								}
-								
+								errorMessage = "";
+								continue;
 								
 							} else {
 								errorMessage = String.format("No soldier on position %s", ms.startID);
@@ -481,7 +479,6 @@ public class Turn {
 					} else {
 						errorMessage = String.format("No position %s", ms.startID);
 					}
-					
 					
 				} else if (obj instanceof UpdateSoldier) {
 					// Check a soldier state update action
@@ -514,15 +511,18 @@ public class Turn {
 					errorMessage = "Invalid soldier action";
 				}
 				
+				System.out.printf("ERROR: %s\n", errorMessage);
 				return false;
 			}
 			
+			System.out.println("ACCEPTED!");
 			return true;
 			
 		} else {
 			errorMessage = "Invalid action given.";
 		}
 		
+		System.out.println("Invalid Action!");
 		return false;
 	}
 
@@ -572,13 +572,20 @@ public class Turn {
 							Soldier target = src.getOccupant(ms.soldierIdx);
 							
 							if (target.getValue() == ms.splitAmt) {
+								// Move the entire group
 								target.setPath(path);
+								target.setState(SoldierState.MOVING);
 								
 							} else {
-								newMap.splitSoliders(target, ms.splitAmt, path);
+								/* Split off a portion of the soldier group to move along
+								 * the given path */
+								Soldier s = newMap.splitSoliders(target, ms.splitAmt, path);
+								
+								if (s != null) {
+									newMap.addSoldiers(s);
+									s.setState(SoldierState.MOVING);
+								}
 							}
-							
-							target.setState(SoldierState.MOVING);
 							
 						} else {
 							// Update a soldier's state
