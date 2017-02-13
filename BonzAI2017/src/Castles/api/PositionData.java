@@ -91,6 +91,14 @@ public class PositionData {
 		}
 	}
 	
+	public boolean isControled(){
+		return (leader == null) ? false : true;
+	}
+	
+	public boolean isControledBy(Castles.api.Color team){
+		return (leader == team) ? true : false;
+	}
+	
 	public String toString() {
 		String claimedBy = (leader == null) ? "N/A" : leader.name();
 		String occupantColor = (occupant == null) ? "N/A" : occupant.name();
