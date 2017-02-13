@@ -3,7 +3,7 @@ import java.util.List;
 import Castles.api.*;
 import bonzai.*;
 
-@Agent(name ="Captain No-Beard")
+@Agent(name ="SimpleAI")
 public class CompetitorAI extends AI {
 
 	Team myTeam;
