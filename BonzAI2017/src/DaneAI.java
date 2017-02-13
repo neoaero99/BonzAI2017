@@ -149,13 +149,8 @@ public class DaneAI extends AI {
 			move.addMove(JohnLucPicard.sIdx, p.soldiersCommited, p.to.ID, p.from.ID);
 		}
 		
-		
-		
-		
-		
 		return move;
-
-	
+		
 	}
 	
 	@SuppressWarnings("unchecked")

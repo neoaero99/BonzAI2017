@@ -36,7 +36,7 @@ public class Building extends RallyPoint {
 		if (myTeamColor != null) {
 			/* Add the reinforcements to an already existing soldier group or add a
 			 * new soldier group. */
-			if (onPoint.size() > 0 && onPoint.get(0).getLeaderColor().equals(myTeamColor)) {
+			if (onPoint.size() > 0 && onPoint.get(0).getLeaderColor().equals(myTeamColor)&&onPoint.get(0).getState()==SoldierState.STANDBY) {
 				Soldier occupant = onPoint.get(0);
 				occupant.setValue(occupant.getValue() + soldierCreationRate);
 				return null;

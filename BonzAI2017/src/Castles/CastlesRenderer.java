@@ -62,7 +62,6 @@ public class CastlesRenderer extends Renderer {
 			new File("art/sprites/ART2016/fox_blue.png"),
 			new File("art/sprites/ART2016/fox_green.png"),
 			new File("art/sprites/ART2016/fox_orange.png"),
-
 			new File("art/sprites/ART2016/fox_purple.png")
 			};
 //
