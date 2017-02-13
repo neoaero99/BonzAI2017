@@ -41,32 +41,32 @@ public class CastlesRenderer extends Renderer {
 
 
 	static File[] selectorFiles = {
-			new File("art/sprites/turn_red.png"),
+			new File("art/sprites/ART2016/turn_red.png"),
 
-			new File("art/sprites/turn_yellow.png"),
-			new File("art/sprites/turn_blue.png"),
-			new File("art/sprites/turn_green.png"),
-			new File("art/sprites/turn_orange.png"),
+			new File("art/sprites/ART2016/turn_yellow.png"),
+			new File("art/sprites/ART2016/turn_blue.png"),
+			new File("art/sprites/ART2016/turn_green.png"),
+			new File("art/sprites/ART2016/turn_orange.png"),
 
-			new File("art/sprites/turn_purple.png")
+			new File("art/sprites/ART2016/turn_purple.png")
 			};
 	
-	static File villageFile = new File("art/sprites/landmark_mountain.png");
-	static File rallyPointFile = new File("art/sprites/target_lake.png");
-	static File soldierFile = new File("art/sprites/cloud.png");
-	static File castleFile = new File("art/sprites/repeater.png");
+	static File villageFile = new File("art/sprites/ART2016/landmark_mountain.png");
+	static File rallyPointFile = new File("art/sprites/ART2016/target_lake.png");
+	static File soldierFile = new File("art/sprites/ART2016/cloud.png");
+	static File castleFile = new File("art/sprites/ART2016/repeater.png");
 
 	static File[] playerFiles = {  
-			new File("art/sprites/fox_red.png"), 
-			new File("art/sprites/fox_yellow.png"), 
-			new File("art/sprites/fox_blue.png"),
-			new File("art/sprites/fox_green.png"),
-			new File("art/sprites/fox_orange.png"),
+			new File("art/sprites/ART2016/fox_red.png"), 
+			new File("art/sprites/ART2016/fox_yellow.png"), 
+			new File("art/sprites/ART2016/fox_blue.png"),
+			new File("art/sprites/ART2016/fox_green.png"),
+			new File("art/sprites/ART2016/fox_orange.png"),
 
-			new File("art/sprites/fox_purple.png")
+			new File("art/sprites/ART2016/fox_purple.png")
 			};
 //
-	static File wallFile 		= new File("art/sprites/wall.png");
+	static File wallFile 		= new File("art/sprites/ART2016/wall.png");
 
 //	static File discoveryFile 	= new File("art/sprites/discovery.png");
 //	static File cloudFile 		= new File("art/sprites/cloud.png");
