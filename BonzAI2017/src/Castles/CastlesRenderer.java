@@ -19,6 +19,7 @@ import Castles.api.CastlesMap;
 //import Castles.api.Color;
 import Castles.api.Turn;
 import Castles.util.graph.SegEdge;
+import DavidMohrhardt.animator.Animator;
 import bonzai.Action;
 import bonzai.Position;
 import bonzai.Renderer;
@@ -264,6 +265,9 @@ public class CastlesRenderer extends Renderer {
 		
 		for (ArrayList<Soldier> soldier: soldierList){
 			for(Soldier newSoldier: soldier){
+				Animator anim = newSoldier.getAnimator();
+				BufferedImage image = anim.getActionFrame("March");
+				
 				RallyPoint r = map.getPosition(newSoldier.getPositionID());
 				int sIdx = r.onPoint.indexOf(newSoldier);
 				
@@ -302,7 +306,6 @@ public class CastlesRenderer extends Renderer {
 					drawToScale(g, soldierImage, px, py, 0, soldierImgSF, 0);
 					//g.translate(halfImgWidth, halfImgHeight);
 				}
-				
 			}
 		}
 	}

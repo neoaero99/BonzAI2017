@@ -13,12 +13,12 @@ import javax.imageio.ImageIO;
 /**
  * @author David Mohrhardt
  * @version 0.02
- * 
+ *
  * This is the animator package.
- * 
+ *
  * This file is the Sprite object.  This file handles the containment of the sprite image data and
- * any queries for a particular frame.  It uses a SpriteBuilder object 
- * 
+ * any queries for a particular frame.  It uses a SpriteBuilder object
+ *
  */
 class Sprite {
 
@@ -36,7 +36,7 @@ class Sprite {
 
 	/**
 	 * Sprite(String spritePath, String spriteScript)
-	 * 
+	 *
 	 * @param spritePath The path to the sprite sheet for this sprite.
 	 * @param spriteScript The path to the sprite script for the given sprite sheet.
 	 */
@@ -93,9 +93,9 @@ class Sprite {
 				if (line.compareTo("END") == 0) {
 					break;
 				}
-				
+
 				data = line.substring(line.lastIndexOf(":=") + 2, line.lastIndexOf(';'));
-				
+
 				// debugging
 //				System.out.println("Data = " + data + " and the dataread = " + data_read);
 
@@ -103,23 +103,23 @@ class Sprite {
 				case (0):
 					name = data;
 				break;
-				
+
 				case (1):
 					size_x = Integer.parseInt(data);
 				break;
-				
+
 				case (2):
 					size_y = Integer.parseInt(data);
 				break;
-				
+
 				case (3):
 					padding_x = Integer.parseInt(data);
 				break;
-				
+
 				case (4):
 					padding_y = Integer.parseInt(data);
 				break;
-				
+
 				default:
 					break;
 
@@ -127,26 +127,26 @@ class Sprite {
 
 				// Read the action data
 				if (data_read >= 6) {
-					
+
 					// Debugging
 //					System.out.println("Reading Frame Data " + data_read + " mod 2 = " + data_read % 2);
-					
+
 					switch (data_read % 2) {
 					case (0):
 						action_name = data;
 					break;
-					
+
 					case (1):
 						action_data = new FrameData(action_name, data_read - 7, Integer.parseInt(data));
 						if (actions.containsKey(action_name)) {
-							System.out.println("ERROR: Duplicate Action Specified in sprite script file!  Skipping the action");
+							System.out.println("ERROR: Action Name is already in the actions list!  Skipping this action!");
 							break;
 						}
 					    actions.put(action_name, action_data);
 					break;
 					}
 				}
-				
+
 				++data_read;
 			}
 
@@ -155,7 +155,7 @@ class Sprite {
 			e.printStackTrace();
 			System.exit(-1);
 		}
-		
+
 		for (String x: actions.keySet()) {
 			//debugging
 //			System.out.println("String X = " + x);
@@ -167,7 +167,7 @@ class Sprite {
 
 	/**
 	 * getActions()
-	 * 
+	 *
 	 * @return An arraylist of all the Keys of the HashMap for the actions.
 	 */
 	public ArrayList<String> getActions() {
@@ -180,7 +180,7 @@ class Sprite {
 
 	/**
 	 * getFrame(String action, int index)
-	 * 
+	 *
 	 * @param action The Action of which the program is trying to get a frame of.
 	 * @param index The index of the frame we are trying to get.
 	 * @return BufferedImage The subimage that makes up a frame of the animation.
@@ -192,38 +192,47 @@ class Sprite {
 	// Getters and Setters
 	/**
 	 * getName()
-	 * 
+	 *
 	 * @return name The name of the current sprite.
 	 */
 	public String getName() {
 		return name;
 	}
-	
+
 	/**
 	 * getSizeX()
-	 * 
+	 *
 	 * @return The size of a single frame of the sprite on the X-Axis
 	 */
 	public int getSizeX() {
 		return size_x;
 	}
-	
+
 	/**
 	 * getSizeY()
-	 * 
+	 *
 	 * @return The size of a single frame of the sprite in pixels on the Y-Axis
 	 */
 	public int getSizeY() {
 		return size_y;
 	}
-
+	
+	/**
+	 * FrameData getFrameData(String action)
+	 * 
+	 * @param action
+	 * @return
+	 */
+	public FrameData getFrameData(String action) {
+		return actions.get(action);
+	}
 
 	// Any Debug Methods I believe I need
 	/**
 	 * checkIndex(int index)
-	 * 
+	 *
 	 * @param index The index of the frame we are trying to get
-	 * 
+	 *
 	 * @return boolean Whether the index is in bounds or not.
 	 */
 	public boolean checkIndex(String current_action, int index) {
@@ -236,13 +245,13 @@ class Sprite {
 
 	/**
 	 * debugSprite(int i)
-	 * 
+	 *
 	 * @param i Indicates what debugging statements you need. 0 = All Info, 1 = General Info
 	 */
 	public void debugSprite(int i) {
 		System.out.println("<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<");
 		System.out.println("Debugging Sprite: " + name);
-		
+
 		switch(i) {
 		// All Information
 		case (0):
@@ -267,15 +276,15 @@ class Sprite {
 
 		// Current FrameData
 		case (2):
-			
+
 			break;
-		
+
 		default:
-			
+
 			break;
 
 		}
-		
+
 		System.out.println("End Debugging for " + name);
 		System.out.println(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
 		System.out.println();

@@ -7,6 +7,7 @@ import java.util.List;
 import javax.swing.JComponent;
 
 import Castles.api.Color;
+import DavidMohrhardt.animator.Animator;
 
 /**
  * Class:	Soldier.java
@@ -68,6 +69,8 @@ public class Soldier extends JComponent {
 	// The ID of the position where the soldier is on the map
 	private String posID;
 	
+	private Animator animator;
+	
 	static {
 		radius = 0f;
 	}
@@ -84,7 +87,7 @@ public class Soldier extends JComponent {
 	 * 
 	 * @author David Mohrhardt
 	 */
-	public Soldier(Color teamColor, int iniVal, String posID) {
+	public Soldier(Color teamColor, int iniVal, String posID) throws IllegalArgumentException{
 		
 		if (posID == null) {
 			throw new NullPointerException("Soldier position cannot be null!\n");
@@ -96,8 +99,22 @@ public class Soldier extends JComponent {
 		
 		this.posID = posID;
 		given_path = new ArrayList<String>();
+		
+		if (teamColor == Color.RED){
+			animator = new Animator("art/sprites/redsoldier.png", "art/sprites/redsoldier.ssc");
+		}
+		else if (teamColor == Color.YELLOW){
+			animator = new Animator("art/sprites/bluesoldier.png", "art/sprites/bluesoldier.ssc");
+		}
+		else{
+			animator = null;
+			throw new IllegalArgumentException("Bad team");
+		}
 	}
 	
+	public Animator getAnimator(){
+		return animator;
+	}
 	public static void quickSort(List<Soldier> s){
 		if(s.size()<=1){
 			return;
