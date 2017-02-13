@@ -68,8 +68,8 @@ public class CastlesRenderer extends Renderer {
 //
 	static File wallFile 		= new File("art/sprites/ART2016/wall.png");
 
-//	static File discoveryFile 	= new File("art/sprites/discovery.png");
-//	static File cloudFile 		= new File("art/sprites/cloud.png");
+//	static File discoveryFile 	= new File("art/sprites/ART2016/discovery.png");
+//	static File cloudFile 		= new File("art/sprites/ART2016/cloud.png");
 //	
 //***************************************************************************************************
 
