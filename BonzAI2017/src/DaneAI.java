@@ -96,7 +96,7 @@ public class DaneAI extends AI {
 		
 		//sort the buildings on the map for the current state
 		for(PositionData p: turn.getAllElements()){
-			if(p.ID.contains("R")) continue;
+			/*if(p.ID.contains("R")) continue;
 			if(p.isControledBy(MyTeam.getColor())){
 				cStructs.add(p);
 				continue;
@@ -105,7 +105,7 @@ public class DaneAI extends AI {
 				uStructs.add(p);
 				continue;
 			}
-			eStructs.add(p);
+			eStructs.add(p);*/
 		}
 		
 		

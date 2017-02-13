@@ -28,6 +28,11 @@ public class Turn {
 	private final HashMap<Color, HashMap<String, PositionData>> teamPositions;
 	private final HashMap<String, PositionData> unclaimedPositions;
 	
+	public static final int CASTLE_PER_TURN = 10;
+	public static final int VILLAGE_PER_TURN = 5;
+	public static final int CASTLE_INIT = 20;
+	public static final int VILLAGE_INIT = 10;
+	
 	final ArrayList<Boolean> success;
 	final int turnNumber;
 
