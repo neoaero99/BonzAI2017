@@ -28,6 +28,11 @@ public class Turn {
 	private final HashMap<Color, HashMap<String, PositionData>> teamPositions;
 	private final HashMap<String, PositionData> unclaimedPositions;
 	
+	public static final int CASTLE_PER_TURN = 10;
+	public static final int VILLAGE_PER_TURN = 5;
+	public static final int CASTLE_INIT = 20;
+	public static final int VILLAGE_INIT = 10;
+	
 	final ArrayList<Boolean> success;
 	final int turnNumber;
 
@@ -719,4 +724,79 @@ public class Turn {
 	public int getMapHeight() {
 		return map.getHeight();
 	}
+	
+	public PositionData getClosestCastle(PositionData p){
+		ArrayList<String> out = null;
+		PositionData out1 = null;
+		ArrayList<PositionData> castles = new ArrayList<>(); 
+		for(String s : unclaimedPositions.keySet()){
+			if(s.contains("C")){
+				castles.add(unclaimedPositions.get(p));
+			}
+		}
+		for(HashMap<String, PositionData> d : teamPositions.values()){
+			for(String s : d.keySet()){
+				if(s.contains("C")){
+					castles.add(d.get(s));
+				}
+			}
+		}
+		for(PositionData d : castles){
+			if(out == null){ 
+				out = map.getPath(d.ID, p.ID);
+				out1 = d;
+			}
+			ArrayList<String> temp = map.getPath(d.ID, p.ID);
+			if(temp.size() < out.size()){
+				temp = out;
+				out1 = d;
+			}
+		}
+		
+		return out1;
+	}
+	
+	public PositionData getClosestVillage(PositionData p){
+		ArrayList<String> out = null;
+		PositionData out1 = null;
+		ArrayList<PositionData> castles = new ArrayList<>(); 
+		for(String s : unclaimedPositions.keySet()){
+			if(s.contains("D")){
+				castles.add(unclaimedPositions.get(p));
+			}
+		}
+		for(HashMap<String, PositionData> d : teamPositions.values()){
+			for(String s : d.keySet()){
+				if(s.contains("C")){
+					castles.add(d.get(s));
+				}
+			}
+		}
+		for(PositionData d : castles){
+			if(out == null){ 
+				out = map.getPath(d.ID, p.ID);
+				out1 = d;
+			}
+			ArrayList<String> temp = map.getPath(d.ID, p.ID);
+			if(temp.size() < out.size()){
+				temp = out;
+				out1 = d;
+			}
+		}
+		
+		return out1;
+	}
+	
+	public ArrayList<PositionData> getAllElements(){
+		ArrayList<PositionData> out = new ArrayList<PositionData>();
+		for(PositionData p : unclaimedPositions.values()){
+			out.add(p);
+		}
+		for(HashMap<String, PositionData> d : teamPositions.values()){
+			for(PositionData p : d.values()){
+				out.add(p);
+			}
+		}
+		return out;
+ 	}
 }

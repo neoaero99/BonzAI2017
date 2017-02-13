@@ -257,7 +257,8 @@ public class CastlesMap {
 	 */
 	protected void moveSoldiers() {
 		for (ArrayList<Soldier> soldierGroup : soldiers) {
-			for (Soldier s : soldierGroup) {
+			for (int j=0;j<soldierGroup.size();j++) {
+				Soldier s=soldierGroup.get(j);
 				String oldPosID = s.updatePositionID();
 				
 				if (oldPosID != null) {
@@ -265,7 +266,24 @@ public class CastlesMap {
 					
 					RallyPoint r = getPosition(s.getPositionID());
 					r.addOccupant(s);
+					if(r.onPoint!=null){
+						for(int i=0;i<r.onPoint.size();i++){
+							Soldier n=r.onPoint.get(i);
+							if(!n.getLeaderColor().equals(s.getLeaderColor())){
+								if(((String)n.getPath().get(1)).equals(oldPosID)){
+									int result=mergeSoldiers(s,n,r);
+									if(result==2||result==4){
+										i--;
+									}
+									else{
+										j--;
+									}
+								}
+							}
+						}
+					}
 				}
+
 			}
 		}
 	}
@@ -336,6 +354,7 @@ public class CastlesMap {
 			if( s1.getState() == SoldierState.STANDBY || s1Path.get(s1Path.size() - 1).equals(s2Path.get(s2Path.size() - 1))) {
 				s1.setValue(s1.getValue()+s2.getValue());
 				soldiers[s2.getLeaderColor().ordinal()].remove(s2);
+				r.onPoint.remove(s2);
 				s2=null;
 				return 1;
 			}
@@ -347,19 +366,23 @@ public class CastlesMap {
 				if(amount>0){
 					s1.setValue(amount);
 					soldiers[s2.getLeaderColor().ordinal()].remove(s2);
+					r.onPoint.remove(s2);
 					s2=null;
 					return 2;
 				}
 				else if(amount<0){
 					s2.setValue(amount);
 					soldiers[s1.getLeaderColor().ordinal()].remove(s1);
+					r.onPoint.remove(s1);
 					s1=null;
 					return 3;
 				}
 				else{
 					soldiers[s1.getLeaderColor().ordinal()].remove(s1);
+					r.onPoint.remove(s1);
 					s1=null;
 					soldiers[s2.getLeaderColor().ordinal()].remove(s2);
+					r.onPoint.remove(s2);
 					s2=null;
 					return 4;
 				}
@@ -372,19 +395,23 @@ public class CastlesMap {
 					if(amount>0){
 						s1.setValue(amount);
 						soldiers[s2.getLeaderColor().ordinal()].remove(s2);
+						r.onPoint.remove(s2);
 						s2=null;
 						return 2;
 					}
 					else if(amount<0){
 						s2.setValue(amount);
 						soldiers[s1.getLeaderColor().ordinal()].remove(s1);
+						r.onPoint.remove(s1);
 						s1=null;
 						return 3;
 					}
 					else{
 						soldiers[s1.getLeaderColor().ordinal()].remove(s1);
+						r.onPoint.remove(s1);
 						s1=null;
 						soldiers[s2.getLeaderColor().ordinal()].remove(s2);
+						r.onPoint.remove(s2);
 						s2=null;
 						return 4;
 					}
@@ -394,19 +421,23 @@ public class CastlesMap {
 					if(amount>0){
 						s1.setValue(amount);
 						soldiers[s2.getLeaderColor().ordinal()].remove(s2);
+						r.onPoint.remove(s2);
 						s2=null;
 						return 2;
 					}
 					else if(amount<0){
 						s2.setValue(amount);
 						soldiers[s1.getLeaderColor().ordinal()].remove(s1);
+						r.onPoint.remove(s1);
 						s1=null;
 						return 3;
 					}
 					else{
 						soldiers[s1.getLeaderColor().ordinal()].remove(s1);
+						r.onPoint.remove(s1);
 						s1=null;
 						soldiers[s2.getLeaderColor().ordinal()].remove(s2);
+						r.onPoint.remove(s2);
 						s2=null;
 						return 4;
 					}
@@ -435,7 +466,7 @@ public class CastlesMap {
 		}
 		if(onPoint.size()==2){
 			int temp =mergeSoldiers(onPoint.get(0),onPoint.get(1),r);
-			for(int i =0;i<2;i++){
+			for(int i =0;i<onPoint.size();i++){
 				if(onPoint.get(i)==null){
 					onPoint.remove(i);
 				}
