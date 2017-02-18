@@ -494,7 +494,7 @@ public class CastlesMap {
 			if(maxid==-1){
 				return -2;
 			}
-			for(Soldier s: onPoint){
+			for (Soldier s: onPoint) {
 				if(s.getLeaderColor().ordinal()!=maxid){
 					onPoint.remove(s);
 					soldiers[s.getLeaderColor().ordinal()].remove(s);
