@@ -3,11 +3,11 @@ import java.util.List;
 import Castles.api.*;
 import bonzai.*;
 
-<<<<<<< HEAD
-@Agent(name ="SimpleAI")
-=======
-@Agent(name ="Test")
->>>>>>> 41a6256361db0ce963710d988fc5a5aced9c069b
+//<<<<<<< HEAD
+//@Agent(name ="SimpleAI")
+//=======
+//@Agent(name ="Test")
+//>>>>>>> 41a6256361db0ce963710d988fc5a5aced9c069b
 public class CompetitorAI extends AI {
 
 	Team myTeam;
