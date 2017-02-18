@@ -54,7 +54,6 @@ public class CastlesRenderer extends Renderer {
 	
 	static File villageFile = new File("art/sprites/ART2016/landmark_mountain.png");
 	static File rallyPointFile = new File("art/sprites/ART2016/target_lake.png");
-	static File soldierFile = new File("art/sprites/ART2016/cloud.png");
 	static File castleFile = new File("art/sprites/ART2016/repeater.png");
 
 	static File[] playerFiles = {  
@@ -80,7 +79,7 @@ public class CastlesRenderer extends Renderer {
 	private static Map<Castles.api.Color, BufferedImage> selectorImages = new HashMap<>();
 //	private static Map<Castles.api.Color, BufferedImage> castleImages = new HashMap<>();
 //	private static BufferedImage[] targetImages = new BufferedImage[targetFiles.length];
-	private static BufferedImage soldierImage,rallyPointImage,villageImage,castleImage;
+	private static BufferedImage rallyPointImage,villageImage,castleImage;
 	private static boolean imagesLoaded = false;
 	private static int gridWidth, gridHeight;
 
@@ -107,7 +106,6 @@ public class CastlesRenderer extends Renderer {
 				playerImages = loadIntoMap(playerFiles);
 				selectorImages = loadIntoMap(selectorFiles);
 				castleImage = ImageIO.read(castleFile);
-				soldierImage = ImageIO.read(soldierFile);
 				rallyPointImage = ImageIO.read(rallyPointFile);
 				villageImage = ImageIO.read(villageFile);
 //				discoveryImage = ImageIO.read(discoveryFile);
@@ -257,7 +255,8 @@ public class CastlesRenderer extends Renderer {
 		
 		g.setStroke(origin);
 	}
-
+	
+	
 	public static void renderSoldiers(Graphics2D g, CastlesMap map) {
 		
 		ArrayList<Soldier>[] soldierList;
@@ -266,7 +265,7 @@ public class CastlesRenderer extends Renderer {
 		for (ArrayList<Soldier> soldier: soldierList){
 			for(Soldier newSoldier: soldier){
 				Animator anim = newSoldier.getAnimator();
-				BufferedImage image = anim.getActionFrame("March");
+				BufferedImage image = anim.getFrameAtIndex("March", 0);
 				
 				RallyPoint r = map.getPosition(newSoldier.getPositionID());
 				int sIdx = r.onPoint.indexOf(newSoldier);
@@ -298,7 +297,7 @@ public class CastlesRenderer extends Renderer {
 						py = rp.getY() + halfPIH;
 					}
 					
-					float soldierImgSF = 0.02f;
+					float soldierImgSF = 0.015f;
 					double halfImgWidth = soldierImgSF * image.getWidth() / 2.0,
 							halfImgHeight = soldierImgSF * image.getHeight() / 2.0;
 					
@@ -309,7 +308,7 @@ public class CastlesRenderer extends Renderer {
 			}
 		}
 	}
-
+	
 	public static void renderBuildings(Graphics2D g, CastlesMap map) {
 		ArrayList<RallyPoint> nodes = map.getAllPositions();
 		
@@ -325,7 +324,8 @@ public class CastlesRenderer extends Renderer {
 				break;
 			case 'P':
 				int i = r.ID.charAt(1) - 48;
-				drawToScale(g,playerImages.get(Castles.api.Color.values()[i]),r.getPosition().getX(),r.getPosition().getY(),0,posImgSF,0);
+				BufferedImage image = playerImages.get( Castles.api.Color.values()[i] );
+				drawToScale(g,image,r.getPosition().getX(),r.getPosition().getY(),0,posImgSF,0);
 				break;
 			default:
 				drawToScale(g,rallyPointImage,r.getPosition().getX(),r.getPosition().getY(),0,1.5f*posImgSF,0);
@@ -443,6 +443,7 @@ public class CastlesRenderer extends Renderer {
 	 * @param rotation - rotation of object
 	 */
 	private static void drawToScale(Graphics2D g, BufferedImage img, int x, int y, float rotation, float scaleFactor, float alpha) {
+		
 		//get the dimentions of the background
 		int bx = backgroundImage.getWidth();
 		int by = backgroundImage.getHeight();
