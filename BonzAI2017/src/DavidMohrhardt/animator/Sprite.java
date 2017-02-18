@@ -218,7 +218,7 @@ class Sprite {
 	}
 	
 	/**
-	 * FrameData getFrameData(String action)
+	 * getFrameData(String action)
 	 * 
 	 * @param action
 	 * @return
@@ -226,6 +226,7 @@ class Sprite {
 	public FrameData getFrameData(String action) {
 		return actions.get(action);
 	}
+
 
 	// Any Debug Methods I believe I need
 	/**
