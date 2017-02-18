@@ -34,6 +34,7 @@ public class Animator {
 	public Animator(String spritePath, String spriteScript) {
 		sprite = new Sprite(spritePath, spriteScript);
 		actions = sprite.getActions();
+		current_frame = 0;
 	}
 
 
@@ -76,8 +77,24 @@ public class Animator {
 	public BufferedImage getFrameAtIndex(String action, int index) {
 		current_action = action;
 		current_frame = index;
-
+		
 		return sprite.getFrame(current_action, current_frame);
+	}
+	
+	/**
+	 * getActionFrame(String action)
+	 * 
+	 * @param action
+	 * @return
+	 */
+	public BufferedImage getActionFrame(String action) {
+		
+		if (current_frame++ >= sprite.getFrameData(action).getNumberOfFrames()) {
+			current_frame = 0;
+			
+		}
+		
+		return sprite.getFrame(action, current_frame);
 	}
 	
 	/**
@@ -111,6 +128,15 @@ public class Animator {
 		}
 
 		return false;
+	}
+	
+	/**
+	 * getFrameCount()
+	 * 
+	 * @return
+	 */
+	public int getFrameCount(){
+		return current_frame;
 	}
 	
 	/**
