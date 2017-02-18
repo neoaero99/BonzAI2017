@@ -31,6 +31,7 @@ import bonzai.ShoutAction;
  */
 @SuppressWarnings("unused")
 public class CastlesRenderer extends Renderer {
+	private static int soldierUpdateCount;
 	// The scale value for rendering position images
 	static final float posImgSF = 0.003f;
 	static HashMap<String,BufferedImage> backgroundImages = new HashMap<String,BufferedImage>();
@@ -83,7 +84,8 @@ public class CastlesRenderer extends Renderer {
 	private static boolean imagesLoaded = false;
 	private static int gridWidth, gridHeight;
 
-	public CastlesRenderer(){
+	public CastlesRenderer() {
+		soldierUpdateCount = 0;
 		loadImages();
 	}
 	
@@ -258,14 +260,22 @@ public class CastlesRenderer extends Renderer {
 	
 	
 	public static void renderSoldiers(Graphics2D g, CastlesMap map) {
-		
+		++soldierUpdateCount;
 		ArrayList<Soldier>[] soldierList;
 		soldierList = map.getSoldiers();
 		
 		for (ArrayList<Soldier> soldier: soldierList){
 			for(Soldier newSoldier: soldier){
 				Animator anim = newSoldier.getAnimator();
-				BufferedImage image = anim.getFrameAtIndex("March", 0);
+				BufferedImage image;
+				
+				if (soldierUpdateCount > 100) {
+					soldierUpdateCount = 0;
+					image = anim.getFrameAtIndex("March", anim.getCurrentFrameIndex());
+					
+				} else {
+					image = anim.getFrameAtIndex("March", anim.getCurrentFrameIndex());
+				}
 				
 				RallyPoint r = map.getPosition(newSoldier.getPositionID());
 				int sIdx = r.onPoint.indexOf(newSoldier);
