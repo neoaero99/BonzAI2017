@@ -298,12 +298,12 @@ public class CastlesRenderer extends Renderer {
 						py = rp.getY() + halfPIH;
 					}
 					
-					float soldierImgSF = 0.002f;
-					double halfImgWidth = soldierImgSF * soldierImage.getWidth() / 2.0,
-							halfImgHeight = soldierImgSF * soldierImage.getHeight() / 2.0;
+					float soldierImgSF = 0.02f;
+					double halfImgWidth = soldierImgSF * image.getWidth() / 2.0,
+							halfImgHeight = soldierImgSF * image.getHeight() / 2.0;
 					
 					//g.translate(-halfImgWidth, -halfImgHeight);
-					drawToScale(g, soldierImage, px, py, 0, soldierImgSF, 0);
+					drawToScale(g, image, px, py, 0, soldierImgSF, 0);
 					//g.translate(halfImgWidth, halfImgHeight);
 				}
 			}

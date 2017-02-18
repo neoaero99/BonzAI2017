@@ -34,7 +34,6 @@ public class Animator {
 	public Animator(String spritePath, String spriteScript) {
 		sprite = new Sprite(spritePath, spriteScript);
 		actions = sprite.getActions();
-		current_frame = 0;
 	}
 
 
@@ -65,6 +64,16 @@ public class Animator {
 
 		return sprite.getFrame(current_action, current_frame);
 	}
+	
+	/**
+	 * getNextFrameClamped()
+	 * 
+	 * @return
+	 */
+	public BufferedImage getNextFrameClamped() {
+		
+		return sprite.getFrame(current_action, current_frame % sprite.getFrameData(current_action).getNumberOfFrames());
+	}
 
 	/**
 	 * getFrameAtIndex(String action, int index)
@@ -78,24 +87,14 @@ public class Animator {
 		current_action = action;
 		current_frame = index;
 		
+		if (!sprite.checkIndex(action, index)) {
+			current_frame = index % sprite.getFrameData(action).getNumberOfFrames();
+		}
+
 		return sprite.getFrame(current_action, current_frame);
 	}
 	
-	/**
-	 * getActionFrame(String action)
-	 * 
-	 * @param action
-	 * @return
-	 */
-	public BufferedImage getActionFrame(String action) {
-		
-		if (current_frame++ >= sprite.getFrameData(action).getNumberOfFrames()) {
-			current_frame = 0;
-			
-		}
-		
-		return sprite.getFrame(action, current_frame);
-	}
+	// Primitive Type getters
 	
 	/**
 	 * getSpriteSizeX()
@@ -114,6 +113,15 @@ public class Animator {
 	public int getSpriteSizeY() {
 		return sprite.getSizeY();
 	}
+	
+	/**
+	 * getCurrentFrameIndex()
+	 * 
+	 * @return
+	 */
+	public int getCurrentFrameIndex() {
+		return current_frame;
+	}
 
 	// Debugging information
 	/**
@@ -128,15 +136,6 @@ public class Animator {
 		}
 
 		return false;
-	}
-	
-	/**
-	 * getFrameCount()
-	 * 
-	 * @return
-	 */
-	public int getFrameCount(){
-		return current_frame;
 	}
 	
 	/**
