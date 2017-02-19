@@ -53,10 +53,10 @@ public class CastlesRenderer extends Renderer {
 			new File("art/sprites/ART2016/turn_purple.png")
 			};
 	
+	static File rallyPointFile = new File("art/sprites/nodes.png");
 	static File villageFile = new File("art/sprites/ART2016/landmark_mountain.png");
-	static File rallyPointFile = new File("art/sprites/ART2016/target_lake.png");
 	static File castleFile = new File("art/sprites/ART2016/repeater.png");
-
+	
 	static File[] playerFiles = {  
 			new File("art/sprites/ART2016/fox_red.png"), 
 			new File("art/sprites/ART2016/fox_yellow.png"), 
@@ -321,10 +321,27 @@ public class CastlesRenderer extends Renderer {
 	
 	public static void renderBuildings(Graphics2D g, CastlesMap map) {
 		ArrayList<RallyPoint> nodes = map.getAllPositions();
+		Animator animate = new Animator("art/sprites/nodes.png", "art/sprites/nodes.ssc");
 		
 		for(RallyPoint r : nodes){
 			String name = r.ID;
 			char c = name.charAt(0);
+			String ownerTeam = "Neutral";
+			
+			if (r instanceof Building) {
+				Building b = (Building)r;
+				
+				if (b.getTeamColor() == Castles.api.Color.RED) {
+					ownerTeam = "Red";
+					
+				} else if (b.getTeamColor() == Castles.api.Color.YELLOW) {
+					ownerTeam = "Blue";
+				}
+			}
+			
+			drawToScale(g, animate.getFrameAtIndex(ownerTeam, 0), r.getPosition().getX(), r.getPosition().getY(), 0, 1.5f*posImgSF, 0);
+			
+			/*
 			switch(c){
 			case 'V':
 				drawToScale(g,villageImage,r.getPosition().getX(),r.getPosition().getY(),0,1.5f*posImgSF,0);
@@ -341,6 +358,7 @@ public class CastlesRenderer extends Renderer {
 				drawToScale(g,rallyPointImage,r.getPosition().getX(),r.getPosition().getY(),0,1.5f*posImgSF,0);
 				break;
 			}
+			*/
 		}
 	}
 
