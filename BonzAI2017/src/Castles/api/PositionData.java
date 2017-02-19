@@ -42,7 +42,9 @@ public class PositionData {
 	 * The list of sizes of soldier groups at this position
 	 */
 	public final int[] occupantSizes;
-	
+	/**
+	 * The type of structure, ie. Village, Castle, RalylPoint, or Building
+	 */
 	public final String type;
 	/**
 	 * Fill the data of the Position with that of the given rally point.
