@@ -28,7 +28,7 @@ public class AIJar implements bonzai.Jar {
 		
 		// if they are not extending the AI class, throw and exception 
 		if(!AI.class.equals(aiClass.getSuperclass())){
-			throw new ClassNotFoundException("CompetitorAI is not extending the AI super class from Package Castles.api");
+			throw new ClassNotFoundException("CompetitorAI is not extending the AI super class from Package snowbound.api");
 		}
 		if(aiClass.getAnnotation(Agent.class) == null){
 			throw new NullPointerException("CompetitorAI is not using the Agent Annotation on their Class");

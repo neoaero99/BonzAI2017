@@ -80,7 +80,7 @@ public class CastlesRenderer extends Renderer {
 	private static Map<Castles.api.Color, BufferedImage> selectorImages = new HashMap<>();
 //	private static Map<Castles.api.Color, BufferedImage> castleImages = new HashMap<>();
 //	private static BufferedImage[] targetImages = new BufferedImage[targetFiles.length];
-	private static BufferedImage rallyPointImage,villageImage,castleImage;
+	private static BufferedImage fakeRallyPointImg,rallyPointImage,villageImage,castleImage;
 	private static boolean imagesLoaded = false;
 	private static int gridWidth, gridHeight;
 
@@ -108,10 +108,9 @@ public class CastlesRenderer extends Renderer {
 				playerImages = loadIntoMap(playerFiles);
 				selectorImages = loadIntoMap(selectorFiles);
 				castleImage = ImageIO.read(castleFile);
+				fakeRallyPointImg = ImageIO.read(new File("art/sprites/ART2016/target_pyramid.png"));
 				rallyPointImage = ImageIO.read(rallyPointFile);
 				villageImage = ImageIO.read(villageFile);
-//				discoveryImage = ImageIO.read(discoveryFile);
-//				cloudImage = ImageIO.read(cloudFile);
 
 			} catch (Exception e) {
 				System.out.println(e.getMessage());
@@ -321,11 +320,12 @@ public class CastlesRenderer extends Renderer {
 	
 	public static void renderBuildings(Graphics2D g, CastlesMap map) {
 		ArrayList<RallyPoint> nodes = map.getAllPositions();
-		Animator animate = new Animator("art/sprites/nodes.png", "art/sprites/nodes.ssc");
+		//Animator animate = new Animator("art/sprites/nodes.png", "art/sprites/nodes.ssc");
 		
 		for(RallyPoint r : nodes){
 			String name = r.ID;
 			char c = name.charAt(0);
+			/*
 			String ownerTeam = "Neutral";
 			
 			if (r instanceof Building) {
@@ -340,8 +340,8 @@ public class CastlesRenderer extends Renderer {
 			}
 			
 			drawToScale(g, animate.getFrameAtIndex(ownerTeam, 0), r.getPosition().getX(), r.getPosition().getY(), 0, 1.5f*posImgSF, 0);
+			*/
 			
-			/*
 			switch(c){
 			case 'V':
 				drawToScale(g,villageImage,r.getPosition().getX(),r.getPosition().getY(),0,1.5f*posImgSF,0);
@@ -355,10 +355,10 @@ public class CastlesRenderer extends Renderer {
 				drawToScale(g,image,r.getPosition().getX(),r.getPosition().getY(),0,posImgSF,0);
 				break;
 			default:
-				drawToScale(g,rallyPointImage,r.getPosition().getX(),r.getPosition().getY(),0,1.5f*posImgSF,0);
+				drawToScale(g,fakeRallyPointImg,r.getPosition().getX(),r.getPosition().getY(),0,1.5f*posImgSF,0);
 				break;
 			}
-			*/
+			
 		}
 	}
 

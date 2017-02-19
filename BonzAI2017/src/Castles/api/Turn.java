@@ -154,8 +154,32 @@ public class Turn {
 	 */
 	public static void main(String[] args) {
 		
+		CastlesMap map = null;
+		
 		try {
-			CastlesMap map = Parser.parseFile("scenarios/testmap.dat");
+			map = Parser.parseFile("scenarios/testmap.dat");
+			RallyPoint r = map.getPosition("R0");
+			//((Building)r).setTeamColor(Color.RED);
+			
+			Soldier s1 = new Soldier(Color.RED, 6, r.ID);
+			Soldier s2 = new Soldier(Color.YELLOW, 5, r.ID);
+			Soldier s3 = new Soldier(Color.RED, 3, r.ID);
+			Soldier s4 = new Soldier(Color.YELLOW, 2, r.ID);
+			Soldier s5 = new Soldier(Color.RED, 4, r.ID);
+			Soldier s6 = new Soldier(Color.YELLOW, 9, r.ID);
+			
+			map.addSoldiers(s1);
+			map.addSoldiers(s2);
+			map.addSoldiers(s3);
+			map.addSoldiers(s4);
+			map.addSoldiers(s5);
+			map.addSoldiers(s6);
+			
+			int[] sizeDiff = map.mergeSoldiers(r);
+			
+			System.out.printf("%s\n", r.getOccupants());
+			
+			/**
 			ArrayList<Team> teams = (ArrayList<Team>) map.getTeams();
 			
 			ArrayList<String> path0 = new ArrayList<String>();
@@ -164,6 +188,7 @@ public class Turn {
 			path0.add("V0");
 			
 			Turn t = new Turn(0, 1, map);
+			
 			t.outputState();
 			
 			ArrayList<Action> actions = new ArrayList<Action>();
@@ -202,8 +227,11 @@ public class Turn {
 				System.out.printf("%s: %s\n", r.ID, r.getOccupants());
 			}
 			
+			/**/
+			
 		} catch (Exception Ex) {
 			Ex.printStackTrace();
+			return;
 		}
 	}
 	
@@ -575,8 +603,6 @@ public class Turn {
 							RallyPoint src = newMap.getPosition(ms.startID);
 							Soldier target = src.getOccupant(ms.soldierIdx);
 							
-							System.out.printf("%s -> %s : %s\n", ms.startID, ms.endID, path);
-							
 							if (target.getValue() == ms.splitAmt) {
 								// Move the entire group	
 								target.setPath(path);
@@ -631,7 +657,7 @@ public class Turn {
 		 */
 		ArrayList<RallyPoint> rally = newMap.getAllPositions();
 		for (RallyPoint r: rally) {
-			newMap.mergeSoldiers(r.onPoint, r);
+			newMap.mergeSoldiers(r);
 			
 			/* Determine if the remaining soldiers on a position can capture an
 			 * unclaimed or enemy position. */
@@ -725,12 +751,6 @@ public class Turn {
 		return map.getHeight();
 	}
 	
-	/**
-	 * Gets the castle closest to the position P
-	 * 
-	 * @param p:	The data of a position
-	 * @return:		The position data of the closest castle
-	 */
 	public PositionData getClosestCastle(PositionData p){
 		ArrayList<String> out = null;
 		PositionData out1 = null;
@@ -761,12 +781,7 @@ public class Turn {
 		
 		return out1;
 	}
-	/**
-	 * Gets the village closest to the position P
-	 * 
-	 * @param p:	The data of a position
-	 * @return:		The position data of the closest village
-	 */
+	
 	public PositionData getClosestVillage(PositionData p){
 		ArrayList<String> out = null;
 		PositionData out1 = null;
@@ -797,11 +812,7 @@ public class Turn {
 		
 		return out1;
 	}
-	/**
-	 * Gets all positions for all the teams
-	 * 
-	 * @return an ArrayList of PositionData containing the data off all positions on the map
-	 */
+	
 	public ArrayList<PositionData> getAllElements(){
 		ArrayList<PositionData> out = new ArrayList<PositionData>();
 		for(PositionData p : unclaimedPositions.values()){

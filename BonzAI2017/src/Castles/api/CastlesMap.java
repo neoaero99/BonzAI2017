@@ -1,9 +1,11 @@
 package Castles.api;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Set;
 
 import Castles.Objects.Building;
 import Castles.Objects.RallyPoint;
@@ -266,24 +268,38 @@ public class CastlesMap {
 					
 					RallyPoint r = getPosition(s.getPositionID());
 					r.addOccupant(s);
-					if(r.onPoint!=null){
-						for(int i=0;i<r.onPoint.size();i++){
-							Soldier n=r.onPoint.get(i);
-							if(!n.getLeaderColor().equals(s.getLeaderColor())){
-								if(((String)n.getPath().get(1)).equals(oldPosID)){
-									int result=mergeSoldiers(s,n,r);
-									if(result==2||result==4){
-										i--;
-									}
-									else{
-										j--;
-									}
+					
+					/* Check any adjacent soldier groups to determine, if they
+					 * would cross paths with the soldier group, which just
+					 * moved and merge with soldier groups, which would pass
+					 * this one. */
+					int sdx2 = 0;
+					while (sdx2 < r.getOccupants().size()) {
+						Soldier neighbor = r.getOccupant(sdx2);
+						
+						if (s.getLeaderColor() != neighbor.getLeaderColor()) {
+							ArrayList<String> path = neighbor.getPath();
+							
+							if (path != null && path.size() > 1 && path.get(1).equals(oldPosID)) {
+								// The soldier groups cross paths
+								byte ret = mergeSoldierPair(s, r.getOccupant(sdx2), r);
+								
+								if (ret != 1) {
+									// The soldier group, which just moved was lost
+									--j;
+									break;
+									
+								} else if (ret != 2) {
+									// The other soldier group was lost
+									continue;
 								}
 							}
+							
 						}
+						
+						++sdx2;
 					}
 				}
-
 			}
 		}
 	}
@@ -329,6 +345,194 @@ public class CastlesMap {
 			s.setState(SoldierState.MOVING);
 		}
 		return null;
+	}
+	
+	/**
+	 * Merges the soldier groups, which occupy the given position.
+	 * 
+	 * @param r	The position, at which to merge soldiers
+	 * @return	The initial and final number of soldier groups on the position
+	 * 			with respect to merging
+	 */
+	@SuppressWarnings("unchecked")
+	protected int[] mergeSoldiers(RallyPoint r) {
+		ArrayList<Soldier> occupants = r.getOccupants();
+		int initialOccupants = occupants.size();
+		
+		if (occupants.size() == 2) {
+			mergeSoldierPair(r.getOccupant(0), r.getOccupant(1), r);
+			
+		} else if (occupants.size() > 2) {
+			List<Team> teams = getTeams();
+			ArrayList<Soldier>[] teamSoldierLists = (ArrayList<Soldier>[]) new ArrayList[teams.size()];
+			int[] teamTotals = new int[teams.size()];
+			Color greatestTeam = null, sndGreatestTeam = null;
+			
+			// Initialize the data structures
+			for (Team t : getTeams()) {
+				teamSoldierLists[t.getColor().ordinal()] = new ArrayList<Soldier>();
+				teamTotals[t.getColor().ordinal()] = 0;
+				
+				if (r instanceof Building) {
+					Building b = (Building)r;
+					
+					if (b.getTeamColor() == t.getColor()) {
+						/* Defending team gains a buff for occupying their
+						 * building */
+						teamTotals[t.getColor().ordinal()] = b.defenseValue;
+					}
+				}
+			}
+			
+			int teamCount = 0;
+			Color prevTeam = null;
+			/* Separate soldiers by color and order the list of soldiers by
+			 * size in ascending order */
+			for (int sdx = 0; sdx < occupants.size(); ++sdx) {
+				Soldier s = occupants.get(sdx);
+				ArrayList<Soldier> soldierList = teamSoldierLists[s.getLeaderColor().ordinal()];
+				int idx = 0;
+				
+				while ( idx < soldierList.size() && soldierList.get(idx).getValue() < s.getValue()) { ++idx; }
+				
+				soldierList.add(idx, s);
+				teamTotals[s.getLeaderColor().ordinal()] += s.getValue();
+				
+				if (prevTeam == null || s.getLeaderColor() != prevTeam) {
+					/* Keep track of the number of teams with soldiers on the
+					 * given position */
+					++teamCount;
+					prevTeam = s.getLeaderColor();
+				}
+			}
+			
+			// Multiple teams must be present to initiate a merge
+			if (teamCount > 2) {
+				// Find the greatest and second greatest team sizes
+				for (Team t : teams) {
+					int total = teamTotals[t.getColor().ordinal()];
+					int greatestTotal = (greatestTeam == null) ? 0 : teamTotals[greatestTeam.ordinal()];
+					int sndGreatestTotal = (sndGreatestTeam == null) ? 0 : teamTotals[sndGreatestTeam.ordinal()];
+					
+					if (total > greatestTotal) {
+						if (greatestTotal > sndGreatestTotal) {
+							/* Push the greatest team down to the second
+							 * greatest */
+							sndGreatestTeam = greatestTeam;
+						}
+						
+						greatestTeam = t.getColor();
+						
+					} else if (total == greatestTotal) {
+						/* If there are more than one greatest team, then
+						 * everyone loses */
+						greatestTeam = null;
+						
+					} else if (total > sndGreatestTotal) {
+						sndGreatestTeam = t.getColor();
+					}
+				}
+				
+				// Update the soldiers occupying the space
+				for (Team t : teams) {
+					ArrayList<Soldier> soldierList = teamSoldierLists[t.getColor().ordinal()];
+					
+					if (soldierList.size() > 0) {
+						if (t.getColor() == greatestTeam) {
+							/* Remove enough soldiers to satisfy the second
+							 * greatest team's total starting with the soldier
+							 * groups with the greatest values */
+							int counter = teamTotals[sndGreatestTeam.ordinal()];
+							int idx = soldierList.size() - 1;
+							
+							if (r instanceof Building) {
+								Building b = (Building)r;
+								
+								if (b.getTeamColor() == t.getColor()) {
+									/* Defending team gains a buff for occupying
+									 * their building */
+									counter -= b.defenseValue;
+								}
+							}
+							
+							while (idx >= 0 && counter > 0) {
+								Soldier s = soldierList.get(idx--);
+								counter -= s.getValue();
+								
+								if (counter < 0) {
+									s.setValue(-counter);
+									
+								} else {
+									removeSoldiers(s);
+								}
+							}
+							
+						} else {
+							// Remove all the soldiers of the teams, which lost
+							for (Soldier s : soldierList) {
+								removeSoldiers(s);
+							}
+						}
+					}
+				}
+			}
+		}
+		
+		/* Return a set containing the initial number of occupying soldier
+		 * groups and the remaining soldier groups */
+		return new int[] { initialOccupants, occupants.size() };
+	}
+	
+	/**
+	 * Merges the two soldier groups s1 and s2, if they are on different teams.
+	 * 
+	 * @param s1	A soldier group at position r
+	 * @param s2	Another soldier group at position r
+	 * @param r		The position containing s1 and s2
+	 * @return		0 -> both s1 and s2 were lost
+	 * 				1 -> s2 was lost
+	 * 				2 -> s1 was lost
+	 */
+	private byte mergeSoldierPair(Soldier s1, Soldier s2, RallyPoint r) {
+		byte ret = 0;
+		// Multiple teams must be present for a merge
+		if (s1.getLeaderColor() != s2.getLeaderColor()) {
+			int s1DiffS2 = s1.getValue() - s2.getValue();
+			
+			if (r instanceof Building) {
+				Building b = (Building)r;
+				// Defending team gains a buff for occupying their building
+				if (b.getTeamColor() == s1.getLeaderColor()) {
+					s1DiffS2 = s1.getValue() - Math.max(0, s2.getValue() - b.defenseValue);
+					
+				} else if (b.getTeamColor() == s2.getLeaderColor()) {
+					s1DiffS2 = Math.max(0, s1.getValue() - b.defenseValue) - s2.getValue();
+				}
+			}
+			
+			/* Remove the soldiers for each team up the difference between
+			 * the sizes of the soldier groups occupying the position. */
+			
+			if (s1DiffS2 <= 0) {
+				removeSoldiers(s1);
+				
+				if (s1DiffS2 < 0) {
+					ret |= 0x2;
+					s2.setValue(-s1DiffS2);
+				}
+			}
+			
+			if (s1DiffS2 >= 0) {
+				removeSoldiers(s2);
+				
+				if (s1DiffS2 > 0) {
+					ret |= 0x1;
+					s1.setValue(s1DiffS2);
+				}
+			}
+		}
+		
+		return ret;
 	}
 	
 	/**
@@ -473,9 +677,7 @@ public class CastlesMap {
 			}
 			return temp;
 		}
-		/* TODO This will not work
-		 * Since the Building class extends RallyPoint, "r instanceof RallyPoint"
-		 * will return true for all Building objects */
+		
 		if(r instanceof RallyPoint){
 			int num[]=new int[6];
 			int total[]=new int[6];
