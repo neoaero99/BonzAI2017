@@ -16,7 +16,7 @@ public class SoldierData {
 	/**
 	 * The team, to which this soldier group belongs
 	 */
-	public final Color leader;
+	public final TeamColor leader;
 	
 	/**
 	 * The current state of the soldier group

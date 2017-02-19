@@ -15,22 +15,28 @@ import Castles.Objects.Soldier;
  * @author Joshua Hooker
  */
 public class PositionData {
+	
 	/**
 	 * The unique ID associated with a position on the map.
 	 */
 	public final String ID;
 	
 	/**
+	 * The type of building, which this position is
+	 */
+	public final PType type;
+	
+	/**
 	 * The team, who currently controls this position, or null if it is
 	 * unclaimed
 	 */
-	public final Color leader;
+	public final TeamColor leader;
 	
 	/**
 	 * The team, who has soldiers currently occupying this position, or null if
 	 * no soldiers exists at this position.
 	 */
-	public final Color occupant;
+	public final TeamColor occupant;
 	
 	/**
 	 * The bonus given to the defending team's soldiers, if this position is
@@ -43,7 +49,6 @@ public class PositionData {
 	 */
 	public final int[] occupantSizes;
 	
-	public final String type;
 	/**
 	 * Fill the data of the Position with that of the given rally point.
 	 * 
@@ -56,28 +61,22 @@ public class PositionData {
 			occupant = null;
 			defVal = -9999;
 			occupantSizes = new int[] { 0 };
-			type= "!@#$%^&*()";
+			type= null;
 			
 		} else {
 			ID = r.ID;
 			
 			if (r instanceof Building) {
-				leader = ((Building)r).getTeamColor();
-				defVal = ((Building)r).defenseValue;
-				if(r instanceof Castle){
-					type = "Castle";
-				}
-				else if (r instanceof Village){
-					type = "Village";
-				}
-				else{
-					type = "Building";
-				}
+				Building b = (Building)r;
+				
+				type = b.type;
+				leader = b.getTeamColor();
+				defVal = b.getDefVal();
 				
 			} else {
 				leader = null;
+				type = PType.RALLY;
 				defVal = 0;
-				type="Rally Point";
 			}
 			
 			ArrayList<Soldier> occupants = r.getOccupants();
@@ -95,7 +94,7 @@ public class PositionData {
 		return (leader == null) ? false : true;
 	}
 	
-	public boolean isControledBy(Castles.api.Color team){
+	public boolean isControledBy(Castles.api.TeamColor team){
 		return (leader == team) ? true : false;
 	}
 	

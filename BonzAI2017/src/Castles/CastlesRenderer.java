@@ -75,9 +75,9 @@ public class CastlesRenderer extends Renderer {
 //***************************************************************************************************
 
 	//These data structures hold the actual images that get pulled from the above files
-	private static final Map<Castles.api.Color, Color> colors = new HashMap<>();
-	private static Map<Castles.api.Color, BufferedImage> playerImages = new HashMap<>();
-	private static Map<Castles.api.Color, BufferedImage> selectorImages = new HashMap<>();
+	private static final Map<Castles.api.TeamColor, Color> colors = new HashMap<>();
+	private static Map<Castles.api.TeamColor, BufferedImage> playerImages = new HashMap<>();
+	private static Map<Castles.api.TeamColor, BufferedImage> selectorImages = new HashMap<>();
 //	private static Map<Castles.api.Color, BufferedImage> castleImages = new HashMap<>();
 //	private static BufferedImage[] targetImages = new BufferedImage[targetFiles.length];
 	private static BufferedImage fakeRallyPointImg,rallyPointImage,villageImage,castleImage;
@@ -92,12 +92,12 @@ public class CastlesRenderer extends Renderer {
 	public static void loadImages(){
 		if(!imagesLoaded){
 			imagesLoaded = true;
-			colors.put(Castles.api.Color.RED,    new Color(217,  51,   21)); // Red
-			colors.put(Castles.api.Color.YELLOW, new Color(238, 218,  102)); // Yellow
-			colors.put(Castles.api.Color.BLUE,   new Color(68,   55,  142)); // Blue
-			colors.put(Castles.api.Color.GREEN,  new Color(0,   173,   59)); // Green
-			colors.put(Castles.api.Color.ORANGE, new Color(236, 135,    0)); // Orange
-			colors.put(Castles.api.Color.PURPLE, new Color(207,  71,  207)); // Purple
+			colors.put(Castles.api.TeamColor.RED,    new Color(217,  51,   21)); // Red
+			colors.put(Castles.api.TeamColor.YELLOW, new Color(238, 218,  102)); // Yellow
+			colors.put(Castles.api.TeamColor.BLUE,   new Color(68,   55,  142)); // Blue
+			colors.put(Castles.api.TeamColor.GREEN,  new Color(0,   173,   59)); // Green
+			colors.put(Castles.api.TeamColor.ORANGE, new Color(236, 135,    0)); // Orange
+			colors.put(Castles.api.TeamColor.PURPLE, new Color(207,  71,  207)); // Purple
 
 
 			getBackgroundImages();
@@ -127,7 +127,7 @@ public class CastlesRenderer extends Renderer {
 	public static void render(Graphics2D g, CastlesMap map) {
 		gridHeight = map.getHeight();
 		gridWidth = map.getWidth();
-		List<Castles.api.Color> colors = new LinkedList<Castles.api.Color>(getColors().keySet());
+		List<Castles.api.TeamColor> colors = new LinkedList<Castles.api.TeamColor>(getColors().keySet());
 		Game game = new Game(0, 2, map, colors);
 		render(g, game.turn(0), game.turn(0), null, 1);
 
@@ -229,7 +229,6 @@ public class CastlesRenderer extends Renderer {
 		turn.renderMap(g);
 		renderShoutActions(g, turn, nextTurn, smoothTween);
 		g.setTransform(oldTransform);
-		//renderAction();(g, turn, turn.actor(), nextTurn.current(turn.actor()), action, tweenPercent);
 	}
 
 	public static void renderPaths(Graphics2D g, CastlesMap map) {
@@ -313,6 +312,8 @@ public class CastlesRenderer extends Renderer {
 					//g.translate(-halfImgWidth, -halfImgHeight);
 					drawToScale(g, image, px, py, 0, soldierImgSF, 0);
 					//g.translate(halfImgWidth, halfImgHeight);
+					
+					drawText(g, Integer.toString(newSoldier.getValue()), px + halfImgWidth / 2f, py + halfImgHeight / 2f - gridHeight, Color.BLACK, Color.WHITE, 0.5f);
 				}
 			}
 		}
@@ -351,7 +352,7 @@ public class CastlesRenderer extends Renderer {
 				break;
 			case 'P':
 				int i = r.ID.charAt(1) - 48;
-				BufferedImage image = playerImages.get( Castles.api.Color.values()[i] );
+				BufferedImage image = playerImages.get( Castles.api.TeamColor.values()[i] );
 				drawToScale(g,image,r.getPosition().getX(),r.getPosition().getY(),0,posImgSF,0);
 				break;
 			default:
@@ -494,7 +495,7 @@ public class CastlesRenderer extends Renderer {
 		return new Point2D.Float(p.getX(), p.getY());
 	}
 
-	public static Map<Castles.api.Color, Color> getColors() {
+	public static Map<Castles.api.TeamColor, Color> getColors() {
 		return colors;
 	}
 
@@ -504,13 +505,13 @@ public class CastlesRenderer extends Renderer {
 	 * @param arr - a String array containing paths to the PNG files to load
 	 * @throws IOException
 	 */
-	public static Map<Castles.api.Color, BufferedImage> loadIntoMap(File[] arr) throws IOException{
-		Map<Castles.api.Color, BufferedImage> h = new HashMap<>();
+	public static Map<Castles.api.TeamColor, BufferedImage> loadIntoMap(File[] arr) throws IOException{
+		Map<Castles.api.TeamColor, BufferedImage> h = new HashMap<>();
 		BufferedImage image;
 		
 		for(int i = 0; i < arr.length; i++){
 			image = ImageIO.read(arr[i]);
-			h.put(Castles.api.Color.values()[i], image);
+			h.put(Castles.api.TeamColor.values()[i], image);
 		}
 		
 		return h;

@@ -13,7 +13,7 @@ public class DanAI extends AI {
 		if(myTeam==null){
 			return new ShoutAction("No team? BUG!");
 		}
-		Color t=myTeam.getColor();
+		TeamColor t=myTeam.getColor();
 		if(t==null){
 			return new ShoutAction("No color? BUG!");
 		}

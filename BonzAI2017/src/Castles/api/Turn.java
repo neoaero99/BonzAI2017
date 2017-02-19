@@ -24,14 +24,9 @@ public class Turn {
 	
 	private final CastlesMap map;
 	// Data used for AI queries
-	private final HashMap<Color, HashMap<String, SoldierData>> teamSoldiers;
-	private final HashMap<Color, HashMap<String, PositionData>> teamPositions;
+	private final HashMap<TeamColor, HashMap<String, SoldierData>> teamSoldiers;
+	private final HashMap<TeamColor, HashMap<String, PositionData>> teamPositions;
 	private final HashMap<String, PositionData> unclaimedPositions;
-	
-	public static final int CASTLE_PER_TURN = 10;
-	public static final int VILLAGE_PER_TURN = 5;
-	public static final int CASTLE_INIT = 20;
-	public static final int VILLAGE_INIT = 10;
 	
 	final ArrayList<Boolean> success;
 	final int turnNumber;
@@ -66,8 +61,8 @@ public class Turn {
 		this.turnNumber = turnNumber;
 
 		this.map = map;
-		teamSoldiers = new HashMap<Color, HashMap<String, SoldierData>>();
-		teamPositions = new HashMap<Color, HashMap<String, PositionData>>();
+		teamSoldiers = new HashMap<TeamColor, HashMap<String, SoldierData>>();
+		teamPositions = new HashMap<TeamColor, HashMap<String, PositionData>>();
 		unclaimedPositions = new HashMap<String, PositionData>();
 		
 		shoutActions = new ArrayList<ShoutAction>();
@@ -161,12 +156,12 @@ public class Turn {
 			RallyPoint r = map.getPosition("R0");
 			//((Building)r).setTeamColor(Color.RED);
 			
-			Soldier s1 = new Soldier(Color.RED, 6, r.ID);
-			Soldier s2 = new Soldier(Color.YELLOW, 5, r.ID);
-			Soldier s3 = new Soldier(Color.RED, 3, r.ID);
-			Soldier s4 = new Soldier(Color.YELLOW, 2, r.ID);
-			Soldier s5 = new Soldier(Color.RED, 4, r.ID);
-			Soldier s6 = new Soldier(Color.YELLOW, 9, r.ID);
+			Soldier s1 = new Soldier(TeamColor.RED, 6, r.ID);
+			Soldier s2 = new Soldier(TeamColor.YELLOW, 5, r.ID);
+			Soldier s3 = new Soldier(TeamColor.RED, 3, r.ID);
+			Soldier s4 = new Soldier(TeamColor.YELLOW, 2, r.ID);
+			Soldier s5 = new Soldier(TeamColor.RED, 4, r.ID);
+			Soldier s6 = new Soldier(TeamColor.YELLOW, 9, r.ID);
 			
 			map.addSoldiers(s1);
 			map.addSoldiers(s2);
@@ -335,7 +330,7 @@ public class Turn {
 	 * @return			A list of positions controlled by the team of the given
 	 * 					color
 	 */
-	public List<PositionData> getPositionsControlledBy(Color teamColor) {
+	public List<PositionData> getPositionsControlledBy(TeamColor teamColor) {
 		HashMap<String, PositionData> step1 = teamPositions.get(teamColor);
 		Collection<PositionData> step2=step1.values();
 		ArrayList<PositionData> step3=new ArrayList<PositionData>();
@@ -352,7 +347,7 @@ public class Turn {
 	 * @return			The list of soldiers associated with the team with the
 	 * 					given color
 	 */
-	public List<SoldierData> getSoldiersControlledBy(Color teamColor) {
+	public List<SoldierData> getSoldiersControlledBy(TeamColor teamColor) {
 		HashMap<String, SoldierData> step1 = teamSoldiers.get(teamColor);
 		Collection<SoldierData> step2=step1.values();
 		return new ArrayList<SoldierData>(step2);
@@ -666,7 +661,7 @@ public class Turn {
 				ArrayList<Soldier> occupants = r.getOccupants();
 				
 				if (occupants.size() > 0) {
-					Color leaderColor = occupants.get(0).getLeaderColor();
+					TeamColor leaderColor = occupants.get(0).getLeaderColor();
 					
 					if (b.getTeamColor() == null || b.getTeamColor() != leaderColor) {
 						int occupantSize = 0;
@@ -677,7 +672,7 @@ public class Turn {
 						/* The total number of soldiers must be greater than
 						 * the defense value of the position in order to
 						 * capture it */
-						if (occupantSize > b.defenseValue) {
+						if (occupantSize > b.getDefVal()) {
 							b.setTeamColor(leaderColor);
 						}
 					}
@@ -689,10 +684,10 @@ public class Turn {
 				if (s != null) {
 					newMap.addSoldiers(s);
 				}
-				Color c =b.getTeamColor();
+				TeamColor c =b.getTeamColor();
 				if(c!=null){
 						int ID =c.ordinal();
-						teamScoreAdditions[ID]+=b.defenseValue;
+						teamScoreAdditions[ID]+=b.getDefVal();
 				}
 			}
 		}

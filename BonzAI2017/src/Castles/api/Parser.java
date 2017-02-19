@@ -63,10 +63,10 @@ public class Parser {
 				switch(parse_mode) {
 				case PARSE_PLAYER:
 					// Create the player's team
-					Team newTeam = new Team(Castles.api.Color.values()[teams.size()], teams.size());
+					Team newTeam = new Team(Castles.api.TeamColor.values()[teams.size()], teams.size());
 					teams.add(newTeam);
 					// Create the player's initial castle
-					r = new Castle(Integer.parseInt(row[0]), Integer.parseInt(row[1]), row[2], newTeam.getColor(), 10, 5);
+					r = new Building(Integer.parseInt(row[0]), Integer.parseInt(row[1]), row[2], newTeam.getColor());
 					// Create the player's initial soldier group
 					Soldier iniTeamGroup = new Soldier(newTeam.getColor(), 5, r.ID);
 					iniSoldiers.add(iniTeamGroup);
@@ -76,7 +76,7 @@ public class Parser {
 					break;
 
 				case PARSE_CASTLE:
-					r = new Castle(Integer.parseInt(row[0]), Integer.parseInt(row[1]), row[2], null);
+					r = new Building(Integer.parseInt(row[0]), Integer.parseInt(row[1]), row[2], null);
 					graphElements.put(r.ID, r);
 					vertices.add(new Vertex(r.ID));
 					break;
@@ -106,7 +106,7 @@ public class Parser {
 					break;
 					
 				case PARSE_VILLAGE:
-					r = new Village(Integer.parseInt(row[0]), Integer.parseInt(row[1]), row[2], null);
+					r = new Building(Integer.parseInt(row[0]), Integer.parseInt(row[1]), row[2], null);
 					graphElements.put(r.ID, r);
 					vertices.add(new Vertex(r.ID));
 					break;

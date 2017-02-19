@@ -6,7 +6,7 @@ import java.util.List;
 
 import javax.swing.JComponent;
 
-import Castles.api.Color;
+import Castles.api.TeamColor;
 import DavidMohrhardt.animator.Animator;
 
 /**
@@ -58,7 +58,7 @@ public class Soldier extends JComponent {
 	
 	private static final long serialVersionUID = 3166707557130028703L;
 	
-	private Color leaderColor;
+	private TeamColor leaderColor;
 	// The combat value this unit has
 	private int value;
 	// The current status of the soldier (always defaults to standby)
@@ -87,7 +87,7 @@ public class Soldier extends JComponent {
 	 * 
 	 * @author David Mohrhardt
 	 */
-	public Soldier(Color teamColor, int iniVal, String posID) throws IllegalArgumentException{
+	public Soldier(TeamColor teamColor, int iniVal, String posID) throws IllegalArgumentException{
 		
 		if (posID == null) {
 			throw new NullPointerException("Soldier position cannot be null!\n");
@@ -100,10 +100,10 @@ public class Soldier extends JComponent {
 		this.posID = posID;
 		given_path = new ArrayList<String>();
 		
-		if (teamColor == Color.RED){
+		if (teamColor == TeamColor.RED){
 			animator = new Animator("art/sprites/redsoldier.png", "art/sprites/redsoldier.ssc");
 		}
-		else if (teamColor == Color.YELLOW){
+		else if (teamColor == TeamColor.YELLOW){
 			animator = new Animator("art/sprites/bluesoldier.png", "art/sprites/bluesoldier.ssc");
 		}
 		else{
@@ -133,7 +133,7 @@ public class Soldier extends JComponent {
 		quickSort(s.subList(part+1, s.size()));
 	}
 	
-	public Color getLeaderColor() {
+	public TeamColor getLeaderColor() {
 		return leaderColor;
 	}
 

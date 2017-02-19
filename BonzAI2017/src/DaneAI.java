@@ -158,7 +158,7 @@ public class DaneAI extends AI {
 		PriorityQueue<Path> pm = new PriorityQueue<>();
 		//YAY!!!! ORDER N^2 ALGORITHM
 		for(PositionData owned : cStructs){
-			if(!(getSoldierCount(owned) > Turn.VILLAGE_INIT)) continue;
+			if(!(getSoldierCount(owned) > Building.VILLAGE_SR)) continue;
 			//finds the list of turns I can use for un-owned buildings
 			//from each owned buildings
 			for(PositionData unowned : uStructs){
@@ -186,9 +186,9 @@ public class DaneAI extends AI {
 		char type = p.ID.charAt(0);
 		switch(type){
 		case 'C':
-			return Turn.CASTLE_PER_TURN;
+			return Building.CASTLE_SR;
 		case 'V':
-			return Turn.VILLAGE_PER_TURN;
+			return Building.VILLAGE_SR;
 		default:
 			return 0;
 		}

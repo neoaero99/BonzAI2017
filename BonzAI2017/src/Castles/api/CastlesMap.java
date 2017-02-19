@@ -147,7 +147,7 @@ public class CastlesMap {
 			return null;
 		}
 		
-		Castles.api.Color c=Castles.api.Color.values()[i];
+		Castles.api.TeamColor c=Castles.api.TeamColor.values()[i];
 		ArrayList<RallyPoint> elementList = getAllPositions();
 		
 		for(RallyPoint r : elementList) {
@@ -366,7 +366,7 @@ public class CastlesMap {
 			List<Team> teams = getTeams();
 			ArrayList<Soldier>[] teamSoldierLists = (ArrayList<Soldier>[]) new ArrayList[teams.size()];
 			int[] teamTotals = new int[teams.size()];
-			Color greatestTeam = null, sndGreatestTeam = null;
+			TeamColor greatestTeam = null, sndGreatestTeam = null;
 			
 			// Initialize the data structures
 			for (Team t : getTeams()) {
@@ -379,13 +379,13 @@ public class CastlesMap {
 					if (b.getTeamColor() == t.getColor()) {
 						/* Defending team gains a buff for occupying their
 						 * building */
-						teamTotals[t.getColor().ordinal()] = b.defenseValue;
+						teamTotals[t.getColor().ordinal()] = b.getDefVal();
 					}
 				}
 			}
 			
 			int teamCount = 0;
-			Color prevTeam = null;
+			TeamColor prevTeam = null;
 			/* Separate soldiers by color and order the list of soldiers by
 			 * size in ascending order */
 			for (int sdx = 0; sdx < occupants.size(); ++sdx) {
@@ -451,7 +451,7 @@ public class CastlesMap {
 								if (b.getTeamColor() == t.getColor()) {
 									/* Defending team gains a buff for occupying
 									 * their building */
-									counter -= b.defenseValue;
+									counter -= b.getDefVal();
 								}
 							}
 							
@@ -503,10 +503,10 @@ public class CastlesMap {
 				Building b = (Building)r;
 				// Defending team gains a buff for occupying their building
 				if (b.getTeamColor() == s1.getLeaderColor()) {
-					s1DiffS2 = s1.getValue() - Math.max(0, s2.getValue() - b.defenseValue);
+					s1DiffS2 = s1.getValue() - Math.max(0, s2.getValue() - b.getDefVal());
 					
 				} else if (b.getTeamColor() == s2.getLeaderColor()) {
-					s1DiffS2 = Math.max(0, s1.getValue() - b.defenseValue) - s2.getValue();
+					s1DiffS2 = Math.max(0, s1.getValue() - b.getDefVal()) - s2.getValue();
 				}
 			}
 			
@@ -592,8 +592,8 @@ public class CastlesMap {
 				}
 			}
 			else{
-				int def=((Building)r).defenseValue;
-				Color team=((Building)r).getTeamColor();
+				int def=((Building)r).getDefVal();
+				TeamColor team=((Building)r).getTeamColor();
 				if(team==s1.getLeaderColor()){
 					int amount= (s1.getValue()+def)-s2.getValue();
 					if(amount>0){
@@ -720,7 +720,7 @@ public class CastlesMap {
 			return 5;
 		}
 		else{
-			int def=((Building)r).defenseValue;
+			int def=((Building)r).getDefVal();
 			int teamID=((Building)r).getTeamColor().ordinal();
 			int num[]=new int[6];
 			int total[]=new int[6];

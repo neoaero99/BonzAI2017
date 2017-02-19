@@ -135,7 +135,7 @@ public class CastlesMain extends JPanel implements GameWrapper, Runnable, KeyLis
 	/**
 	 * Given a color, get the AI name that belongs to that color.
 	 */
-	public String getTeamName(Castles.api.Color color) {
+	public String getTeamName(Castles.api.TeamColor color) {
 		try{
 			String name = simulation.jar(color).name();
 			return name;
