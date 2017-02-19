@@ -46,9 +46,7 @@ class FrameData {
 	 * @param padding_y The amount of padding between frames on the Y-axis
 	 */
 	protected void parseFrames(BufferedImage sprite_sheet, int size_x, int size_y, int padding_x, int padding_y) {
-
 		for(int i = 0; i < num_frames; i++) {
-			
 			frames[i] = sprite_sheet.getSubimage(
 					(i * size_x) + (i * padding_x), 
 					(row * size_y) + (row * padding_y),

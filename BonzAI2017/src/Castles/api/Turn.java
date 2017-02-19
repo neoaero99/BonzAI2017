@@ -751,6 +751,12 @@ public class Turn {
 		return map.getHeight();
 	}
 	
+	/**
+	 * Gets the castle closest to the position P
+	 * 
+	 * @param p:	The data of a position
+	 * @return:		The position data of the closest castle
+	 */
 	public PositionData getClosestCastle(PositionData p){
 		ArrayList<String> out = null;
 		PositionData out1 = null;
@@ -782,6 +788,12 @@ public class Turn {
 		return out1;
 	}
 	
+	/**
+	 * Gets the village closest to the position P
+	 * 
+	 * @param p:	The data of a position
+	 * @return:		The position data of the closest village
+	 */
 	public PositionData getClosestVillage(PositionData p){
 		ArrayList<String> out = null;
 		PositionData out1 = null;
@@ -813,6 +825,11 @@ public class Turn {
 		return out1;
 	}
 	
+	/**
+	 * Gets all positions for all the teams
+	 * 
+	 * @return an ArrayList of PositionData containing the data off all positions on the map
+	 */
 	public ArrayList<PositionData> getAllElements(){
 		ArrayList<PositionData> out = new ArrayList<PositionData>();
 		for(PositionData p : unclaimedPositions.values()){
