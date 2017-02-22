@@ -20,7 +20,7 @@ public class NAAI extends AI {
 	private static final Random generator;
 	
 	static {
-		generator = new Random( System.currentTimeMillis() );
+		generator = new Random(0);
 	}
 
 	@Override

@@ -24,9 +24,9 @@ public class DanAI extends AI {
 		MoveAction movements= new MoveAction();
 		for(PositionData p:myPositions){
 			int max=0;
-			for(int i=0;i<p.occupantSizes.length;i++){
+			for(int i=0;i<p.occupantData.length;i++){
 				numSoldiers++;
-				max+=p.occupantSizes[i];
+				max+=p.occupantData[i].size;
 			}
 			Team otherTeam=null;
 			int i=(int)Math.random()*teams.size();
@@ -37,7 +37,7 @@ public class DanAI extends AI {
 			List<PositionData> otherData=turn.getPositionsControlledBy(otherTeam.getColor());
 			int x=(int)Math.random()*otherData.size();
 			PositionData go=otherData.get(x);
-			for(int j=0;j<p.occupantSizes.length;j++){
+			for(int j=0;j<p.occupantData.length;j++){
 				movements.addMove(j, max, p.ID, go.ID);
 			}
 		}

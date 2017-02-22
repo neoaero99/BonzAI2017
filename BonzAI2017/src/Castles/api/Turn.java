@@ -10,6 +10,9 @@ import java.util.List;
 
 import Castles.CastlesRenderer;
 import Castles.Objects.*;
+import Castles.util.graph.CastlesMapGraph;
+import Castles.util.graph.Vertex;
+import Castles.util.priorityq.AdaptablePQ;
 import bonzai.Action;
 import bonzai.Position;
 import bonzai.Team;
@@ -24,9 +27,10 @@ public class Turn {
 	
 	private final CastlesMap map;
 	// Data used for AI queries
-	private final HashMap<TeamColor, HashMap<String, SoldierData>> teamSoldiers;
-	private final HashMap<TeamColor, HashMap<String, PositionData>> teamPositions;
-	private final HashMap<String, PositionData> unclaimedPositions;
+	private final HashMap<String, PositionData> positions;
+	private final HashMap<TeamColor, List<PositionData>> teamPositions;
+	private final List<PositionData> unclaimedPositions;
+	private final HashMap<TeamColor, List<SoldierData>> teamSoldiers;
 	
 	final ArrayList<Boolean> success;
 	final int turnNumber;
@@ -61,9 +65,10 @@ public class Turn {
 		this.turnNumber = turnNumber;
 
 		this.map = map;
-		teamSoldiers = new HashMap<TeamColor, HashMap<String, SoldierData>>();
-		teamPositions = new HashMap<TeamColor, HashMap<String, PositionData>>();
-		unclaimedPositions = new HashMap<String, PositionData>();
+		positions = new HashMap<String, PositionData>();
+		teamPositions = new HashMap<TeamColor, List<PositionData>>();
+		unclaimedPositions = new ArrayList<PositionData>();
+		teamSoldiers = new HashMap<TeamColor, List<SoldierData>>();
 		
 		shoutActions = new ArrayList<ShoutAction>();
 		moveActions = new ArrayList<MoveAction>();
@@ -71,20 +76,12 @@ public class Turn {
 		List<Team> teams = map.getTeams();
 		success = new ArrayList<Boolean>();
 		
+		/**
+		 * Initialize the team's list of positions and soldiers.
+		 */
 		for (Team t : teams) {
-			/* Associate each group of soldiers with their team color and with
-			 * their position */
-			HashMap<String, SoldierData> soldierGroups = new HashMap<String, SoldierData>();
-			ArrayList<Soldier> soldiers = map.getSoldiers(t);
-			
-			for (Soldier s : soldiers) {
-				SoldierData data = getSoldierData(s);
-				
-				soldierGroups.put(data.posID, data);
-			}
-			
-			teamSoldiers.put(t.getColor(), soldierGroups);
-			teamPositions.put(t.getColor(), new HashMap<String, PositionData>());
+			teamPositions.put(t.getColor(), new ArrayList<PositionData>());
+			teamSoldiers.put(t.getColor(), new ArrayList<SoldierData>());
 		}
 		
 		ArrayList<RallyPoint> elements = map.getAllPositions();
@@ -94,19 +91,26 @@ public class Turn {
 			 * owns the position and then with the positions ID. Unclaimed
 			 * positions are simply associated with their ID. */
 			PositionData p = new PositionData(r);
+			positions.put(p.ID, p);
 			
 			if (r instanceof Building) {
 				Building b = (Building)r;
 				
 				if (b.getTeamColor() != null) {
-					teamPositions.get(b.getTeamColor()).put(p.ID, p);
+					teamPositions.get(b.getTeamColor()).add(p);
 					
 				} else {
-					unclaimedPositions.put(p.ID, p);
+					unclaimedPositions.add(p);
 				}
 				
 			} else {
-				unclaimedPositions.put(p.ID, p);
+				unclaimedPositions.add(p);
+			}
+			
+			// Add the soldier data to the team list of soldiers.
+			for (SoldierData sd : p.occupantData) {
+				TeamColor c = sd.leader;
+				teamSoldiers.get(c).add(sd);
 			}
 		}
 	}
@@ -153,6 +157,8 @@ public class Turn {
 		
 		try {
 			map = Parser.parseFile("scenarios/testmap.dat");
+			
+			/**/
 			RallyPoint r = map.getPosition("R0");
 			//((Building)r).setTeamColor(Color.RED);
 			
@@ -188,15 +194,15 @@ public class Turn {
 			
 			ArrayList<Action> actions = new ArrayList<Action>();
 			
-			ArrayList<SoldierData> soldierSet = t.getSoldiersAt("P0");
-			SoldierData s0 = soldierSet.get(0);
+			SoldierData[] soldierSet = t.getPosition("P0").occupantData;
+			SoldierData s0 = soldierSet[0];
 			
-			List<PositionData> positions = t.getPositionsControlledBy(Color.RED);
+			List<PositionData> positions = t.getPositionsControlledBy(TeamColor.RED);
 			System.out.println(positions.size());
 			
 			for (PositionData pd : positions) {
-				for (int sNum : pd.occupantSizes) {
-					System.out.printf("%d\n", sNum);
+				for (SoldierData sd : pd.occupantData) {
+					System.out.printf("%d\n", sd.size);
 				}
 			}
 			
@@ -234,16 +240,16 @@ public class Turn {
 	 * Outputs the data associated with the Turn to the console.
 	 */
 	private void outputState() {
-		Collection<HashMap<String, SoldierData>> soldierGroups = teamSoldiers.values();
+		Collection<List<SoldierData>> soldierGroups = teamSoldiers.values();
 		
-		for (HashMap<String, SoldierData> groups : soldierGroups) {
+		for (List<SoldierData> groups : soldierGroups) {
 			System.out.printf("%s\n", groups);
 		}
 		System.out.println();
 		
-		Collection<HashMap<String, PositionData>> claimed = teamPositions.values();
+		Collection<List<PositionData>> claimed = teamPositions.values();
 		
-		for (HashMap<String, PositionData> positions : claimed) {
+		for (List<PositionData> positions : claimed) {
 			System.out.printf("%s\n", positions);
 		}
 		System.out.println();
@@ -251,32 +257,18 @@ public class Turn {
 		System.out.printf("%s\n\n\n", unclaimedPositions);
 	}
 	
-	/**
-	 * 
-	 * 
-	 * @param s
-	 * @return
-	 */
-	private SoldierData getSoldierData(Soldier s) {
-		RallyPoint r = map.getPosition(s.getPositionID());
-		
-		if (r != null) {
-			
-			for (int idx = 0; idx < r.getOccupants().size(); ++idx) {
-				if (s == r.getOccupant(idx)) {
-					return new SoldierData(s, idx);
-				}
-			}
-		}
-		
-		return null;
-	}
-	
 	/*************************************************************************
 	 * 
 	 *						  ADD API METHODS HERE!!!!!!!!!
 	 *
 	 */
+	
+	/**
+	 * @return	A list of all positions on the map
+	 */
+	public Collection<PositionData> getAllPositions() {
+		return positions.values();
+	}
 	
 	/**
 	 * Returns the position with the given ID value, if one exists. If no
@@ -287,36 +279,25 @@ public class Turn {
 	 * 				the map
 	 */
 	public PositionData getPosition(String ID) {
-		Collection<HashMap<String, PositionData>> claimedPositions = teamPositions.values();
-		// Check each list of positions owned by teams for the position
-		for (HashMap<String, PositionData> positionsSet : claimedPositions) {
-			PositionData pos = positionsSet.get(ID);
-			
-			if (pos != null) {
-				return pos;
-			}
-		}
-		// Finally, check the unclaimed positions
-		return unclaimedPositions.get(ID);
+		return positions.get(ID);
 	}
 	
 	/**
-	 * Returns a list of soldiers, which occupy the position with the given ID.
-	 * If the position with the given ID is unoccupied, an empty set is
-	 * returned. If no position with the given ID exists, then null is
-	 * returned.
+	 * Returns a list of positions that are adjacent to the position with the
+	 * given ID. If the position is invalid, an empty set is returned.
 	 * 
-	 * @param ID	The ID of a position on the map
-	 * @return		The list of soldiers occupying the position with the given
-	 * 				ID
+	 * @param ID	The ID of a position
+	 * @return		The positions adjacent to the position with the given ID
 	 */
-	public ArrayList<SoldierData> getSoldiersAt(String ID) {
-		ArrayList<SoldierData> data = new ArrayList<SoldierData>();
-		RallyPoint r =map.getPosition(ID);
-		for(Soldier s: r.onPoint){
-			data.add(getSoldierData(s));
+	public List<PositionData> adjacentTo(String ID) {
+		List<PositionData> adjPositions = new ArrayList<PositionData>();
+		List<String> adjPosIDs = map.getAdjPosIDs(ID);
+		
+		for (String adjPosID : adjPosIDs) {
+			adjPositions.add( getPosition(adjPosID) );
 		}
-		return data;
+		
+		return adjPositions;
 	}
 	
 	/**
@@ -331,11 +312,7 @@ public class Turn {
 	 * 					color
 	 */
 	public List<PositionData> getPositionsControlledBy(TeamColor teamColor) {
-		HashMap<String, PositionData> step1 = teamPositions.get(teamColor);
-		Collection<PositionData> step2=step1.values();
-		ArrayList<PositionData> step3=new ArrayList<PositionData>();
-		step3.addAll(step2);
-		return step3;
+		return teamPositions.get(teamColor);
 	}
 	
 	/**
@@ -348,9 +325,7 @@ public class Turn {
 	 * 					given color
 	 */
 	public List<SoldierData> getSoldiersControlledBy(TeamColor teamColor) {
-		HashMap<String, SoldierData> step1 = teamSoldiers.get(teamColor);
-		Collection<SoldierData> step2=step1.values();
-		return new ArrayList<SoldierData>(step2);
+		return teamSoldiers.get(teamColor);
 	}
 	
 	/**
@@ -366,10 +341,119 @@ public class Turn {
 		return map.getPath(startID, endID);
 	}
 	
-	/*************************************************************************/
+	/**
+	 * Returns the positions with the given building type that are the closest
+	 * to the given position.
+	 * 
+	 * @param refID		The reference position
+	 * @param target	The type of building to find
+	 * @return			A list of positions with the given type that are
+	 * 					the closest to the given position
+	 */
+	public List<PositionData> getClosestByType(String refID, PType target) {
+		List<PositionData> positions = new ArrayList<PositionData>();
+		PositionData p = this.getPosition(refID);
+		
+		if (p != null) {
+			HashMap<String, Boolean> posVisited = new HashMap<String, Boolean>();
+			ArrayList<String> curLayer = map.getAdjPosIDs(refID);
+			
+			posVisited.put(refID, true);
+			
+			for (String ID : curLayer) {
+				posVisited.put(ID, true);
+				PositionData adjP = getPosition(ID);
+				
+				if (adjP.type == target) {
+					positions.add(adjP);
+				}
+			}
+			
+			while (positions.size() == 0 && curLayer.size() > 0) {
+				ArrayList<String> nextLayer = new ArrayList<String>();
+				
+				for (String ID : curLayer) {
+					ArrayList<String> adjPosIDs = map.getAdjPosIDs(ID);
+					
+					for (String adjID : adjPosIDs) {
+						Boolean visited = posVisited.get(adjID);
+						
+						if (visited == null) {
+							posVisited.put(ID, true);
+							PositionData adjP = getPosition(ID);
+							
+							if (adjP.type == target) {
+								positions.add(adjP);
+							}
+							
+							nextLayer.add(adjID);
+						}
+					}
+				}
+				
+				curLayer = nextLayer;
+			}
+		}
+		
+		return positions;
+	}
 	
-	
-	
+	/**
+	 * Returns the positions controlled by the team with the given color that
+	 * are the closest to the given position.
+	 * 
+	 * @param refID		The reference position
+	 * @param target	The color of a team
+	 * @return			A list of positions controlled by the team with the
+	 * 					given color that are the closest to the given position
+	 */
+	public List<PositionData> getClosestByColor(String refID, TeamColor target) {
+		List<PositionData> positions = new ArrayList<PositionData>();
+		PositionData p = this.getPosition(refID);
+		
+		if (p != null) {
+			HashMap<String, Boolean> posVisited = new HashMap<String, Boolean>();
+			ArrayList<String> curLayer = map.getAdjPosIDs(refID);
+			
+			posVisited.put(refID, true);
+			
+			for (String ID : curLayer) {
+				posVisited.put(ID, true);
+				PositionData adjP = getPosition(ID);
+				
+				if (adjP.leader == target) {
+					positions.add(adjP);
+				}
+			}
+			
+			while (positions.size() == 0 && curLayer.size() > 0) {
+				ArrayList<String> nextLayer = new ArrayList<String>();
+				
+				for (String ID : curLayer) {
+					ArrayList<String> adjPosIDs = map.getAdjPosIDs(ID);
+					
+					for (String adjID : adjPosIDs) {
+						Boolean visited = posVisited.get(adjID);
+						
+						if (visited == null) {
+							posVisited.put(ID, true);
+							PositionData adjP = getPosition(ID);
+							
+							if (adjP.leader == target) {
+								positions.add(adjP);
+							}
+							
+							nextLayer.add(adjID);
+						}
+					}
+				}
+				
+				curLayer = nextLayer;
+			}
+		}
+		
+		return positions;
+	}
 	
 	/**
 	 * Returns your AI's Team object
@@ -391,6 +475,8 @@ public class Turn {
 	public List<Team> getAllTeams() {
 		return map.getTeams();
 	}
+	
+	/*************************************************************************/
 	
 	/**
 	 * If isValid() returns false, this method returns
@@ -752,22 +838,25 @@ public class Turn {
 	 * @param p:	The data of a position
 	 * @return:		The position data of the closest castle
 	 */
-	public PositionData getClosestCastle(PositionData p){
+	public PositionData getClosestCastle(PositionData p) {
 		ArrayList<String> out = null;
 		PositionData out1 = null;
 		ArrayList<PositionData> castles = new ArrayList<>(); 
-		for(String s : unclaimedPositions.keySet()){
-			if(s.contains("C")){
-				castles.add(unclaimedPositions.get(p));
+		
+		for(PositionData pd : unclaimedPositions){
+			if(pd.type == PType.CASTLE){
+				castles.add(pd);
 			}
 		}
-		for(HashMap<String, PositionData> d : teamPositions.values()){
-			for(String s : d.keySet()){
-				if(s.contains("C")){
-					castles.add(d.get(s));
+		
+		for(List<PositionData> d : teamPositions.values()){
+			for(PositionData pd : d){
+				if(pd.type == PType.CASTLE){
+					castles.add(pd);
 				}
 			}
 		}
+		
 		for(PositionData d : castles){
 			if(out == null){ 
 				out = map.getPath(d.ID, p.ID);
@@ -793,15 +882,15 @@ public class Turn {
 		ArrayList<String> out = null;
 		PositionData out1 = null;
 		ArrayList<PositionData> castles = new ArrayList<>(); 
-		for(String s : unclaimedPositions.keySet()){
-			if(s.contains("D")){
-				castles.add(unclaimedPositions.get(p));
+		for(PositionData pd : unclaimedPositions){
+			if(pd.type == PType.CASTLE){
+				castles.add(pd);
 			}
 		}
-		for(HashMap<String, PositionData> d : teamPositions.values()){
-			for(String s : d.keySet()){
-				if(s.contains("C")){
-					castles.add(d.get(s));
+		for(List<PositionData> d : teamPositions.values()){
+			for(PositionData pd : d){
+				if(pd.type == PType.CASTLE){
+					castles.add(pd);
 				}
 			}
 		}
@@ -819,22 +908,4 @@ public class Turn {
 		
 		return out1;
 	}
-	
-	/**
-	 * Gets all positions for all the teams
-	 * 
-	 * @return an ArrayList of PositionData containing the data off all positions on the map
-	 */
-	public ArrayList<PositionData> getAllElements(){
-		ArrayList<PositionData> out = new ArrayList<PositionData>();
-		for(PositionData p : unclaimedPositions.values()){
-			out.add(p);
-		}
-		for(HashMap<String, PositionData> d : teamPositions.values()){
-			for(PositionData p : d.values()){
-				out.add(p);
-			}
-		}
-		return out;
- 	}
 }

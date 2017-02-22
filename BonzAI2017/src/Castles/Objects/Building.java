@@ -6,12 +6,15 @@ import Castles.Objects.PType;
 public class Building extends RallyPoint {
 	
 	/**
-	 * The defense and soldier spawn rates for each class of building
+	 * The defense value for this building
 	 */
 	public static final int BASE_DV = 10,
 							CASTLE_DV = 5,
-							VILLAGE_DV = 3,
-							BASE_SR = 4,
+							VILLAGE_DV = 3;
+	/**
+	 * The soldier spawn rate for this building
+	 */
+	public static final int	BASE_SR = 4,
 							CASTLE_SR = 3,
 							VILLAGE_SR = 2;	
 	

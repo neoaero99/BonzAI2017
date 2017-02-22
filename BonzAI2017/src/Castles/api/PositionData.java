@@ -33,21 +33,15 @@ public class PositionData {
 	public final TeamColor leader;
 	
 	/**
-	 * The team, who has soldiers currently occupying this position, or null if
-	 * no soldiers exists at this position.
-	 */
-	public final TeamColor occupant;
-	
-	/**
 	 * The bonus given to the defending team's soldiers, if this position is
 	 * attacked by another team's soldiers.
 	 */
 	public final int defVal;
 	
 	/**
-	 * The list of sizes of soldier groups at this position
+	 * The list soldier groups at this position
 	 */
-	public final int[] occupantSizes;
+	public final SoldierData[] occupantData;
 	
 	/**
 	 * Fill the data of the Position with that of the given rally point.
@@ -58,9 +52,8 @@ public class PositionData {
 		if (r == null) {
 			ID = "!@#$%^&*()";
 			leader = null;
-			occupant = null;
 			defVal = -9999;
-			occupantSizes = new int[] { 0 };
+			this.occupantData = new SoldierData[0];
 			type= null;
 			
 		} else {
@@ -80,13 +73,11 @@ public class PositionData {
 			}
 			
 			ArrayList<Soldier> occupants = r.getOccupants();
-			occupantSizes = new int[occupants.size()];
+			occupantData = new SoldierData[occupants.size()];
 			
-			for (int idx = 0 ; idx < occupants.size(); ++idx) {
-				occupantSizes[idx] = occupants.get(idx).getValue();
+			for (int idx = 0; idx < occupants.size(); ++idx) {
+				occupantData[idx] = new SoldierData(occupants.get(idx), idx);
 			}
-			
-			occupant = (occupants.size() == 0) ? null : occupants.get(0).getLeaderColor();
 		}
 	}
 	
@@ -100,9 +91,8 @@ public class PositionData {
 	
 	public String toString() {
 		String claimedBy = (leader == null) ? "N/A" : leader.name();
-		String occupantColor = (occupant == null) ? "N/A" : occupant.name();
 		
-		return String.format("id:%s def:%d claimed_by:%s occupants:%s : %s", ID,
-				defVal, claimedBy, occupantColor, Arrays.toString(occupantSizes));
+		return String.format("id:%s def:%d claimed_by:%s occupants:%s", ID,
+				defVal, claimedBy, Arrays.toString(occupantData));
 	}
 }

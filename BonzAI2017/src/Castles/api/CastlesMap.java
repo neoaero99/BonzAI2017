@@ -12,6 +12,7 @@ import Castles.Objects.RallyPoint;
 import Castles.Objects.Soldier;
 import Castles.Objects.SoldierState;
 import Castles.util.graph.IDPair;
+import Castles.util.graph.Node;
 import Castles.util.graph.SegEdge;
 import Castles.util.graph.Vertex;
 import Castles.util.graph.CastlesMapGraph;
@@ -100,6 +101,57 @@ public class CastlesMap {
 	}
 	
 	/**
+	 * Compiles a list of positions, which are adjacent to the position with
+	 * the given ID.
+	 * 
+	 * @param ID	The ID of some position on the map
+	 * @return		A list of IDs of adjacent positions
+	 */
+	public ArrayList<String> getAdjPosIDs(String ID) {
+		
+		try {
+			char first = ID.charAt(0);
+			
+			if (first == '!') {
+				// The position is on an edge
+				return graph.getEdge(ID).adjPositionIDs(ID);
+				
+			} else {
+				// The position is on a vertex
+				return graph.getVertex(ID).adjPositionIDs();
+			}
+		
+		} catch (Exception Ex) {
+			// Invalid ID
+			return new ArrayList<String>();
+		}
+	}
+	
+	/**
+	 * A list of IDs pertaining to the vertices that are adjacent to the vertex
+	 * with the given ID. If no vertex has the given ID, then null is returned.
+	 * 
+	 * @param ID	The ID of a vertex on the map
+	 * @return		The list of IDs of adjacent vertices
+	 */
+	public ArrayList<String> getAdjVertexIDs(String ID) {
+		Vertex v = graph.getVertex(ID);
+		
+		if (v != null) {
+			ArrayList<String> adjVIDs = new ArrayList<String>();
+			List<Vertex> adjVertices = v.adjacentVertices();
+			
+			for (Vertex adjV : adjVertices) {
+				adjVIDs.add(adjV.ID);
+			}
+			
+			return adjVIDs;
+		}
+		
+		return null;
+	}
+	
+	/**
 	 * Returns the position, with which the given ID is associated or null if
 	 * no such position exists.
 	 * 
@@ -134,6 +186,13 @@ public class CastlesMap {
 	 */
 	public boolean areAdjacent(String rID1, String rID2) {
 		return graph.areAdjacent(rID1, rID2);
+	}
+	
+	/**
+	 * @return	The map's graph structure
+	 */
+	protected CastlesMapGraph getGraph() {
+		return graph;
 	}
 	
 	/**
@@ -385,7 +444,6 @@ public class CastlesMap {
 			}
 			
 			int teamCount = 0;
-			TeamColor prevTeam = null;
 			/* Separate soldiers by color and order the list of soldiers by
 			 * size in ascending order */
 			for (int sdx = 0; sdx < occupants.size(); ++sdx) {
@@ -398,11 +456,10 @@ public class CastlesMap {
 				soldierList.add(idx, s);
 				teamTotals[s.getLeaderColor().ordinal()] += s.getValue();
 				
-				if (prevTeam == null || s.getLeaderColor() != prevTeam) {
+				if (soldierList.size() == 1) {
 					/* Keep track of the number of teams with soldiers on the
 					 * given position */
 					++teamCount;
-					prevTeam = s.getLeaderColor();
 				}
 			}
 			
