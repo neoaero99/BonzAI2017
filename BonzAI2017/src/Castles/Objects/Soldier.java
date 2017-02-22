@@ -101,10 +101,10 @@ public class Soldier extends JComponent {
 		given_path = new ArrayList<String>();
 		
 		if (teamColor == TeamColor.RED){
-			animator = new Animator("art/sprites/redsoldier.png", "art/sprites/redsoldier.ssc");
+			animator = new Animator("art/sprite_sheets/redsoldier.png", "art/sprite_sheets/redsoldier.ssc");
 		}
 		else if (teamColor == TeamColor.YELLOW){
-			animator = new Animator("art/sprites/bluesoldier.png", "art/sprites/bluesoldier.ssc");
+			animator = new Animator("art/sprite_sheets/bluesoldier.png", "art/sprite_sheets/bluesoldier.ssc");
 		}
 		else{
 			animator = null;

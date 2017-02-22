@@ -23,9 +23,9 @@ public class CastlesMap {
 	
 	// TODO 2017: Read in map files here. 
 
-	private static int width, height;
+	private int width, height;
 	
-	private static HashMap<String, String> fields;
+	private HashMap<String, String> fields;
 	
 	private CastlesMapGraph graph;
 	private HashMap<IDPair, ArrayList<String>> pathIDsMap;
@@ -71,6 +71,11 @@ public class CastlesMap {
 	 */
 	@SuppressWarnings("unchecked")
 	public CastlesMap(CastlesMap previousTurn) {
+		
+		width = previousTurn.getWidth();
+		height = previousTurn.getHeight();
+		
+		fields = previousTurn.getFields();
 		
 		//copy the list of teams
 		players = previousTurn.players;

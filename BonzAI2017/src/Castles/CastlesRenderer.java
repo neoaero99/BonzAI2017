@@ -16,6 +16,7 @@ import javax.imageio.ImageIO;
 import Castles.Game;
 import Castles.Objects.*;
 import Castles.api.CastlesMap;
+import Castles.api.TeamColor;
 //import Castles.api.Color;
 import Castles.api.Turn;
 import Castles.util.graph.SegEdge;
@@ -33,7 +34,7 @@ import bonzai.ShoutAction;
 public class CastlesRenderer extends Renderer {
 	private static int soldierUpdateCount;
 	// The scale value for rendering position images
-	static final float posImgSF = 0.003f;
+	static final float posImgSF = 0.015f;
 	static HashMap<String,BufferedImage> backgroundImages = new HashMap<String,BufferedImage>();
 	static BufferedImage backgroundImage;	//The current background image
 
@@ -53,34 +54,24 @@ public class CastlesRenderer extends Renderer {
 			new File("art/sprites/ART2016/turn_purple.png")
 			};
 	
-	static File rallyPointFile = new File("art/sprites/nodes.png");
-	static File villageFile = new File("art/sprites/ART2016/landmark_mountain.png");
-	static File castleFile = new File("art/sprites/ART2016/repeater.png");
-	
-	static File[] playerFiles = {  
-			new File("art/sprites/ART2016/fox_red.png"), 
-			new File("art/sprites/ART2016/fox_yellow.png"), 
-			new File("art/sprites/ART2016/fox_blue.png"),
-			new File("art/sprites/ART2016/fox_green.png"),
-			new File("art/sprites/ART2016/fox_orange.png"),
-
-			new File("art/sprites/ART2016/fox_purple.png")
+	static File[] rallyPointFiles = new File[] {
+				new File("art/sprites/gray_node.png"),
+				new File("art/sprites/red_node.png"),
+				new File("art/sprites/blue_node.png")
 			};
-//
-	static File wallFile 		= new File("art/sprites/ART2016/wall.png");
+	static File villageFile = new File("art/sprites/village.png");
+	static File castleFile = new File("art/sprites/castle.png");
 
-//	static File discoveryFile 	= new File("art/sprites/ART2016/discovery.png");
-//	static File cloudFile 		= new File("art/sprites/ART2016/cloud.png");
 //	
 //***************************************************************************************************
 
 	//These data structures hold the actual images that get pulled from the above files
-	private static final Map<Castles.api.TeamColor, Color> colors = new HashMap<>();
-	private static Map<Castles.api.TeamColor, BufferedImage> playerImages = new HashMap<>();
-	private static Map<Castles.api.TeamColor, BufferedImage> selectorImages = new HashMap<>();
+	private static final Map<TeamColor, Color> colors = new HashMap<>();
+	private static Map<TeamColor, BufferedImage> selectorImages = new HashMap<>();
 //	private static Map<Castles.api.Color, BufferedImage> castleImages = new HashMap<>();
 //	private static BufferedImage[] targetImages = new BufferedImage[targetFiles.length];
-	private static BufferedImage fakeRallyPointImg,rallyPointImage,villageImage,castleImage;
+	private static BufferedImage[] rallyPointImages;
+	private static BufferedImage rallyPointImage,villageImage,castleImage;
 	private static boolean imagesLoaded = false;
 	private static int gridWidth, gridHeight;
 
@@ -92,25 +83,26 @@ public class CastlesRenderer extends Renderer {
 	public static void loadImages(){
 		if(!imagesLoaded){
 			imagesLoaded = true;
-			colors.put(Castles.api.TeamColor.RED,    new Color(217,  51,   21)); // Red
-			colors.put(Castles.api.TeamColor.YELLOW, new Color(238, 218,  102)); // Yellow
-			colors.put(Castles.api.TeamColor.BLUE,   new Color(68,   55,  142)); // Blue
-			colors.put(Castles.api.TeamColor.GREEN,  new Color(0,   173,   59)); // Green
-			colors.put(Castles.api.TeamColor.ORANGE, new Color(236, 135,    0)); // Orange
-			colors.put(Castles.api.TeamColor.PURPLE, new Color(207,  71,  207)); // Purple
-
+			colors.put(TeamColor.RED,    new Color(217,  51,   21)); // Red
+			colors.put(TeamColor.YELLOW, new Color(238, 218,  102)); // Yellow
+			colors.put(TeamColor.BLUE,   new Color(68,   55,  142)); // Blue
+			colors.put(TeamColor.GREEN,  new Color(0,   173,   59)); // Green
+			colors.put(TeamColor.ORANGE, new Color(236, 135,    0)); // Orange
+			colors.put(TeamColor.PURPLE, new Color(207,  71,  207)); // Purple
 
 			getBackgroundImages();
 			try { 
 				//Read the images into the data structures, given the file names defined above.
 				//TODO load our sprites here
 //				//load our png's
-				playerImages = loadIntoMap(playerFiles);
 				selectorImages = loadIntoMap(selectorFiles);
 				castleImage = ImageIO.read(castleFile);
-				fakeRallyPointImg = ImageIO.read(new File("art/sprites/ART2016/target_pyramid.png"));
-				rallyPointImage = ImageIO.read(rallyPointFile);
 				villageImage = ImageIO.read(villageFile);
+				rallyPointImages = new BufferedImage[rallyPointFiles.length];
+				
+				for (int idx = 0; idx < rallyPointFiles.length; ++idx) {
+					rallyPointImages[idx] = ImageIO.read(rallyPointFiles[idx]);
+				}
 
 			} catch (Exception e) {
 				System.out.println(e.getMessage());
@@ -138,8 +130,9 @@ public class CastlesRenderer extends Renderer {
 		File temp = new File(path);//opens the map directory
 		String[] files = temp.list(); //gets all files in the directory
 		for(int i = 0; i < files.length; i++){
-			
-				String name = files[i].replace(".png", "");
+				
+				int dotIdx = files[i].indexOf('.');
+				String name = files[i].substring(0, dotIdx);
 				
 				try {
 					backgroundImages.put(name, ImageIO.read(new File(path+files[i])));
@@ -321,11 +314,10 @@ public class CastlesRenderer extends Renderer {
 	
 	public static void renderBuildings(Graphics2D g, CastlesMap map) {
 		ArrayList<RallyPoint> nodes = map.getAllPositions();
-		//Animator animate = new Animator("art/sprites/nodes.png", "art/sprites/nodes.ssc");
+		//Animator animate = new Animator("art/sprite_sheets/nodes.png", "art/sprite_sheets/nodes.ssc");
 		
-		for(RallyPoint r : nodes){
-			String name = r.ID;
-			char c = name.charAt(0);
+		for(RallyPoint r : nodes) {
+			Position p = r.getPosition();
 			/*
 			String ownerTeam = "Neutral";
 			
@@ -343,23 +335,30 @@ public class CastlesRenderer extends Renderer {
 			drawToScale(g, animate.getFrameAtIndex(ownerTeam, 0), r.getPosition().getX(), r.getPosition().getY(), 0, 1.5f*posImgSF, 0);
 			*/
 			
-			switch(c){
-			case 'V':
-				drawToScale(g,villageImage,r.getPosition().getX(),r.getPosition().getY(),0,1.5f*posImgSF,0);
-				break;
-			case 'C':
-				drawToScale(g,castleImage,r.getPosition().getX(),r.getPosition().getY(),0,posImgSF,0);
-				break;
-			case 'P':
-				int i = r.ID.charAt(1) - 48;
-				BufferedImage image = playerImages.get( Castles.api.TeamColor.values()[i] );
-				drawToScale(g,image,r.getPosition().getX(),r.getPosition().getY(),0,posImgSF,0);
-				break;
-			default:
-				drawToScale(g,fakeRallyPointImg,r.getPosition().getX(),r.getPosition().getY(),0,1.5f*posImgSF,0);
-				break;
-			}
-			
+			if (r instanceof Building) {
+				Building b = (Building)r;
+				
+				// Draw team color under buildings controlled by an AI
+				if (b.getTeamColor() != null) {
+					int teamIdx = b.getTeamColor().ordinal() + 1;
+					
+					g.translate(0.2, 0.75);
+					drawToScale(g,rallyPointImages[teamIdx],p.getX(),p.getY(),0,2f*posImgSF/3f,0);
+					g.translate(-0.2, -0.75);
+				}
+				
+				// Draw the image for the position based on its building type
+				if (b.type == PType.BASE || b.type == PType.CASTLE) {
+					drawToScale(g,castleImage,p.getX(),p.getY(),0,posImgSF,0);
+					
+				} else {
+					drawToScale(g,villageImage,p.getX(),p.getY(),0,posImgSF,0);
+				}
+				
+			} else {
+				// Position is a rally point
+				drawToScale(g,rallyPointImages[0],p.getX(),p.getY(),0,2f*posImgSF/3f,0);
+			}	
 		}
 	}
 
