@@ -371,29 +371,32 @@ public class CastlesRenderer extends Renderer {
 			
 			if (s != null) {
 				Position pos = turn.getEntity(i);
-				String message = s.getMessage();
+				
+				if (pos != null) {
+					String message = s.getMessage();
+		
+					g.setFont(new Font("Arial", Font.PLAIN, fontSize));
+		
+					RoundRectangle2D.Float bubble = new RoundRectangle2D.Float();
+		
+					int length = message.length();
+					length += (length < 9 ? 9 - length : 0);
+		
+					bubble.width = (g.getFontMetrics().stringWidth(message) + length) / 20.f;
+					float offsetX = bubble.width / 2 / fontScale;
+		
+					bubble.height = g.getFontMetrics().getHeight() * 3 / 40.f;
+					bubble.archeight = .4f;
+					bubble.arcwidth = .4f;
+		
+					bubble.x = pos.getX() - offsetX;
+					bubble.y = pos.getY() - gridHeight;
+		
+					g.setColor(new Color(245, 245, 245, 200));
+					g.fill(bubble);
 	
-				g.setFont(new Font("Arial", Font.PLAIN, fontSize));
-	
-				RoundRectangle2D.Float bubble = new RoundRectangle2D.Float();
-	
-				int length = message.length();
-				length += (length < 9 ? 9 - length : 0);
-	
-				bubble.width = (g.getFontMetrics().stringWidth(message) + length) / 20.f;
-				float offsetX = bubble.width / 2 / fontScale;
-	
-				bubble.height = g.getFontMetrics().getHeight() * 3 / 40.f;
-				bubble.archeight = .4f;
-				bubble.arcwidth = .4f;
-	
-				bubble.x = pos.getX() - offsetX;
-				bubble.y = pos.getY() - gridHeight;
-	
-				g.setColor(new Color(245, 245, 245, 200));
-				g.fill(bubble);
-
-				drawText(g, message, bubble.getCenterX(), bubble.getCenterY() , Color.BLACK, new Color(0, 0, 0, 0),1.0f);
+					drawText(g, message, bubble.getCenterX(), bubble.getCenterY() , Color.BLACK, new Color(0, 0, 0, 0),1.0f);
+				}
 			}
 			
 			++i;
