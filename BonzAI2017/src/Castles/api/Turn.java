@@ -572,7 +572,7 @@ public class Turn {
 						if (r != null) {
 							Soldier s = r.getOccupant(ms.soldierIdx);
 							
-							if (s != null) {
+							if (s != null && s.getLeaderColor()==team.getColor()) {
 								/* Clamp the split amount for the move action
 								 * within the valid range for the target
 								 * soldier group */
