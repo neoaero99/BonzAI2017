@@ -312,6 +312,9 @@ public class Turn {
 	 * 					color
 	 */
 	public List<PositionData> getPositionsControlledBy(TeamColor teamColor) {
+		if(teamColor==null){
+			return unclaimedPositions;
+		}
 		return teamPositions.get(teamColor);
 	}
 	
@@ -572,11 +575,11 @@ public class Turn {
 						if (r != null) {
 							Soldier s = r.getOccupant(ms.soldierIdx);
 							
-							if (s != null) {
+							if (s != null && s.getLeaderColor()==team.getColor()) {
 								/* Clamp the split amount for the move action
 								 * within the valid range for the target
 								 * soldier group */
-								ms.splitAmt = Math.max(0, Math.min(ms.splitAmt,
+								ms.splitAmt = Math.max(1, Math.min(ms.splitAmt,
 										s.getValue()));
 									
 								errorMessage = "";
@@ -758,7 +761,7 @@ public class Turn {
 						/* The total number of soldiers must be greater than
 						 * the defense value of the position in order to
 						 * capture it */
-						if (occupantSize > b.getDefVal()) {
+						if (occupantSize >= b.getDefVal()) {
 							b.setTeamColor(leaderColor);
 						}
 					}

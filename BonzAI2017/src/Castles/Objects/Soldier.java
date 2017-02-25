@@ -48,15 +48,8 @@ import DavidMohrhardt.animator.Animator;
  * 
  */
 
-public class Soldier extends JComponent {
-	
-	// The radius used in collision
-	public final static float radius;
-	
-	// The shared sprite for the soldier
-	private static BufferedImage sprite;
-	
-	private static final long serialVersionUID = 3166707557130028703L;
+public class Soldier{
+
 	
 	private TeamColor leaderColor;
 	// The combat value this unit has
@@ -71,9 +64,6 @@ public class Soldier extends JComponent {
 	
 	private Animator animator;
 	
-	static {
-		radius = 0f;
-	}
 	
 	/**
 	 * Method:	Soldier(VectorND base_position)
