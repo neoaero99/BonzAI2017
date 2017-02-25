@@ -9,7 +9,7 @@ public class CompetitorAI extends AI {
 	Team myTeam;
 	@Override
 	public Action action(Turn turn) {
-			Team myTeam=turn.getMyTeam();
+		/**Team myTeam=turn.getMyTeam();
 		if(myTeam==null){
 			return new ShoutAction("No team? BUG!");
 		}
@@ -34,7 +34,7 @@ public class CompetitorAI extends AI {
 			if(otherTeam==null){
 				return new ShoutAction("Captain No-Beard wins my default! No other Challengers!");
 			}
-			List<PositionData> otherData=turn.getPositionsControlledBy(otherTeam.getColor());
+			List<PositionData> otherData=turn.getPositionsControlledBy(null);
 			int x=(int)Math.random()*otherData.size();
 			PositionData go=otherData.get(x);
 			for(int j=0;j<p.occupantData.length;j++){
@@ -44,6 +44,7 @@ public class CompetitorAI extends AI {
 		if(numSoldiers<=0){
 			return new ShoutAction("I be Captain No-Beard!");
 		}
-		return movements;
+		return movements;*/
+		return new ShoutAction("test3");
 	}
 }
