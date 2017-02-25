@@ -312,6 +312,9 @@ public class Turn {
 	 * 					color
 	 */
 	public List<PositionData> getPositionsControlledBy(TeamColor teamColor) {
+		if(teamColor==null){
+			return unclaimedPositions;
+		}
 		return teamPositions.get(teamColor);
 	}
 	
