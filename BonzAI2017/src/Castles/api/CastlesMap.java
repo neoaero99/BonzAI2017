@@ -5,6 +5,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Random;
 import java.util.Set;
 
 import Castles.Objects.Building;
@@ -22,7 +23,6 @@ import bonzai.Team;
 public class CastlesMap {
 	
 	// TODO 2017: Read in map files here. 
-
 	private int width, height;
 	
 	private HashMap<String, String> fields;
@@ -198,30 +198,6 @@ public class CastlesMap {
 	 */
 	protected CastlesMapGraph getGraph() {
 		return graph;
-	}
-	
-	/**
-	 * 
-	 * 
-	 * @param i
-	 * @return
-	 */
-	public Position getEntity(int i) {
-		if(!players[i]){
-			return null;
-		}
-		
-		Castles.api.TeamColor c=Castles.api.TeamColor.values()[i];
-		ArrayList<RallyPoint> elementList = getAllPositions();
-		
-		for(RallyPoint r : elementList) {
-			if(r instanceof Building ){
-				if(((Building)r).getTeamColor()==c){
-					return r.getPosition().clone();
-				}
-			}
-		}
-		return null;
 	}
 	
 	/**

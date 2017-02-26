@@ -1,7 +1,8 @@
 package Castles.api;
 
 /**
- * Used by the Move Action to store the update for a soldier.
+ * A data class used by the Move Action to store an AI's move command for a
+ * specific soldier group.
  * 
  * @author Joshua Hooker
  */

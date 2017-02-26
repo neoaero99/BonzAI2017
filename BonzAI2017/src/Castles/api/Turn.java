@@ -7,6 +7,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Random;
 
 import Castles.CastlesRenderer;
 import Castles.Objects.*;
@@ -24,6 +25,8 @@ import bonzai.ShoutAction;
  * those entities at this turn.
  **/
 public class Turn {
+	
+	public static final Random generator;
 	
 	private final CastlesMap map;
 	// Data used for AI queries
@@ -51,6 +54,10 @@ public class Turn {
 
 	int currentTeam;
 	int MAX_TURNS = CastlesScenario.NUM_TURNS;
+	
+	static {
+		generator = new Random(0);
+	}
 
 	/**
 	 * Turn constructor.
@@ -364,7 +371,7 @@ public class Turn {
 	 */
 	public List<PositionData> getClosestByType(String refID, PType target) {
 		List<PositionData> positions = new ArrayList<PositionData>();
-		PositionData p = this.getPosition(refID);
+		PositionData p = getPosition(refID);
 		
 		if (p != null) {
 			HashMap<String, Boolean> posVisited = new HashMap<String, Boolean>();
@@ -468,9 +475,9 @@ public class Turn {
 	}
 	
 	/**
-	 * Returns your AI's Team object
+	 * Returns your AI's team.
 	 * 
-	 * @return - your AI's Team object
+	 * @return	your AI's team
 	 */
 	public Team getMyTeam() {
 		for (Team t : getAllTeams()) {
@@ -482,6 +489,8 @@ public class Turn {
 	}
 	
 	/**
+	 * Returns a list of all AI team's, which are participating in the match.
+	 * 
 	 * @return	The list of all teams
 	 */
 	public List<Team> getAllTeams() {
@@ -498,16 +507,6 @@ public class Turn {
 	 */
 	public String getIsValidError() {
 		return errorMessage;
-	}
-	
-	/**
-	 * Who really knows ...
-	 * 
-	 * @param i
-	 * @return
-	 */
-	public Position getEntity(int i) {
-		return map.getEntity(i);
 	}
 	
 	/**
@@ -616,7 +615,9 @@ public class Turn {
 						
 						if (s != null) {
 							
-							if (us.newState == SoldierState.STANDBY || us.newState == SoldierState.MOVING) {
+							if (s.getLeaderColor() == team.getColor() && (us.newState == SoldierState.STANDBY
+								|| us.newState == SoldierState.MOVING)) {
+								
 								errorMessage = "";
 								continue;
 								
@@ -792,6 +793,32 @@ public class Turn {
 		
 		newMap.updateTeamScores(teamScoreAdditions);
 		return new Turn(this, currentTeam, newMap, failedTeams);
+	}
+	
+	/**
+	 * TODO
+	 * 
+	 * @param target	The color of the target team
+	 * @return			The position of some building on the map
+	 */
+	public Position getRanOccupiedPos(TeamColor target) {
+		ArrayList<RallyPoint> possiblePositions = new ArrayList<RallyPoint>();
+		ArrayList<RallyPoint> elementList = map.getAllPositions();
+		
+		// Find all positions controlled by the AI with the given team color
+		for(RallyPoint r : elementList) {
+			if(r instanceof Building) {
+				if(((Building)r).getTeamColor() == target) {
+					possiblePositions.add(r);
+				}
+			}
+		}
+		
+		if (possiblePositions.size() > 0) {
+			return possiblePositions.get(0).getPosition();
+		}
+		// No positions exist
+		return null;
 	}
 	
 	/**

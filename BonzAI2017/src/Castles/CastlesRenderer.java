@@ -365,41 +365,43 @@ public class CastlesRenderer extends Renderer {
 	private static void renderShoutActions(Graphics2D g, Turn turn, Turn nextTurn, float smoothTween) {
 		int fontSize = 20;
 		float fontScale = fontSize / 2.f;
-
-		int i = 0;
+		int teamID = 0;
+		
 		for (ShoutAction s : turn.getShoutActions()) {
 			
 			if (s != null) {
-				Position pos = turn.getEntity(i);
+				Position pos = turn.getRanOccupiedPos( turn.getAllTeams().get(teamID).getColor() );
 				
-				if (pos != null) {
-					String message = s.getMessage();
-		
-					g.setFont(new Font("Arial", Font.PLAIN, fontSize));
-		
-					RoundRectangle2D.Float bubble = new RoundRectangle2D.Float();
-		
-					int length = message.length();
-					length += (length < 9 ? 9 - length : 0);
-		
-					bubble.width = (g.getFontMetrics().stringWidth(message) + length) / 20.f;
-					float offsetX = bubble.width / 2 / fontScale;
-		
-					bubble.height = g.getFontMetrics().getHeight() * 3 / 40.f;
-					bubble.archeight = .4f;
-					bubble.arcwidth = .4f;
-		
-					bubble.x = pos.getX() - offsetX;
-					bubble.y = pos.getY() - gridHeight;
-		
-					g.setColor(new Color(245, 245, 245, 200));
-					g.fill(bubble);
-	
-					drawText(g, message, bubble.getCenterX(), bubble.getCenterY() , Color.BLACK, new Color(0, 0, 0, 0),1.0f);
+				if (pos == null) {
+					pos = new Position(CastlesRenderer.gridWidth / 2, CastlesRenderer.gridHeight / 2);
 				}
+				
+				String message = s.getMessage();
+	
+				g.setFont(new Font("Arial", Font.PLAIN, fontSize));
+	
+				RoundRectangle2D.Float bubble = new RoundRectangle2D.Float();
+	
+				int length = message.length();
+				length += (length < 9 ? 9 - length : 0);
+	
+				bubble.width = (g.getFontMetrics().stringWidth(message) + length) / 20.f;
+				float offsetX = bubble.width / 2 / fontScale;
+	
+				bubble.height = g.getFontMetrics().getHeight() * 3 / 40.f;
+				bubble.archeight = .4f;
+				bubble.arcwidth = .4f;
+	
+				bubble.x = pos.getX() - offsetX;
+				bubble.y = pos.getY() - gridHeight;
+	
+				g.setColor(new Color(245, 245, 245, 200));
+				g.fill(bubble);
+
+				drawText(g, message, bubble.getCenterX(), bubble.getCenterY() , Color.BLACK, new Color(0, 0, 0, 0),1.0f);
 			}
 			
-			++i;
+			++teamID;
 		}
 	}
 
