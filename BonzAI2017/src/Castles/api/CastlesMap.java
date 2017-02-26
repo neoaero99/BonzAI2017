@@ -845,10 +845,144 @@ public class CastlesMap {
 	 * @param From: The ID of where the soldiers is coming from
 	 * @param To:	the ID of where the soldiers is going to
 	 * @return	the path of RallyPoint IDs
+	 * @throws NullPointerException	If either From or To are invalid IDs
 	 */
-	public ArrayList<String> getPath(String From, String To) {
-		Vertex f=graph.getVertex(From);
-		Vertex t=graph.getVertex(To);
-		return CastlesMapGraph.getPath(pathIDsMap, f, t);
+	public ArrayList<String> getPath(String From, String To) throws NullPointerException {
+		Vertex from = graph.getVertex(From),
+			   to = graph.getVertex(To);
+		
+		if (from != null && to != null) {
+			// Both IDs refer to vertices
+			return CastlesMapGraph.getPath(pathIDsMap, from, to);
+		}
+		
+		String wpID;
+		Vertex v;
+		ArrayList<String> path, otherWayPoints = null;
+		
+		if (from == null) {
+			// From refers to a waypoint
+			wpID = From;
+			
+			if (to == null) {
+				// To refers to a waypointalso
+				otherWayPoints = new ArrayList<String>();
+				SegEdge firstE = graph.getEdge(wpID),
+						secondE = graph.getEdge(To);
+				ArrayList<String> firstPath = CastlesMapGraph.getPath(pathIDsMap, firstE.first, secondE.first),
+								  secondPath = CastlesMapGraph.getPath(pathIDsMap, firstE.first, secondE.second);
+				int endIdx = secondE.indexOf(To);
+				
+				/* Keep track of the waypoints on the second edge, which are
+				 * part of the path */
+				if (firstPath.size() <= secondPath.size()) {
+					v = secondE.first;
+					
+					for (int idx = 0; idx <= endIdx && idx < secondE.getWeight(); ++idx) {
+						otherWayPoints.add( String.format("%s:%d", secondE.ID, idx + 1) );
+					}
+					
+				} else {
+					v = secondE.second;
+					
+					for (int idx = secondE.getWeight() - 1; idx >= endIdx && idx >= 0; --idx) {
+						otherWayPoints.add( String.format("%s:%d", secondE.ID, idx + 1) );
+					}
+					
+				}
+				
+			} else {
+				v = to;
+			}
+			
+		} else {
+			// To refers to a waypoint
+			wpID = To;
+			v = from;
+		}
+		
+		/* Find the path between vertex, v, to the edge containing the waypoint
+		 * with ID, wpID */
+		path = getPathToEdge(graph.getEdge(wpID), wpID, v, from == null);
+		
+		if (otherWayPoints != null) {
+			/* Add the waypoints from the second edge to the path */
+			for (String ID : otherWayPoints) {
+				path.add(ID);
+			}
+		}
+		
+		return path;
+	}
+	
+	/**
+	 * Returns the list of position IDs, which connect the waypoint of the given
+	 * edge and ID to the given vertex. If the parameter edgeToVertex is true,
+	 * then the first position will be the ID of the waypoint, otherwise the
+	 * first ID will be that of the vertex.
+	 * 
+	 * @param e				The given edge
+	 * @param wpID			The ID of the target waypoint on the given edge
+	 * @param v				The given vertex
+	 * @param edgeToVertex	Determines the order of the posiiton IDs in the path
+	 * @return				An ordered list of position IDs
+	 */
+	private ArrayList<String> getPathToEdge(SegEdge e, String wpID, Vertex v,
+			boolean edgeToVertex) {
+		
+		ArrayList<String> path, firstPath, secondPath;
+		int idx, endIdx, incVal;
+		
+		if (edgeToVertex) {
+			// The path goes from the edge to the vertex
+			firstPath = CastlesMapGraph.getPath(pathIDsMap, e.first, v);
+			secondPath = CastlesMapGraph.getPath(pathIDsMap, e.second, v);
+			
+		} else {
+			// The path goes from the vertex to the edge
+			firstPath = CastlesMapGraph.getPath(pathIDsMap, v, e.first);
+			secondPath = CastlesMapGraph.getPath(pathIDsMap, v, e.second);
+		}
+		
+		// Which vertex is on the path?
+		if (firstPath.size() <= secondPath.size()) {
+			idx = 0;
+			endIdx = e.indexOf(wpID);
+			incVal = 1;
+			path = firstPath;
+			
+		} else {
+			idx = e.getWeight() - 1;
+			endIdx = e.indexOf(wpID);
+			incVal = -1;
+			path = secondPath;
+		}
+		
+		if (path.size() == 0) {
+			// The vertex is adjacent to the edge
+			path.add(v.ID);
+		}
+		
+		/* Add the edge waypoints to the path, which connect the target waypoint
+		 * to the vertex path */
+		for (; idx >= 0 && idx != endIdx && idx < e.getWeight(); idx += incVal) {
+			
+			if (edgeToVertex) {
+				path.add(0, String.format("%s:%d", e.ID, idx + 1));
+				
+			} else {
+				path.add(String.format("%s:%d", e.ID, idx + 1));
+			}
+		}
+		
+		// Add the target waypoint to the path
+		if (edgeToVertex) {
+			path.add(0, String.format("%s:%d", e.ID, idx + 1));
+			
+		} else {
+			path.add(String.format("%s:%d", e.ID, idx + 1));
+		}
+		
+		return path;
 	}
 }

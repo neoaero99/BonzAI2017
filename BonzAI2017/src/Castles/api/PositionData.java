@@ -81,6 +81,21 @@ public class PositionData {
 		}
 	}
 	
+	/**
+	 * Returns the team color of the soldiers occupying this position. It is
+	 * entirely possible that a soldier group belonging to one AI is
+	 * occupying a building controlled by another AI.
+	 * 
+	 * @return	The team color of occupying soldiers
+	 */
+	public TeamColor getOccupantLeader() {
+		if (occupantData.length > 0) {
+			return occupantData[0].leader;
+		}
+		
+		return null;
+	}
+	
 	public boolean isControled(){
 		return (leader == null) ? false : true;
 	}
@@ -89,6 +104,7 @@ public class PositionData {
 		return (leader == team) ? true : false;
 	}
 	
+	@Override
 	public String toString() {
 		String claimedBy = (leader == null) ? "N/A" : leader.name();
 		

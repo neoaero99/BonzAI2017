@@ -158,7 +158,16 @@ public class Turn {
 		try {
 			map = Parser.parseFile("scenarios/testmap.dat");
 			
-			/**/
+			ArrayList<String> path = map.getPath("!P0-R0:1", "P0");
+			System.out.printf("%s\n", path);
+			
+			path = map.getPath("!C0-V0:2", "P0");
+			System.out.printf("%s\n", path);
+			
+			path = map.getPath("!C0-V0:1", "!P0-R0:1");
+			System.out.printf("%s\n", path);
+			
+			/**
 			RallyPoint r = map.getPosition("R0");
 			//((Building)r).setTeamColor(Color.RED);
 			
@@ -886,13 +895,13 @@ public class Turn {
 		PositionData out1 = null;
 		ArrayList<PositionData> castles = new ArrayList<>(); 
 		for(PositionData pd : unclaimedPositions){
-			if(pd.type == PType.CASTLE){
+			if(pd.type == PType.VILLAGE){
 				castles.add(pd);
 			}
 		}
 		for(List<PositionData> d : teamPositions.values()){
 			for(PositionData pd : d){
-				if(pd.type == PType.CASTLE){
+				if(pd.type == PType.VILLAGE){
 					castles.add(pd);
 				}
 			}

@@ -54,7 +54,7 @@ public class SoldierData {
 		if (s == null) {
 			leader = null;
 			size = 0;
-			state = SoldierState.CONFLICT;
+			state = SoldierState.STANDBY;
 			posID = "?";
 			path = null;
 			
