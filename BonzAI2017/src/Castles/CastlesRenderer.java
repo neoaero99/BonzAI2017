@@ -365,18 +365,18 @@ public class CastlesRenderer extends Renderer {
 	private static void renderShoutActions(Graphics2D g, Turn turn, Turn nextTurn, float smoothTween) {
 		int fontSize = 20;
 		float fontScale = fontSize / 2.f;
-		int teamID = 0;
 		
-		for (ShoutAction s : turn.getShoutActions()) {
+		for (Team t : turn.getAllTeams()) {
+			Action a = turn.getActionFor(t.getColor());
 			
-			if (s != null) {
-				Position pos = turn.getRanOccupiedPos( turn.getAllTeams().get(teamID).getColor() );
+			if (a instanceof ShoutAction) {
+				Position pos = turn.getRanOccupiedPos( t.getColor() );
 				
 				if (pos == null) {
 					pos = new Position(CastlesRenderer.gridWidth / 2, CastlesRenderer.gridHeight / 2);
 				}
 				
-				String message = s.getMessage();
+				String message = ((ShoutAction)a).getMessage();
 	
 				g.setFont(new Font("Arial", Font.PLAIN, fontSize));
 	
@@ -400,8 +400,6 @@ public class CastlesRenderer extends Renderer {
 
 				drawText(g, message, bubble.getCenterX(), bubble.getCenterY() , Color.BLACK, new Color(0, 0, 0, 0),1.0f);
 			}
-			
-			++teamID;
 		}
 	}
 

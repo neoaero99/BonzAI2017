@@ -33,31 +33,32 @@ public class AnAI extends AI {
 		
 		for (SoldierData s : soldiers) {
 			
-			List<PositionData> unclaimedBuildings = turn.getClosestByColor(s.posID, null);
-			
-			if (unclaimedBuildings.size() < 0) {
-				List<PositionData> enemyBuildings = turn.getClosestByColor(s.posID, enemy);
+			if (s.path == null || s.path.size() < 2) {
+				List<PositionData> unclaimedBuildings = turn.getClosestByColor(s.posID, null);
 				
-				if (enemyBuildings.size() < 0) {
-					break;
-				}
-				
-				PositionData dest = enemyBuildings.get(0);
-				
-				if (dest.defVal < s.sIdx) {
-					movedSomeSoldier = true;
-					move.addMove(s.sIdx, s.size, s.posID, dest.ID);
-				}
-				
-			} else {
-				PositionData dest = unclaimedBuildings.get(0);
-				
-				if (dest.defVal < s.size) {
-					movedSomeSoldier = true;
-					move.addMove(s.sIdx, s.size, s.posID, dest.ID);
+				if (unclaimedBuildings.size() <= 0) {
+					List<PositionData> enemyBuildings = turn.getClosestByColor(s.posID, enemy);
+					
+					if (enemyBuildings.size() <= 0) {
+						break;
+					}
+					
+					PositionData dest = enemyBuildings.get(0);
+					
+					if (dest.defVal < s.sIdx) {
+						movedSomeSoldier = true;
+						move.addMove(s.sIdx, s.size, s.posID, dest.ID);
+					}
+					
+				} else {
+					PositionData dest = unclaimedBuildings.get(0);
+					
+					if (dest.defVal < s.size) {
+						movedSomeSoldier = true;
+						move.addMove(s.sIdx, s.size, s.posID, dest.ID);
+					}
 				}
 			}
-			
 		}
 		
 		if (movedSomeSoldier) {

@@ -37,9 +37,8 @@ public class Turn {
 	
 	final ArrayList<Boolean> success;
 	final int turnNumber;
-
-	private final ArrayList<ShoutAction> shoutActions;
-	private final ArrayList<MoveAction> moveActions;
+	
+	private final HashMap<TeamColor, Action> AIActionsMap;
 
 	private String errorMessage = "";
 
@@ -77,8 +76,7 @@ public class Turn {
 		unclaimedPositions = new ArrayList<PositionData>();
 		teamSoldiers = new HashMap<TeamColor, List<SoldierData>>();
 		
-		shoutActions = new ArrayList<ShoutAction>();
-		moveActions = new ArrayList<MoveAction>();
+		AIActionsMap = new HashMap<TeamColor, Action>();
 
 		List<Team> teams = map.getTeams();
 		success = new ArrayList<Boolean>();
@@ -164,7 +162,21 @@ public class Turn {
 		
 		try {
 			map = Parser.parseFile("scenarios/testmap.dat");
+			Turn t = new Turn(0, 1, map, 5);
+			TeamColor enemy = t.getEnemyTeams().get(0).getColor();
+			List<SoldierData> soldiers = t.getSoldiersControlledBy(t.getMyTeam().getColor());
 			
+			if (soldiers.size() > 0) {
+				SoldierData s = soldiers.get(0);
+				List<PositionData> closestBuildings = t.getClosestByColor(s.posID, null);
+				List<String> path = t.getPath(s.posID, closestBuildings.get(0).ID);
+				
+				System.out.printf("%s\n", path);
+			}
+			
+			
+			
+			/**
 			ArrayList<String> path = map.getPath("!P0-R0:1", "P0");
 			System.out.printf("%s\n", path);
 			
@@ -440,7 +452,7 @@ public class Turn {
 				posVisited.put(ID, true);
 				PositionData adjP = getPosition(ID);
 				
-				if (adjP.leader == target) {
+				if (adjP.type != PType.RALLY && adjP.leader == target) {
 					positions.add(adjP);
 				}
 			}
@@ -458,7 +470,7 @@ public class Turn {
 							posVisited.put(ID, true);
 							PositionData adjP = getPosition(ID);
 							
-							if (adjP.leader == target) {
+							if (adjP.type != PType.RALLY && adjP.leader == target) {
 								positions.add(adjP);
 							}
 							
@@ -699,7 +711,7 @@ public class Turn {
 			if (isValid(teams.get(teamID), action)) {
 				
 				if (action instanceof ShoutAction) {
-					shoutActions.add((ShoutAction)action);
+					AIActionsMap.put(teams.get(teamID).getColor(), action);
 					
 				} else if (action instanceof MoveAction) {
 					MoveAction move = (MoveAction)action;
@@ -734,7 +746,7 @@ public class Turn {
 						}
 					}
 					
-					moveActions.add(move);
+					AIActionsMap.put(teams.get(teamID).getColor(), action);
 				}
 				
 			} else {
@@ -839,24 +851,13 @@ public class Turn {
 	}
 	
 	/**
-	 * Get a list of the ShoutActions performed on this turn.
-	 * This has LITERALLY ZERO USE TO YOUR CODE, but if you want to
-	 * make an AI that evaluates the humor level of other teams'
-	 * shouts, be our guest. :D
+	 * TODO
 	 * 
-	 * @return a Collection of the ShoutActions performed on this turn
+	 * @param tc	The color of team, of which to find the action
+	 * @return		The action taken by the AI of the given color
 	 */
-	public Collection<ShoutAction> getShoutActions() {
-		return shoutActions;
-	}
-	
-	/**
-	 * Returns a list of move actions performed on this turn.
-	 * 
-	 * @return	a Collection of move actions performed on this turn
-	 */
-	public Collection<MoveAction> getMoveActions() {
-		return moveActions;
+	public Action getActionFor(TeamColor tc) {
+		return AIActionsMap.get(tc);
 	}
 	
 	/**
