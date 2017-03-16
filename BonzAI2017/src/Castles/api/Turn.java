@@ -489,6 +489,23 @@ public class Turn {
 	}
 	
 	/**
+	 * Returns all the enemy teams.
+	 * 
+	 * @return	a list of all enemy teams
+	 */
+	public List<Team> getEnemyTeams() {
+		List<Team> eTeams = new ArrayList<Team>();		
+		
+		for (Team t : getAllTeams()) {
+			if (t.getID() != currentTeam) {
+				eTeams.add(t);
+			}
+		}
+		
+		return eTeams;
+	}
+	
+	/**
 	 * Returns a list of all AI team's, which are participating in the match.
 	 * 
 	 * @return	The list of all teams
