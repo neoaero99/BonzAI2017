@@ -162,19 +162,26 @@ public class Turn {
 		
 		try {
 			map = Parser.parseFile("scenarios/testmap.dat");
+			
 			Turn t = new Turn(0, 1, map, 5);
 			TeamColor enemy = t.getEnemyTeams().get(0).getColor();
 			List<SoldierData> soldiers = t.getSoldiersControlledBy(t.getMyTeam().getColor());
 			
+			/**/
+			System.out.println(t.getMyTeam().getColor());
+			System.out.println(enemy);
+			
+			/**/
 			if (soldiers.size() > 0) {
 				SoldierData s = soldiers.get(0);
 				List<PositionData> closestBuildings = t.getClosestByColor(s.posID, null);
+				System.out.println(closestBuildings);
+				/**
 				List<String> path = t.getPath(s.posID, closestBuildings.get(0).ID);
 				
 				System.out.printf("%s\n", path);
+				/**/
 			}
-			
-			
 			
 			/**
 			ArrayList<String> path = map.getPath("!P0-R0:1", "P0");
@@ -410,8 +417,8 @@ public class Turn {
 						Boolean visited = posVisited.get(adjID);
 						
 						if (visited == null) {
-							posVisited.put(ID, true);
-							PositionData adjP = getPosition(ID);
+							posVisited.put(adjID, true);
+							PositionData adjP = getPosition(adjID);
 							
 							if (adjP.type == target) {
 								positions.add(adjP);
@@ -467,8 +474,8 @@ public class Turn {
 						Boolean visited = posVisited.get(adjID);
 						
 						if (visited == null) {
-							posVisited.put(ID, true);
-							PositionData adjP = getPosition(ID);
+							posVisited.put(adjID, true);
+							PositionData adjP = getPosition(adjID);
 							
 							if (adjP.type != PType.RALLY && adjP.leader == target) {
 								positions.add(adjP);
