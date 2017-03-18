@@ -44,14 +44,12 @@ public class CastlesRenderer extends Renderer {
 
 
 	static File[] selectorFiles = {
-			new File("art/sprites/ART2016/turn_red.png"),
-
-			new File("art/sprites/ART2016/turn_yellow.png"),
-			new File("art/sprites/ART2016/turn_blue.png"),
-			new File("art/sprites/ART2016/turn_green.png"),
-			new File("art/sprites/ART2016/turn_orange.png"),
-
-			new File("art/sprites/ART2016/turn_purple.png")
+				new File("art/turn/turn_red.png"),
+				new File("art/turn/turn_blue.png"),
+				new File("art/turn/turn_yellow.png"),
+				new File("art/turn/turn_green.png"),
+				new File("art/turn/turn_orange.png"),
+				new File("art/turn/turn_purple.png")
 			};
 	
 	static File[] rallyPointFiles = new File[] {
@@ -59,6 +57,7 @@ public class CastlesRenderer extends Renderer {
 				new File("art/sprites/red_node.png"),
 				new File("art/sprites/blue_node.png")
 			};
+	
 	static File villageFile = new File("art/sprites/village.png");
 	static File castleFile = new File("art/sprites/castle.png");
 

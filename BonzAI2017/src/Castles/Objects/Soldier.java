@@ -93,7 +93,7 @@ public class Soldier{
 		if (teamColor == TeamColor.RED){
 			animator = new Animator("art/sprite_sheets/redsoldier.png", "art/sprite_sheets/redsoldier.ssc");
 		}
-		else if (teamColor == TeamColor.YELLOW){
+		else if (teamColor == TeamColor.BLUE){
 			animator = new Animator("art/sprite_sheets/bluesoldier.png", "art/sprite_sheets/bluesoldier.ssc");
 		}
 		else{
