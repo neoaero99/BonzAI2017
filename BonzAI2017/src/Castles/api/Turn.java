@@ -7,6 +7,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Random;
 
 import Castles.CastlesRenderer;
 import Castles.Objects.*;
@@ -25,6 +26,8 @@ import bonzai.ShoutAction;
  **/
 public class Turn {
 	
+	public static final Random generator;
+	
 	private final CastlesMap map;
 	// Data used for AI queries
 	private final HashMap<String, PositionData> positions;
@@ -34,9 +37,8 @@ public class Turn {
 	
 	final ArrayList<Boolean> success;
 	final int turnNumber;
-
-	private final ArrayList<ShoutAction> shoutActions;
-	private final ArrayList<MoveAction> moveActions;
+	
+	private final HashMap<TeamColor, Action> AIActionsMap;
 
 	private String errorMessage = "";
 
@@ -51,6 +53,10 @@ public class Turn {
 
 	int currentTeam;
 	int MAX_TURNS = CastlesScenario.NUM_TURNS;
+	
+	static {
+		generator = new Random(0);
+	}
 
 	/**
 	 * Turn constructor.
@@ -70,8 +76,7 @@ public class Turn {
 		unclaimedPositions = new ArrayList<PositionData>();
 		teamSoldiers = new HashMap<TeamColor, List<SoldierData>>();
 		
-		shoutActions = new ArrayList<ShoutAction>();
-		moveActions = new ArrayList<MoveAction>();
+		AIActionsMap = new HashMap<TeamColor, Action>();
 
 		List<Team> teams = map.getTeams();
 		success = new ArrayList<Boolean>();
@@ -158,7 +163,37 @@ public class Turn {
 		try {
 			map = Parser.parseFile("scenarios/testmap.dat");
 			
+			Turn t = new Turn(0, 1, map, 5);
+			TeamColor enemy = t.getEnemyTeams().get(0).getColor();
+			List<SoldierData> soldiers = t.getSoldiersControlledBy(t.getMyTeam().getColor());
+			
 			/**/
+			System.out.println(t.getMyTeam().getColor());
+			System.out.println(enemy);
+			
+			/**/
+			if (soldiers.size() > 0) {
+				SoldierData s = soldiers.get(0);
+				List<PositionData> closestBuildings = t.getClosestByColor(s.posID, null);
+				System.out.println(closestBuildings);
+				/**
+				List<String> path = t.getPath(s.posID, closestBuildings.get(0).ID);
+				
+				System.out.printf("%s\n", path);
+				/**/
+			}
+			
+			/**
+			ArrayList<String> path = map.getPath("!P0-R0:1", "P0");
+			System.out.printf("%s\n", path);
+			
+			path = map.getPath("!C0-V0:2", "P0");
+			System.out.printf("%s\n", path);
+			
+			path = map.getPath("!C0-V0:1", "!P0-R0:1");
+			System.out.printf("%s\n", path);
+			
+			/**
 			RallyPoint r = map.getPosition("R0");
 			//((Building)r).setTeamColor(Color.RED);
 			
@@ -355,7 +390,7 @@ public class Turn {
 	 */
 	public List<PositionData> getClosestByType(String refID, PType target) {
 		List<PositionData> positions = new ArrayList<PositionData>();
-		PositionData p = this.getPosition(refID);
+		PositionData p = getPosition(refID);
 		
 		if (p != null) {
 			HashMap<String, Boolean> posVisited = new HashMap<String, Boolean>();
@@ -382,8 +417,8 @@ public class Turn {
 						Boolean visited = posVisited.get(adjID);
 						
 						if (visited == null) {
-							posVisited.put(ID, true);
-							PositionData adjP = getPosition(ID);
+							posVisited.put(adjID, true);
+							PositionData adjP = getPosition(adjID);
 							
 							if (adjP.type == target) {
 								positions.add(adjP);
@@ -424,7 +459,7 @@ public class Turn {
 				posVisited.put(ID, true);
 				PositionData adjP = getPosition(ID);
 				
-				if (adjP.leader == target) {
+				if (adjP.type != PType.RALLY && adjP.leader == target) {
 					positions.add(adjP);
 				}
 			}
@@ -439,10 +474,10 @@ public class Turn {
 						Boolean visited = posVisited.get(adjID);
 						
 						if (visited == null) {
-							posVisited.put(ID, true);
-							PositionData adjP = getPosition(ID);
+							posVisited.put(adjID, true);
+							PositionData adjP = getPosition(adjID);
 							
-							if (adjP.leader == target) {
+							if (adjP.type != PType.RALLY && adjP.leader == target) {
 								positions.add(adjP);
 							}
 							
@@ -459,9 +494,9 @@ public class Turn {
 	}
 	
 	/**
-	 * Returns your AI's Team object
+	 * Returns your AI's team.
 	 * 
-	 * @return - your AI's Team object
+	 * @return	your AI's team
 	 */
 	public Team getMyTeam() {
 		for (Team t : getAllTeams()) {
@@ -473,6 +508,25 @@ public class Turn {
 	}
 	
 	/**
+	 * Returns all the enemy teams.
+	 * 
+	 * @return	a list of all enemy teams
+	 */
+	public List<Team> getEnemyTeams() {
+		List<Team> eTeams = new ArrayList<Team>();		
+		
+		for (Team t : getAllTeams()) {
+			if (t.getID() != currentTeam) {
+				eTeams.add(t);
+			}
+		}
+		
+		return eTeams;
+	}
+	
+	/**
+	 * Returns a list of all AI team's, which are participating in the match.
+	 * 
 	 * @return	The list of all teams
 	 */
 	public List<Team> getAllTeams() {
@@ -489,16 +543,6 @@ public class Turn {
 	 */
 	public String getIsValidError() {
 		return errorMessage;
-	}
-	
-	/**
-	 * Who really knows ...
-	 * 
-	 * @param i
-	 * @return
-	 */
-	public Position getEntity(int i) {
-		return map.getEntity(i);
 	}
 	
 	/**
@@ -607,7 +651,9 @@ public class Turn {
 						
 						if (s != null) {
 							
-							if (us.newState == SoldierState.STANDBY || us.newState == SoldierState.MOVING) {
+							if (s.getLeaderColor() == team.getColor() && (us.newState == SoldierState.STANDBY
+								|| us.newState == SoldierState.MOVING)) {
+								
 								errorMessage = "";
 								continue;
 								
@@ -672,7 +718,7 @@ public class Turn {
 			if (isValid(teams.get(teamID), action)) {
 				
 				if (action instanceof ShoutAction) {
-					shoutActions.add((ShoutAction)action);
+					AIActionsMap.put(teams.get(teamID).getColor(), action);
 					
 				} else if (action instanceof MoveAction) {
 					MoveAction move = (MoveAction)action;
@@ -707,7 +753,7 @@ public class Turn {
 						}
 					}
 					
-					moveActions.add(move);
+					AIActionsMap.put(teams.get(teamID).getColor(), action);
 				}
 				
 			} else {
@@ -786,24 +832,39 @@ public class Turn {
 	}
 	
 	/**
-	 * Get a list of the ShoutActions performed on this turn.
-	 * This has LITERALLY ZERO USE TO YOUR CODE, but if you want to
-	 * make an AI that evaluates the humor level of other teams'
-	 * shouts, be our guest. :D
+	 * TODO
 	 * 
-	 * @return a Collection of the ShoutActions performed on this turn
+	 * @param target	The color of the target team
+	 * @return			The position of some building on the map
 	 */
-	public Collection<ShoutAction> getShoutActions() {
-		return shoutActions;
+	public Position getRanOccupiedPos(TeamColor target) {
+		ArrayList<RallyPoint> possiblePositions = new ArrayList<RallyPoint>();
+		ArrayList<RallyPoint> elementList = map.getAllPositions();
+		
+		// Find all positions controlled by the AI with the given team color
+		for(RallyPoint r : elementList) {
+			if(r instanceof Building) {
+				if(((Building)r).getTeamColor() == target) {
+					possiblePositions.add(r);
+				}
+			}
+		}
+		
+		if (possiblePositions.size() > 0) {
+			return possiblePositions.get(0).getPosition();
+		}
+		// No positions exist
+		return null;
 	}
 	
 	/**
-	 * Returns a list of move actions performed on this turn.
+	 * TODO
 	 * 
-	 * @return	a Collection of move actions performed on this turn
+	 * @param tc	The color of team, of which to find the action
+	 * @return		The action taken by the AI of the given color
 	 */
-	public Collection<MoveAction> getMoveActions() {
-		return moveActions;
+	public Action getActionFor(TeamColor tc) {
+		return AIActionsMap.get(tc);
 	}
 	
 	/**
@@ -886,13 +947,13 @@ public class Turn {
 		PositionData out1 = null;
 		ArrayList<PositionData> castles = new ArrayList<>(); 
 		for(PositionData pd : unclaimedPositions){
-			if(pd.type == PType.CASTLE){
+			if(pd.type == PType.VILLAGE){
 				castles.add(pd);
 			}
 		}
 		for(List<PositionData> d : teamPositions.values()){
 			for(PositionData pd : d){
-				if(pd.type == PType.CASTLE){
+				if(pd.type == PType.VILLAGE){
 					castles.add(pd);
 				}
 			}

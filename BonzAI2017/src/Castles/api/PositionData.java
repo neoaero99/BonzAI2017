@@ -17,18 +17,19 @@ import Castles.Objects.Soldier;
 public class PositionData {
 	
 	/**
-	 * The unique ID associated with a position on the map.
+	 * The unique ID associated with this position.
 	 */
 	public final String ID;
 	
 	/**
-	 * The type of building, which this position is
+	 * The type of building, which this position is (i.e. base, castle or
+	 * village).
 	 */
 	public final PType type;
 	
 	/**
-	 * The team, who currently controls this position, or null if it is
-	 * unclaimed
+	 * The AI, who currently controls this position; null if it is
+	 * unclaimed.
 	 */
 	public final TeamColor leader;
 	
@@ -39,14 +40,15 @@ public class PositionData {
 	public final int defVal;
 	
 	/**
-	 * The list soldier groups at this position
+	 * The list soldier groups at this position. The index of the soldier group
+	 * in this list is directly related to the soldier group's soldier index.
 	 */
 	public final SoldierData[] occupantData;
 	
 	/**
-	 * Fill the data of the Position with that of the given rally point.
+	 * Fill the data of the Position with that of the given position.
 	 * 
-	 * @param r	The rally point, which will have its data copied to this
+	 * @param r	The position, which will have its data copied to this
 	 */
 	public PositionData(RallyPoint r) {
 		if (r == null) {
@@ -81,6 +83,21 @@ public class PositionData {
 		}
 	}
 	
+	/**
+	 * Returns the team color of the soldiers occupying this position. It is
+	 * entirely possible that a soldier group belonging to one AI is
+	 * occupying a building controlled by another AI.
+	 * 
+	 * @return	The team color of occupying soldiers
+	 */
+	public TeamColor getOccupantLeader() {
+		if (occupantData.length > 0) {
+			return occupantData[0].leader;
+		}
+		
+		return null;
+	}
+	
 	public boolean isControled(){
 		return (leader == null) ? false : true;
 	}
@@ -89,6 +106,7 @@ public class PositionData {
 		return (leader == team) ? true : false;
 	}
 	
+	@Override
 	public String toString() {
 		String claimedBy = (leader == null) ? "N/A" : leader.name();
 		

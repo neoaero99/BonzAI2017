@@ -5,8 +5,10 @@ import java.util.List;
 
 /**
  * The segmented edge class is used for the edges of the BonzAI Graph structure.
- * It contains a number of way points, which break the edge up into equal
- * segments based on its weight.
+ * It contains an ordered list of way points w0, w1, ... , wn, whose size is
+ * equal to the weight of the edge. In terms of adjacency, w0 is adjacent to
+ * the first vertex and wn is adjacent to the last vertex. Also, wi is adjacent
+ * to wj and wk, where j + 1 = i and i + 1 = k.
  * 
  * @author Joshua Hooker
  */
@@ -18,6 +20,8 @@ public class SegEdge extends Node {
 	
 	/**
 	 * Creates an edge, with the given ID, which connects the two given edges.
+	 * This constructor takes care of joining the new edge with the given
+	 * vertices.
 	 * 
 	 * @param weight	The number of way points on the edge
 	 * @param f			One vertex connected to the edge

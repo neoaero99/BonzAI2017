@@ -3,7 +3,8 @@ package Castles.api;
 import Castles.Objects.SoldierState;
 
 /**
- * A data holder class for updating a soldier's state.
+ * A data class used by the MoveAction to store an AI's update command for a
+ * specific soldier group.
  * 
  * @author Joshua Hooker
  */

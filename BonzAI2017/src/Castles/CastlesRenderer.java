@@ -44,14 +44,12 @@ public class CastlesRenderer extends Renderer {
 
 
 	static File[] selectorFiles = {
-			new File("art/sprites/ART2016/turn_red.png"),
-
-			new File("art/sprites/ART2016/turn_yellow.png"),
-			new File("art/sprites/ART2016/turn_blue.png"),
-			new File("art/sprites/ART2016/turn_green.png"),
-			new File("art/sprites/ART2016/turn_orange.png"),
-
-			new File("art/sprites/ART2016/turn_purple.png")
+				new File("art/turn/turn_red.png"),
+				new File("art/turn/turn_blue.png"),
+				new File("art/turn/turn_yellow.png"),
+				new File("art/turn/turn_green.png"),
+				new File("art/turn/turn_orange.png"),
+				new File("art/turn/turn_purple.png")
 			};
 	
 	static File[] rallyPointFiles = new File[] {
@@ -59,6 +57,7 @@ public class CastlesRenderer extends Renderer {
 				new File("art/sprites/red_node.png"),
 				new File("art/sprites/blue_node.png")
 			};
+	
 	static File villageFile = new File("art/sprites/village.png");
 	static File castleFile = new File("art/sprites/castle.png");
 
@@ -365,41 +364,41 @@ public class CastlesRenderer extends Renderer {
 	private static void renderShoutActions(Graphics2D g, Turn turn, Turn nextTurn, float smoothTween) {
 		int fontSize = 20;
 		float fontScale = fontSize / 2.f;
-
-		int i = 0;
-		for (ShoutAction s : turn.getShoutActions()) {
+		
+		for (Team t : turn.getAllTeams()) {
+			Action a = turn.getActionFor(t.getColor());
 			
-			if (s != null) {
-				Position pos = turn.getEntity(i);
+			if (a instanceof ShoutAction) {
+				Position pos = turn.getRanOccupiedPos( t.getColor() );
 				
-				if (pos != null) {
-					String message = s.getMessage();
-		
-					g.setFont(new Font("Arial", Font.PLAIN, fontSize));
-		
-					RoundRectangle2D.Float bubble = new RoundRectangle2D.Float();
-		
-					int length = message.length();
-					length += (length < 9 ? 9 - length : 0);
-		
-					bubble.width = (g.getFontMetrics().stringWidth(message) + length) / 20.f;
-					float offsetX = bubble.width / 2 / fontScale;
-		
-					bubble.height = g.getFontMetrics().getHeight() * 3 / 40.f;
-					bubble.archeight = .4f;
-					bubble.arcwidth = .4f;
-		
-					bubble.x = pos.getX() - offsetX;
-					bubble.y = pos.getY() - gridHeight;
-		
-					g.setColor(new Color(245, 245, 245, 200));
-					g.fill(bubble);
-	
-					drawText(g, message, bubble.getCenterX(), bubble.getCenterY() , Color.BLACK, new Color(0, 0, 0, 0),1.0f);
+				if (pos == null) {
+					pos = new Position(CastlesRenderer.gridWidth / 2, CastlesRenderer.gridHeight / 2);
 				}
+				
+				String message = ((ShoutAction)a).getMessage();
+	
+				g.setFont(new Font("Arial", Font.PLAIN, fontSize));
+	
+				RoundRectangle2D.Float bubble = new RoundRectangle2D.Float();
+	
+				int length = message.length();
+				length += (length < 9 ? 9 - length : 0);
+	
+				bubble.width = (g.getFontMetrics().stringWidth(message) + length) / 20.f;
+				float offsetX = bubble.width / 2 / fontScale;
+	
+				bubble.height = g.getFontMetrics().getHeight() * 3 / 40.f;
+				bubble.archeight = .4f;
+				bubble.arcwidth = .4f;
+	
+				bubble.x = pos.getX() - offsetX;
+				bubble.y = pos.getY() - gridHeight;
+	
+				g.setColor(new Color(245, 245, 245, 200));
+				g.fill(bubble);
+
+				drawText(g, message, bubble.getCenterX(), bubble.getCenterY() , Color.BLACK, new Color(0, 0, 0, 0),1.0f);
 			}
-			
-			++i;
 		}
 	}
 
