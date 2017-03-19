@@ -1,24 +1,78 @@
 package Castles.Objects;
 
-import Castles.api.Color;
+import Castles.api.TeamColor;
+import Castles.Objects.PType;
 
 public class Building extends RallyPoint {
 	
-	public final int defenseValue;         // how strong is the castle?
-	public final int soldierCreationRate;  // number of soldiers being produced (more details needed!)
+	/**
+	 * The defense value for this building
+	 */
+	public static final int BASE_DV = 10,
+							CASTLE_DV = 5,
+							VILLAGE_DV = 3;
+	/**
+	 * The soldier spawn rate for this building
+	 */
+	public static final int	BASE_SR = 4,
+							CASTLE_SR = 3,
+							VILLAGE_SR = 2;	
 	
-	private Color myTeamColor;
+	public final PType type;
 	
-	public Building(int x, int y, String id, Color teamColor, int defValue, int soldSpawnRate) {
+	private TeamColor myTeamColor;
+	
+	public Building (int x, int y, String id, TeamColor team) {
 		super(x, y, id);
 		
-		myTeamColor = teamColor;
-		defenseValue = defValue;
-		soldierCreationRate = soldSpawnRate;
+		char prefix = id.charAt(0);
+		
+		if (prefix == 'P') {
+			// Building is a player base
+			type = PType.BASE;
+			
+		} else if (prefix == 'C') {
+			// Building is a castle
+			type = PType.CASTLE;
+			
+		} else if (prefix == 'V') {
+			// Building is village
+			type = PType.VILLAGE;
+			
+		} else {
+			type = null;
+		}
+		
+		myTeamColor = team;
 	}
 	
-	public Color getTeamColor() {
+	public TeamColor getTeamColor() {
 		return myTeamColor;
+	}
+	
+	/**
+	 * @return	The defense value associated with this building's type
+	 */
+	public int getDefVal() {
+		
+		switch (type) {
+			case BASE:		return BASE_DV;
+			case CASTLE:	return CASTLE_DV;
+			case VILLAGE:	return VILLAGE_DV;
+			default:		return 0;
+		}
+	}
+	
+	/**
+	 * @return	The soldier spawn rate associated with this buidling's type
+	 */
+	public int getSoldSpwnRate() {
+		switch (type) {
+			case BASE:		return BASE_SR;
+			case CASTLE:	return CASTLE_SR;
+			case VILLAGE:	return VILLAGE_SR;
+			default:		return 0;
+		}
 	}
 	
 	/**
@@ -38,12 +92,12 @@ public class Building extends RallyPoint {
 			 * new soldier group. */
 			if (onPoint.size() > 0 && onPoint.get(0).getLeaderColor().equals(myTeamColor)&&onPoint.get(0).getState()==SoldierState.STANDBY) {
 				Soldier occupant = onPoint.get(0);
-				occupant.setValue(occupant.getValue() + soldierCreationRate);
+				occupant.setValue(occupant.getValue() + getSoldSpwnRate());
 				return null;
 				
 			} else {
 				// Create a new soldier and return it to be added to the map
-				Soldier newSoldier = new Soldier(myTeamColor, soldierCreationRate, ID);
+				Soldier newSoldier = new Soldier(myTeamColor, getSoldSpwnRate(), ID);
 				return newSoldier;
 			}
 		}
@@ -54,12 +108,12 @@ public class Building extends RallyPoint {
 	@Override
 	public RallyPoint copy() {
 		Building copy = new Building(getPosition().getX(), getPosition().getY(),
-				ID, myTeamColor, defenseValue, soldierCreationRate);
+				ID, myTeamColor);
 		
 		return copy;
 	}
 
-	public void setTeamColor(Color teamColor) {
+	public void setTeamColor(TeamColor teamColor) {
 		myTeamColor = teamColor;
 	}
 }

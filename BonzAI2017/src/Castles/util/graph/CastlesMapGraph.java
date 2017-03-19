@@ -127,6 +127,8 @@ public class CastlesMapGraph {
 			System.out.printf("%s -> %s\n", sp, SPPathsMap.get(sp));
 		}
 		
+		/**
+		
 		Vertex v0 = vertexList.get(0),
 			   v1 = vertexList.get(1),
 			   v3 = vertexList.get(3),
@@ -145,11 +147,14 @@ public class CastlesMapGraph {
 	}
 	
 	/**
-	 * TODO
+	 * Returns whether the positions with the given ID values are adjacent on
+	 * the map. Keep in mind that vertices are not adjacent to one another,
+	 * instead the end waypoints on an edge adjacent to the vertices
+	 * connected to the edge.
 	 * 
-	 * @param rID1
-	 * @param rID2
-	 * @return
+	 * @param rID1	A position ID
+	 * @param rID2	Another position ID
+	 * @return		Are there positions adjacent?
 	 */
 	public boolean areAdjacent(String rID1, String rID2) {
 		Node n1 = getVertex(rID1);
@@ -187,12 +192,13 @@ public class CastlesMapGraph {
 	}
 	
 	/**
-	 * TODO
+	 * Determines if the given waypoint ID, which corresponds to a waypoint on
+	 * the given edge, e, is adjacent to the given vertex, v.
 	 * 
-	 * @param e
-	 * @param wayPointID
-	 * @param v
-	 * @return
+	 * @param e				Some edge in the graph
+	 * @param wayPointID	The ID of a waypoint on an edge
+	 * @param v				A vertex connected to e
+	 * @return				Are v and the waypoint of wayPointID adjacent?
 	 */
 	private boolean testEdgeVertexConnection(SegEdge e, String wayPointID, Vertex v) {
 		int idx = e.indexOf(wayPointID);
@@ -274,6 +280,7 @@ public class CastlesMapGraph {
 	 * @param v1		Another vertex in the graph
 	 * @return			A path connecting v0 and v1, in the graph
 	 */
+	@SuppressWarnings("unchecked")
 	public static ArrayList<String> getPath(HashMap<IDPair, ArrayList<String>> pathsMap,
 			Vertex v0, Vertex v1) {
 		
@@ -297,13 +304,13 @@ public class CastlesMapGraph {
 					return reverse;
 					
 				} else {
-					return path;
+					return (ArrayList<String>)path.clone();
 				}
 			}
 		}
 		
 		// Invalid start or end vertex
-		return null;
+		return new ArrayList<String>();
 	}
 
 	/**
@@ -325,7 +332,7 @@ public class CastlesMapGraph {
 		for (Vertex v : vertices) {
 			for (Vertex u : vertices) {
 				boolean areEqual = v.equals(u);
-				boolean pathExists = getPath(pathIDsMap, u, v) != null;
+				boolean pathExists = getPath(pathIDsMap, u, v).size() > 0;
 				
 				if (areEqual || pathExists) {
 					continue;

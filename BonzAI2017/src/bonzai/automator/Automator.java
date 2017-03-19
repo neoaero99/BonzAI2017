@@ -419,15 +419,15 @@ public class Automator {
 						Simulation simulation = new Simulation(scenario,jars);
 						simulation.start();
 						simulation.join();
-						Color winner = simulation.getWinner();
+						TeamColor winner = simulation.getWinner();
 
 						//This is a hacky way of doing this, but team 1 is lochmara
 						//and team 2 is jazzberry.  Check who won, and give them a point
 
-						if (winner.equals(Color.RED)) {
+						if (winner.equals(TeamColor.RED)) {
 							winningTeam = 1;
 							System.out.println("Winner: " + pad(match.team1.name(),15));
-						} else if (winner.equals(Color.YELLOW)){
+						} else if (winner.equals(TeamColor.YELLOW)){
 							winningTeam = 2;
 							System.out.println("Winner: " + pad(match.team2.name(),15));
 						} else {

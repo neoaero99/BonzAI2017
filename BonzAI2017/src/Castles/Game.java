@@ -17,12 +17,12 @@ public class Game {
 	/**
 	 * list of colors that have jars selected
 	 */
-	private List<Castles.api.Color> activeColors;
+	private List<Castles.api.TeamColor> activeColors;
 
 	/**
 	 *
 	 **/
-	public Game(int teamID, int turns, CastlesMap map, List<Castles.api.Color> colors) {
+	public Game(int teamID, int turns, CastlesMap map, List<Castles.api.TeamColor> colors) {
 		this.remaining = turns;
 		this.map = map;
 		this.history = new ArrayList<Turn>(turns);

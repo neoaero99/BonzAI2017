@@ -83,8 +83,8 @@ public class CastlesMain extends JPanel implements GameWrapper, Runnable, KeyLis
 	public Color color(int team) {
 		final Color[] colors = { 
 				new Color(217,  51,   21), // Red
-				new Color(238, 218,  102), // Yellow
 				new Color(68,   55,  142), // Blue
+				new Color(238, 218,  102), // Yellow
 				new Color(0,   173,   59), // Green
 				new Color(236, 135,    0), // Orange
 				new Color(207,  71,  207), // Purple-pink
@@ -135,7 +135,7 @@ public class CastlesMain extends JPanel implements GameWrapper, Runnable, KeyLis
 	/**
 	 * Given a color, get the AI name that belongs to that color.
 	 */
-	public String getTeamName(Castles.api.Color color) {
+	public String getTeamName(Castles.api.TeamColor color) {
 		try{
 			String name = simulation.jar(color).name();
 			return name;

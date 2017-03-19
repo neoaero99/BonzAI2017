@@ -1,15 +1,19 @@
 package Castles.api;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Random;
+import java.util.Set;
 
 import Castles.Objects.Building;
 import Castles.Objects.RallyPoint;
 import Castles.Objects.Soldier;
 import Castles.Objects.SoldierState;
 import Castles.util.graph.IDPair;
+import Castles.util.graph.Node;
 import Castles.util.graph.SegEdge;
 import Castles.util.graph.Vertex;
 import Castles.util.graph.CastlesMapGraph;
@@ -19,10 +23,9 @@ import bonzai.Team;
 public class CastlesMap {
 	
 	// TODO 2017: Read in map files here. 
-
-	private static int width, height;
+	private int width, height;
 	
-	private static HashMap<String, String> fields;
+	private HashMap<String, String> fields;
 	
 	private CastlesMapGraph graph;
 	private HashMap<IDPair, ArrayList<String>> pathIDsMap;
@@ -69,6 +72,11 @@ public class CastlesMap {
 	@SuppressWarnings("unchecked")
 	public CastlesMap(CastlesMap previousTurn) {
 		
+		width = previousTurn.getWidth();
+		height = previousTurn.getHeight();
+		
+		fields = previousTurn.getFields();
+		
 		//copy the list of teams
 		players = previousTurn.players;
 		teams = previousTurn.teams;
@@ -95,6 +103,57 @@ public class CastlesMap {
 				addSoldiers( s.copy() );
 			}
 		}
+	}
+	
+	/**
+	 * Compiles a list of positions, which are adjacent to the position with
+	 * the given ID.
+	 * 
+	 * @param ID	The ID of some position on the map
+	 * @return		A list of IDs of adjacent positions
+	 */
+	public ArrayList<String> getAdjPosIDs(String ID) {
+		
+		try {
+			char first = ID.charAt(0);
+			
+			if (first == '!') {
+				// The position is on an edge
+				return graph.getEdge(ID).adjPositionIDs(ID);
+				
+			} else {
+				// The position is on a vertex
+				return graph.getVertex(ID).adjPositionIDs();
+			}
+		
+		} catch (Exception Ex) {
+			// Invalid ID
+			return new ArrayList<String>();
+		}
+	}
+	
+	/**
+	 * A list of IDs pertaining to the vertices that are adjacent to the vertex
+	 * with the given ID. If no vertex has the given ID, then null is returned.
+	 * 
+	 * @param ID	The ID of a vertex on the map
+	 * @return		The list of IDs of adjacent vertices
+	 */
+	public ArrayList<String> getAdjVertexIDs(String ID) {
+		Vertex v = graph.getVertex(ID);
+		
+		if (v != null) {
+			ArrayList<String> adjVIDs = new ArrayList<String>();
+			List<Vertex> adjVertices = v.adjacentVertices();
+			
+			for (Vertex adjV : adjVertices) {
+				adjVIDs.add(adjV.ID);
+			}
+			
+			return adjVIDs;
+		}
+		
+		return null;
 	}
 	
 	/**
@@ -135,27 +194,10 @@ public class CastlesMap {
 	}
 	
 	/**
-	 * 
-	 * 
-	 * @param i
-	 * @return
+	 * @return	The map's graph structure
 	 */
-	public Position getEntity(int i) {
-		if(!players[i]){
-			return null;
-		}
-		
-		Castles.api.Color c=Castles.api.Color.values()[i];
-		ArrayList<RallyPoint> elementList = getAllPositions();
-		
-		for(RallyPoint r : elementList) {
-			if(r instanceof Building ){
-				if(((Building)r).getTeamColor()==c){
-					return r.getPosition().clone();
-				}
-			}
-		}
-		return null;
+	protected CastlesMapGraph getGraph() {
+		return graph;
 	}
 	
 	/**
@@ -266,24 +308,38 @@ public class CastlesMap {
 					
 					RallyPoint r = getPosition(s.getPositionID());
 					r.addOccupant(s);
-					if(r.onPoint!=null){
-						for(int i=0;i<r.onPoint.size();i++){
-							Soldier n=r.onPoint.get(i);
-							if(!n.getLeaderColor().equals(s.getLeaderColor())){
-								if(((String)n.getPath().get(1)).equals(oldPosID)){
-									int result=mergeSoldiers(s,n,r);
-									if(result==2||result==4){
-										i--;
-									}
-									else{
-										j--;
-									}
+					
+					/* Check any adjacent soldier groups to determine, if they
+					 * would cross paths with the soldier group, which just
+					 * moved and merge with soldier groups, which would pass
+					 * this one. */
+					int sdx2 = 0;
+					while (sdx2 < r.getOccupants().size()) {
+						Soldier neighbor = r.getOccupant(sdx2);
+						
+						if (s.getLeaderColor() != neighbor.getLeaderColor()) {
+							ArrayList<String> path = neighbor.getPath();
+							
+							if (path != null && path.size() > 1 && path.get(1).equals(oldPosID)) {
+								// The soldier groups cross paths
+								byte ret = mergeSoldierPair(s, r.getOccupant(sdx2), r);
+								
+								if (ret != 1) {
+									// The soldier group, which just moved was lost
+									--j;
+									break;
+									
+								} else if (ret != 2) {
+									// The other soldier group was lost
+									continue;
 								}
 							}
+							
 						}
+						
+						++sdx2;
 					}
 				}
-
 			}
 		}
 	}
@@ -329,6 +385,192 @@ public class CastlesMap {
 			s.setState(SoldierState.MOVING);
 		}
 		return null;
+	}
+	
+	/**
+	 * Merges the soldier groups, which occupy the given position.
+	 * 
+	 * @param r	The position, at which to merge soldiers
+	 * @return	The initial and final number of soldier groups on the position
+	 * 			with respect to merging
+	 */
+	@SuppressWarnings("unchecked")
+	protected int[] mergeSoldiers(RallyPoint r) {
+		ArrayList<Soldier> occupants = r.getOccupants();
+		int initialOccupants = occupants.size();
+		
+		if (occupants.size() == 2) {
+			mergeSoldierPair(r.getOccupant(0), r.getOccupant(1), r);
+			
+		} else if (occupants.size() > 2) {
+			List<Team> teams = getTeams();
+			ArrayList<Soldier>[] teamSoldierLists = (ArrayList<Soldier>[]) new ArrayList[teams.size()];
+			int[] teamTotals = new int[teams.size()];
+			TeamColor greatestTeam = null, sndGreatestTeam = null;
+			
+			// Initialize the data structures
+			for (Team t : getTeams()) {
+				teamSoldierLists[t.getColor().ordinal()] = new ArrayList<Soldier>();
+				teamTotals[t.getColor().ordinal()] = 0;
+				
+				if (r instanceof Building) {
+					Building b = (Building)r;
+					
+					if (b.getTeamColor() == t.getColor()) {
+						/* Defending team gains a buff for occupying their
+						 * building */
+						teamTotals[t.getColor().ordinal()] = b.getDefVal();
+					}
+				}
+			}
+			
+			int teamCount = 0;
+			/* Separate soldiers by color and order the list of soldiers by
+			 * size in ascending order */
+			for (int sdx = 0; sdx < occupants.size(); ++sdx) {
+				Soldier s = occupants.get(sdx);
+				ArrayList<Soldier> soldierList = teamSoldierLists[s.getLeaderColor().ordinal()];
+				int idx = 0;
+				
+				while ( idx < soldierList.size() && soldierList.get(idx).getValue() < s.getValue()) { ++idx; }
+				
+				soldierList.add(idx, s);
+				teamTotals[s.getLeaderColor().ordinal()] += s.getValue();
+				
+				if (soldierList.size() == 1) {
+					/* Keep track of the number of teams with soldiers on the
+					 * given position */
+					++teamCount;
+				}
+			}
+			
+			// Multiple teams must be present to initiate a merge
+			if (teamCount > 2) {
+				// Find the greatest and second greatest team sizes
+				for (Team t : teams) {
+					int total = teamTotals[t.getColor().ordinal()];
+					int greatestTotal = (greatestTeam == null) ? 0 : teamTotals[greatestTeam.ordinal()];
+					int sndGreatestTotal = (sndGreatestTeam == null) ? 0 : teamTotals[sndGreatestTeam.ordinal()];
+					
+					if (total > greatestTotal) {
+						if (greatestTotal > sndGreatestTotal) {
+							/* Push the greatest team down to the second
+							 * greatest */
+							sndGreatestTeam = greatestTeam;
+						}
+						
+						greatestTeam = t.getColor();
+						
+					} else if (total == greatestTotal) {
+						/* If there are more than one greatest team, then
+						 * everyone loses */
+						greatestTeam = null;
+						
+					} else if (total > sndGreatestTotal) {
+						sndGreatestTeam = t.getColor();
+					}
+				}
+				
+				// Update the soldiers occupying the space
+				for (Team t : teams) {
+					ArrayList<Soldier> soldierList = teamSoldierLists[t.getColor().ordinal()];
+					
+					if (soldierList.size() > 0) {
+						if (t.getColor() == greatestTeam) {
+							/* Remove enough soldiers to satisfy the second
+							 * greatest team's total starting with the soldier
+							 * groups with the greatest values */
+							int counter = teamTotals[sndGreatestTeam.ordinal()];
+							int idx = soldierList.size() - 1;
+							
+							if (r instanceof Building) {
+								Building b = (Building)r;
+								
+								if (b.getTeamColor() == t.getColor()) {
+									/* Defending team gains a buff for occupying
+									 * their building */
+									counter -= b.getDefVal();
+								}
+							}
+							
+							while (idx >= 0 && counter > 0) {
+								Soldier s = soldierList.get(idx--);
+								counter -= s.getValue();
+								
+								if (counter < 0) {
+									s.setValue(-counter);
+									
+								} else {
+									removeSoldiers(s);
+								}
+							}
+							
+						} else {
+							// Remove all the soldiers of the teams, which lost
+							for (Soldier s : soldierList) {
+								removeSoldiers(s);
+							}
+						}
+					}
+				}
+			}
+		}
+		
+		/* Return a set containing the initial number of occupying soldier
+		 * groups and the remaining soldier groups */
+		return new int[] { initialOccupants, occupants.size() };
+	}
+	
+	/**
+	 * Merges the two soldier groups s1 and s2, if they are on different teams.
+	 * 
+	 * @param s1	A soldier group at position r
+	 * @param s2	Another soldier group at position r
+	 * @param r		The position containing s1 and s2
+	 * @return		0 -> both s1 and s2 were lost
+	 * 				1 -> s2 was lost
+	 * 				2 -> s1 was lost
+	 */
+	private byte mergeSoldierPair(Soldier s1, Soldier s2, RallyPoint r) {
+		byte ret = 0;
+		// Multiple teams must be present for a merge
+		if (s1.getLeaderColor() != s2.getLeaderColor()) {
+			int s1DiffS2 = s1.getValue() - s2.getValue();
+			
+			if (r instanceof Building) {
+				Building b = (Building)r;
+				// Defending team gains a buff for occupying their building
+				if (b.getTeamColor() == s1.getLeaderColor()) {
+					s1DiffS2 = s1.getValue() - Math.max(0, s2.getValue() - b.getDefVal());
+					
+				} else if (b.getTeamColor() == s2.getLeaderColor()) {
+					s1DiffS2 = Math.max(0, s1.getValue() - b.getDefVal()) - s2.getValue();
+				}
+			}
+			
+			/* Remove the soldiers for each team up the difference between
+			 * the sizes of the soldier groups occupying the position. */
+			
+			if (s1DiffS2 <= 0) {
+				removeSoldiers(s1);
+				
+				if (s1DiffS2 < 0) {
+					ret |= 0x2;
+					s2.setValue(-s1DiffS2);
+				}
+			}
+			
+			if (s1DiffS2 >= 0) {
+				removeSoldiers(s2);
+				
+				if (s1DiffS2 > 0) {
+					ret |= 0x1;
+					s1.setValue(s1DiffS2);
+				}
+			}
+		}
+		
+		return ret;
 	}
 	
 	/**
@@ -388,8 +630,8 @@ public class CastlesMap {
 				}
 			}
 			else{
-				int def=((Building)r).defenseValue;
-				Color team=((Building)r).getTeamColor();
+				int def=((Building)r).getDefVal();
+				TeamColor team=((Building)r).getTeamColor();
 				if(team==s1.getLeaderColor()){
 					int amount= (s1.getValue()+def)-s2.getValue();
 					if(amount>0){
@@ -473,9 +715,7 @@ public class CastlesMap {
 			}
 			return temp;
 		}
-		/* TODO This will not work
-		 * Since the Building class extends RallyPoint, "r instanceof RallyPoint"
-		 * will return true for all Building objects */
+		
 		if(r instanceof RallyPoint){
 			int num[]=new int[6];
 			int total[]=new int[6];
@@ -494,7 +734,7 @@ public class CastlesMap {
 			if(maxid==-1){
 				return -2;
 			}
-			for(Soldier s: onPoint){
+			for (Soldier s: onPoint) {
 				if(s.getLeaderColor().ordinal()!=maxid){
 					onPoint.remove(s);
 					soldiers[s.getLeaderColor().ordinal()].remove(s);
@@ -518,7 +758,7 @@ public class CastlesMap {
 			return 5;
 		}
 		else{
-			int def=((Building)r).defenseValue;
+			int def=((Building)r).getDefVal();
 			int teamID=((Building)r).getTeamColor().ordinal();
 			int num[]=new int[6];
 			int total[]=new int[6];
@@ -581,10 +821,144 @@ public class CastlesMap {
 	 * @param From: The ID of where the soldiers is coming from
 	 * @param To:	the ID of where the soldiers is going to
 	 * @return	the path of RallyPoint IDs
+	 * @throws NullPointerException	If either From or To are invalid IDs
 	 */
-	public ArrayList<String> getPath(String From, String To) {
-		Vertex f=graph.getVertex(From);
-		Vertex t=graph.getVertex(To);
-		return CastlesMapGraph.getPath(pathIDsMap, f, t);
+	public ArrayList<String> getPath(String From, String To) throws NullPointerException {
+		Vertex from = graph.getVertex(From),
+			   to = graph.getVertex(To);
+		
+		if (from != null && to != null) {
+			// Both IDs refer to vertices
+			return CastlesMapGraph.getPath(pathIDsMap, from, to);
+		}
+		
+		String wpID;
+		Vertex v;
+		ArrayList<String> path, otherWayPoints = null;
+		
+		if (from == null) {
+			// From refers to a waypoint
+			wpID = From;
+			
+			if (to == null) {
+				// To refers to a waypointalso
+				otherWayPoints = new ArrayList<String>();
+				SegEdge firstE = graph.getEdge(wpID),
+						secondE = graph.getEdge(To);
+				ArrayList<String> firstPath = CastlesMapGraph.getPath(pathIDsMap, firstE.first, secondE.first),
+								  secondPath = CastlesMapGraph.getPath(pathIDsMap, firstE.first, secondE.second);
+				int endIdx = secondE.indexOf(To);
+				
+				/* Keep track of the waypoints on the second edge, which are
+				 * part of the path */
+				if (firstPath.size() <= secondPath.size()) {
+					v = secondE.first;
+					
+					for (int idx = 0; idx <= endIdx && idx < secondE.getWeight(); ++idx) {
+						otherWayPoints.add( String.format("%s:%d", secondE.ID, idx + 1) );
+					}
+					
+				} else {
+					v = secondE.second;
+					
+					for (int idx = secondE.getWeight() - 1; idx >= endIdx && idx >= 0; --idx) {
+						otherWayPoints.add( String.format("%s:%d", secondE.ID, idx + 1) );
+					}
+					
+				}
+				
+			} else {
+				v = to;
+			}
+			
+		} else {
+			// To refers to a waypoint
+			wpID = To;
+			v = from;
+		}
+		
+		/* Find the path between vertex, v, to the edge containing the waypoint
+		 * with ID, wpID */
+		path = getPathToEdge(graph.getEdge(wpID), wpID, v, from == null);
+		
+		if (otherWayPoints != null) {
+			/* Add the waypoints from the second edge to the path */
+			for (String ID : otherWayPoints) {
+				path.add(ID);
+			}
+		}
+		
+		return path;
+	}
+	
+	/**
+	 * Returns the list of position IDs, which connect the waypoint of the given
+	 * edge and ID to the given vertex. If the parameter edgeToVertex is true,
+	 * then the first position will be the ID of the waypoint, otherwise the
+	 * first ID will be that of the vertex.
+	 * 
+	 * @param e				The given edge
+	 * @param wpID			The ID of the target waypoint on the given edge
+	 * @param v				The given vertex
+	 * @param edgeToVertex	Determines the order of the posiiton IDs in the path
+	 * @return				An ordered list of position IDs
+	 */
+	private ArrayList<String> getPathToEdge(SegEdge e, String wpID, Vertex v,
+			boolean edgeToVertex) {
+		
+		ArrayList<String> path, firstPath, secondPath;
+		int idx, endIdx, incVal;
+		
+		if (edgeToVertex) {
+			// The path goes from the edge to the vertex
+			firstPath = CastlesMapGraph.getPath(pathIDsMap, e.first, v);
+			secondPath = CastlesMapGraph.getPath(pathIDsMap, e.second, v);
+			
+		} else {
+			// The path goes from the vertex to the edge
+			firstPath = CastlesMapGraph.getPath(pathIDsMap, v, e.first);
+			secondPath = CastlesMapGraph.getPath(pathIDsMap, v, e.second);
+		}
+		
+		// Which vertex is on the path?
+		if (firstPath.size() <= secondPath.size()) {
+			idx = 0;
+			endIdx = e.indexOf(wpID);
+			incVal = 1;
+			path = firstPath;
+			
+		} else {
+			idx = e.getWeight() - 1;
+			endIdx = e.indexOf(wpID);
+			incVal = -1;
+			path = secondPath;
+		}
+		
+		if (path.size() == 0) {
+			// The vertex is adjacent to the edge
+			path.add(v.ID);
+		}
+		
+		/* Add the edge waypoints to the path, which connect the target waypoint
+		 * to the vertex path */
+		for (; idx >= 0 && idx != endIdx && idx < e.getWeight(); idx += incVal) {
+			
+			if (edgeToVertex) {
+				path.add(0, String.format("%s:%d", e.ID, idx + 1));
+				
+			} else {
+				path.add(String.format("%s:%d", e.ID, idx + 1));
+			}
+		}
+		
+		// Add the target waypoint to the path
+		if (edgeToVertex) {
+			path.add(0, String.format("%s:%d", e.ID, idx + 1));
+			
+		} else {
+			path.add(String.format("%s:%d", e.ID, idx + 1));
+		}
+		
+		return path;
 	}
 }

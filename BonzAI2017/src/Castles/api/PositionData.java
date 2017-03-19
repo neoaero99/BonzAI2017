@@ -15,22 +15,23 @@ import Castles.Objects.Soldier;
  * @author Joshua Hooker
  */
 public class PositionData {
+	
 	/**
-	 * The unique ID associated with a position on the map.
+	 * The unique ID associated with this position.
 	 */
 	public final String ID;
 	
 	/**
-	 * The team, who currently controls this position, or null if it is
-	 * unclaimed
+	 * The type of building, which this position is (i.e. base, castle or
+	 * village).
 	 */
-	public final Color leader;
+	public final PType type;
 	
 	/**
-	 * The team, who has soldiers currently occupying this position, or null if
-	 * no soldiers exists at this position.
+	 * The AI, who currently controls this position; null if it is
+	 * unclaimed.
 	 */
-	public final Color occupant;
+	public final TeamColor leader;
 	
 	/**
 	 * The bonus given to the defending team's soldiers, if this position is
@@ -39,71 +40,77 @@ public class PositionData {
 	public final int defVal;
 	
 	/**
-	 * The list of sizes of soldier groups at this position
+	 * The list soldier groups at this position. The index of the soldier group
+	 * in this list is directly related to the soldier group's soldier index.
 	 */
-	public final int[] occupantSizes;
+	public final SoldierData[] occupantData;
 	
-	public final String type;
 	/**
-	 * Fill the data of the Position with that of the given rally point.
+	 * Fill the data of the Position with that of the given position.
 	 * 
-	 * @param r	The rally point, which will have its data copied to this
+	 * @param r	The position, which will have its data copied to this
 	 */
 	public PositionData(RallyPoint r) {
 		if (r == null) {
 			ID = "!@#$%^&*()";
 			leader = null;
-			occupant = null;
 			defVal = -9999;
-			occupantSizes = new int[] { 0 };
-			type= "!@#$%^&*()";
+			this.occupantData = new SoldierData[0];
+			type= null;
 			
 		} else {
 			ID = r.ID;
 			
 			if (r instanceof Building) {
-				leader = ((Building)r).getTeamColor();
-				defVal = ((Building)r).defenseValue;
-				if(r instanceof Castle){
-					type = "Castle";
-				}
-				else if (r instanceof Village){
-					type = "Village";
-				}
-				else{
-					type = "Building";
-				}
+				Building b = (Building)r;
+				
+				type = b.type;
+				leader = b.getTeamColor();
+				defVal = b.getDefVal();
 				
 			} else {
 				leader = null;
+				type = PType.RALLY;
 				defVal = 0;
-				type="Rally Point";
 			}
 			
 			ArrayList<Soldier> occupants = r.getOccupants();
-			occupantSizes = new int[occupants.size()];
+			occupantData = new SoldierData[occupants.size()];
 			
-			for (int idx = 0 ; idx < occupants.size(); ++idx) {
-				occupantSizes[idx] = occupants.get(idx).getValue();
+			for (int idx = 0; idx < occupants.size(); ++idx) {
+				occupantData[idx] = new SoldierData(occupants.get(idx), idx);
 			}
-			
-			occupant = (occupants.size() == 0) ? null : occupants.get(0).getLeaderColor();
 		}
+	}
+	
+	/**
+	 * Returns the team color of the soldiers occupying this position. It is
+	 * entirely possible that a soldier group belonging to one AI is
+	 * occupying a building controlled by another AI.
+	 * 
+	 * @return	The team color of occupying soldiers
+	 */
+	public TeamColor getOccupantLeader() {
+		if (occupantData.length > 0) {
+			return occupantData[0].leader;
+		}
+		
+		return null;
 	}
 	
 	public boolean isControled(){
 		return (leader == null) ? false : true;
 	}
 	
-	public boolean isControledBy(Castles.api.Color team){
+	public boolean isControledBy(Castles.api.TeamColor team){
 		return (leader == team) ? true : false;
 	}
 	
+	@Override
 	public String toString() {
 		String claimedBy = (leader == null) ? "N/A" : leader.name();
-		String occupantColor = (occupant == null) ? "N/A" : occupant.name();
 		
-		return String.format("id:%s def:%d claimed_by:%s occupants:%s : %s", ID,
-				defVal, claimedBy, occupantColor, Arrays.toString(occupantSizes));
+		return String.format("id:%s def:%d claimed_by:%s occupants:%s", ID,
+				defVal, claimedBy, Arrays.toString(occupantData));
 	}
 }

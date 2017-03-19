@@ -95,7 +95,7 @@ public class DaneAI extends AI {
 		PriorityQueue<Path> possibleMoves = new PriorityQueue<>();
 		
 		//sort the buildings on the map for the current state
-		for(PositionData p: turn.getAllElements()){
+		for(PositionData p: turn.getAllPositions()){
 			if(p.ID.contains("R")) continue;
 			if(p.isControledBy(MyTeam.getColor())){
 				cStructs.add(p);
@@ -111,7 +111,7 @@ public class DaneAI extends AI {
 		
 		//second turn send all my troops to the nearest castle
 		if(turnNumber == 2){
-			ArrayList<SoldierData> s = turn.getSoldiersAt(cStructs.get(0).ID);
+			SoldierData[] s = turn.getPosition(cStructs.get(0).ID).occupantData;
 			SoldierData bob = null;
 			for(SoldierData glen : s){
 				if(glen.state == SoldierState.STANDBY){
@@ -141,7 +141,7 @@ public class DaneAI extends AI {
 		//add all moves
 		for(Path p : currentMovements){
 			SoldierData JohnLucPicard = null;
-			for(SoldierData s : turn.getSoldiersAt(p.from.ID)){
+			for(SoldierData s : p.from.occupantData){
 				if(s.state == SoldierState.STANDBY){
 					JohnLucPicard = s;
 				}
@@ -158,7 +158,7 @@ public class DaneAI extends AI {
 		PriorityQueue<Path> pm = new PriorityQueue<>();
 		//YAY!!!! ORDER N^2 ALGORITHM
 		for(PositionData owned : cStructs){
-			if(!(getSoldierCount(owned) > Turn.VILLAGE_INIT)) continue;
+			if(!(getSoldierCount(owned) > Building.VILLAGE_SR)) continue;
 			//finds the list of turns I can use for un-owned buildings
 			//from each owned buildings
 			for(PositionData unowned : uStructs){
@@ -186,16 +186,16 @@ public class DaneAI extends AI {
 		char type = p.ID.charAt(0);
 		switch(type){
 		case 'C':
-			return Turn.CASTLE_PER_TURN;
+			return Building.CASTLE_SR;
 		case 'V':
-			return Turn.VILLAGE_PER_TURN;
+			return Building.VILLAGE_SR;
 		default:
 			return 0;
 		}
 	}
 	
 	private int getSoldierCount(PositionData p){
-		ArrayList<SoldierData> soldiers = turn.getSoldiersAt(p.ID);
+		SoldierData[] soldiers = p.occupantData;
 		SoldierData Josh = null;
 		int count = 0;
 		for(SoldierData david : soldiers){

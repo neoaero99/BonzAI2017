@@ -16,7 +16,7 @@ public class SoldierData {
 	/**
 	 * The team, to which this soldier group belongs
 	 */
-	public final Color leader;
+	public final TeamColor leader;
 	
 	/**
 	 * The current state of the soldier group
@@ -54,7 +54,7 @@ public class SoldierData {
 		if (s == null) {
 			leader = null;
 			size = 0;
-			state = SoldierState.CONFLICT;
+			state = SoldierState.STANDBY;
 			posID = "?";
 			path = null;
 			

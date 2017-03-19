@@ -22,10 +22,10 @@ import Castles.api.*;
  **/
 public class Simulation extends Thread {
 	private final Queue<AIHost> clients;
-	private final Map<Color, bonzai.Jar> jars;
+	private final Map<TeamColor, bonzai.Jar> jars;
 	private final Game game;
 	private final List<Action> actions;
-	private Castles.api.Color winningTeam;
+	private Castles.api.TeamColor winningTeam;
 	int numTurns;
 	
 	/**
@@ -35,7 +35,7 @@ public class Simulation extends Thread {
 		String timestamp = new SimpleDateFormat("HH-mm-ss").format(new Date());
 		
 		this.clients = new LinkedList<AIHost>();
-		this.jars = new HashMap<Color, bonzai.Jar>();
+		this.jars = new HashMap<TeamColor, bonzai.Jar>();
 		int team = 0;
 		
 		//For each AI jar that is in the game, make an AIHost thread for it.
@@ -43,7 +43,7 @@ public class Simulation extends Thread {
 			if(jar != null) {
 				this.clients.add(AIHost.spawn(timestamp, scenario, jar, jars, team));
 			}
-			this.jars.put(Color.values()[team++], jar);
+			this.jars.put(TeamColor.values()[team++], jar);
 		}
 		
 		//Initialize the game with the required jars and scenario.
@@ -56,14 +56,14 @@ public class Simulation extends Thread {
 	/**
 	 * Get the winning team
 	 */
-	public Color getWinner() {
+	public TeamColor getWinner() {
 		return winningTeam;
 	}
 
 	/**
 	 * Return the team color associated with a specific AI's jar.
 	 */
-	public bonzai.Jar jar(Castles.api.Color color) {
+	public bonzai.Jar jar(Castles.api.TeamColor color) {
 		return jars.get(color);
 	}
 	
@@ -160,7 +160,7 @@ public class Simulation extends Thread {
 			}
 		}
 		if(winner == null){
-			this.winningTeam = Castles.api.Color.BLUE;
+			this.winningTeam = Castles.api.TeamColor.BLUE;
 		}else{
 			this.winningTeam = winner.getColor();
 		}

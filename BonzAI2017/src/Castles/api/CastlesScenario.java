@@ -11,7 +11,7 @@ import Castles.Game;
 import bonzai.Team;
 
 public class CastlesScenario implements bonzai.Scenario {
-  public static final int NUM_TURNS = 50;
+  public static final int NUM_TURNS = 15;
 
 	
 	//TODO 2017: This is used in simulation. If the turns are not applied at the same time,
@@ -96,13 +96,13 @@ public class CastlesScenario implements bonzai.Scenario {
 	 **/
 	public Game instantiate(List<? extends bonzai.Jar> jars) {
 		//active colors in game; some colors may not have been given AI's to use
-		List<Castles.api.Color> colors = new ArrayList<>();
+		List<Castles.api.TeamColor> colors = new ArrayList<>();
 		
 		CastlesMap map = new CastlesMap(this.map);
 		
 		for(int x = 0; x < this.getNumTeams(); x += 1) {
 			if(jars.get(x) != null) {
-				Castles.api.Color c = Castles.api.Color.values()[x];
+				Castles.api.TeamColor c = Castles.api.TeamColor.values()[x];
 				colors.add(c);
 				teams[x] = true;
 			}
