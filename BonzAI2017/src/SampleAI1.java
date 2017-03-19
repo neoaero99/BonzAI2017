@@ -2,20 +2,21 @@ import java.util.List;
 
 import Castles.api.MoveAction;
 import Castles.api.PositionData;
-import Castles.api.ShoutAction;
 import Castles.api.SoldierData;
 import Castles.api.TeamColor;
 import Castles.api.Turn;
 import bonzai.AI;
 import bonzai.Action;
 import bonzai.Agent;
+import Castles.api.ShoutAction;
 import bonzai.Team;
 
-@Agent(name="AnAI")
-public class AnAI extends AI {
+@Agent(name="FindClosest")
+public class SampleAI1 extends AI {
+	
 	private TeamColor enemy;
 	
-	public AnAI() {
+	public SampleAI1() {
 		enemy = null;
 	}
 	
@@ -23,6 +24,7 @@ public class AnAI extends AI {
 	public Action action(Turn turn) {
 		MoveAction move = new MoveAction();
 		boolean movedSomeSoldier = false;
+		
 		if (enemy == null) {
 			enemy = turn.getEnemyTeams().get(0).getColor();
 		}
@@ -43,7 +45,7 @@ public class AnAI extends AI {
 					
 					PositionData dest = enemyBuildings.get(0);
 					
-					if (dest.defVal < s.sIdx) {
+					if (dest.defVal <= s.sIdx) {
 						movedSomeSoldier = true;
 						move.addMove(s.sIdx, s.size, s.posID, dest.ID);
 					}
@@ -51,7 +53,7 @@ public class AnAI extends AI {
 				} else {
 					PositionData dest = unclaimedBuildings.get(0);
 					
-					if (dest.defVal < s.size) {
+					if (dest.defVal <= s.size) {
 						movedSomeSoldier = true;
 						move.addMove(s.sIdx, s.size, s.posID, dest.ID);
 					}

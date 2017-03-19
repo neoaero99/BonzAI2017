@@ -53,7 +53,7 @@ public class DaneAI extends AI {
 			"Bad move, sad"
 			};
 	private final boolean taunt;
-	private final boolean test = true;
+	private final boolean test = false;
 	private int turnNumber = 0;
 	private Turn turn;
 	private ArrayList<PositionData> cStructs,uStructs,eStructs;
@@ -65,7 +65,7 @@ public class DaneAI extends AI {
 	public DaneAI(){
 		//decides if today is a good day to taunt
 		int rand = (int)(Math.random() * 99);
-		if(rand%42 == 0 || rand%69 == 0 || rand%17 == 0 || test){
+		if((rand%42 == 0 || rand%69 == 0 || rand%17 == 0 || test) && false){
 			taunt = true;
 		}else{
 			taunt = false;
@@ -84,6 +84,7 @@ public class DaneAI extends AI {
 			return new ShoutAction(taunts[(int)(Math.random()*taunts.length)]);
 		}
 		MoveAction move = new MoveAction(); //the move for the turn
+		currentMovements = new ArrayList<>();
 		//Data Structures to sort the state of all buildings
 		//on the map
 		cStructs = new ArrayList<>();

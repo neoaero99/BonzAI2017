@@ -1,18 +1,18 @@
 name: Atlantis
-size: 25, 25
+size: 79, 79
 theme: water
 playercount: 2
 
 players:
-    <20, 4, P0>
-    <4, 20, P1>
+    <63, 15, P0>
+    <15, 63, P1>
 
 castles:
-    <12, 12, C0>
+    <39, 39, C0>
 
 villages:
     <0, 0, V0>
-    <24, 24, V1>
+    <75, 75, V1>
     <8, 12, V2>
     <16, 12, V3>
     <12, 8, V4>
