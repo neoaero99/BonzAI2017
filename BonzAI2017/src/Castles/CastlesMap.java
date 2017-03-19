@@ -1,4 +1,4 @@
-package Castles.api;
+package Castles;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -12,6 +12,7 @@ import Castles.Objects.Building;
 import Castles.Objects.RallyPoint;
 import Castles.Objects.Soldier;
 import Castles.Objects.SoldierState;
+import Castles.api.TeamColor;
 import Castles.util.graph.IDPair;
 import Castles.util.graph.Node;
 import Castles.util.graph.SegEdge;
@@ -236,7 +237,7 @@ public class CastlesMap {
 	 * 
 	 * @param additions
 	 */
-	protected void updateTeamScores(int[] additions) {
+	public void updateTeamScores(int[] additions) {
 		for (int idx = 0; idx < teams.size(); ++idx) {
 			Team oldRef = teams.get(idx);
 			teams.set(idx, new Team(oldRef, additions[idx]));
@@ -257,7 +258,7 @@ public class CastlesMap {
 	 * 
 	 * @param s the soldier to add
 	 */
-	protected void addSoldiers(Soldier s) {
+	public void addSoldiers(Soldier s) {
 		
 		if (s != null) {
 			// Add to team soldiers list
@@ -297,7 +298,7 @@ public class CastlesMap {
 	/**
 	 * Moves all active soldiers one position across their designated path.
 	 */
-	protected void moveSoldiers() {
+	public void moveSoldiers() {
 		for (ArrayList<Soldier> soldierGroup : soldiers) {
 			for (int j=0;j<soldierGroup.size();j++) {
 				Soldier s=soldierGroup.get(j);
@@ -395,7 +396,7 @@ public class CastlesMap {
 	 * 			with respect to merging
 	 */
 	@SuppressWarnings("unchecked")
-	protected int[] mergeSoldiers(RallyPoint r) {
+	public int[] mergeSoldiers(RallyPoint r) {
 		ArrayList<Soldier> occupants = r.getOccupants();
 		int initialOccupants = occupants.size();
 		

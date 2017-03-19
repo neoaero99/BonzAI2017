@@ -15,7 +15,7 @@ import javax.imageio.ImageIO;
 
 import Castles.Game;
 import Castles.Objects.*;
-import Castles.api.CastlesMap;
+import Castles.api.ShoutAction;
 import Castles.api.TeamColor;
 //import Castles.api.Color;
 import Castles.api.Turn;
@@ -25,7 +25,6 @@ import bonzai.Action;
 import bonzai.Position;
 import bonzai.Renderer;
 import bonzai.Team;
-import bonzai.ShoutAction;
 
 /**
  * Handle rendering the actual game objects on the screen. 

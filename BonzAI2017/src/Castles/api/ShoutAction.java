@@ -1,4 +1,6 @@
-package bonzai;
+package Castles.api;
+
+import bonzai.Action;
 
 /**
  * What would BonzAI be without the capability shout?
