@@ -11,12 +11,12 @@ import bonzai.Agent;
 import bonzai.ShoutAction;
 import bonzai.Team;
 
-@Agent(name="AnAI")
-public class AnAI extends AI {
+@Agent(name="FindClosest")
+public class SampleAI1 extends AI {
 	
 	private TeamColor enemy;
 	
-	public AnAI() {
+	public SampleAI1() {
 		enemy = null;
 	}
 	
@@ -45,7 +45,7 @@ public class AnAI extends AI {
 					
 					PositionData dest = enemyBuildings.get(0);
 					
-					if (dest.defVal < s.sIdx) {
+					if (dest.defVal <= s.sIdx) {
 						movedSomeSoldier = true;
 						move.addMove(s.sIdx, s.size, s.posID, dest.ID);
 					}
@@ -53,7 +53,7 @@ public class AnAI extends AI {
 				} else {
 					PositionData dest = unclaimedBuildings.get(0);
 					
-					if (dest.defVal < s.size) {
+					if (dest.defVal <= s.size) {
 						movedSomeSoldier = true;
 						move.addMove(s.sIdx, s.size, s.posID, dest.ID);
 					}
