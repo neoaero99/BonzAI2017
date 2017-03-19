@@ -53,7 +53,7 @@ public class DaneAI extends AI {
 			"Bad move, sad"
 			};
 	private final boolean taunt;
-	private final boolean test = true;
+	private final boolean test = false;
 	private int turnNumber = 0;
 	private Turn turn;
 	private ArrayList<PositionData> cStructs,uStructs,eStructs;
