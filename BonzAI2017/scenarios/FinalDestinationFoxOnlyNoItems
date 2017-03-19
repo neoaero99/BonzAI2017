@@ -1,6 +1,6 @@
-name: Atlantis
+name: Final Destination, Fox Only, No Items
 size: 25, 25
-theme: water
+theme: supernova
 playercount: 2
 
 players:
@@ -50,7 +50,3 @@ paths:
     <V2, C0, 1>
     <V3, C0, 1>
     <V4, C0, 1>
-    
-    
-    
-    

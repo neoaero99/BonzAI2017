@@ -113,16 +113,15 @@
 	<target name = "javadoc" depends = "compile">
 		<mkdir dir = "${package}/docs" />
 		<javadoc
+			access		= "public"
 			destdir     = "${package}/docs"
 			author      = "false"
 			version     = "false"
 			use         = "false"
 			windowtitle = "BonzAI 2017: Castles">
-
 			<packageset dir = "src" defaultexcludes = "yes">
-				<include name="castles/api/**"/>
-    			</packageset>
-
+				<include name="Castles/api/**"/>
+			</packageset>
 			<link href="http://docs.oracle.com/javase/7/docs/api/"/>
 		</javadoc>
 	</target>

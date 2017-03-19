@@ -2,18 +2,17 @@ import java.util.List;
 
 import Castles.api.MoveAction;
 import Castles.api.PositionData;
+import Castles.api.ShoutAction;
 import Castles.api.SoldierData;
 import Castles.api.TeamColor;
 import Castles.api.Turn;
 import bonzai.AI;
 import bonzai.Action;
 import bonzai.Agent;
-import bonzai.ShoutAction;
 import bonzai.Team;
 
 @Agent(name="AnAI")
 public class AnAI extends AI {
-	
 	private TeamColor enemy;
 	
 	public AnAI() {
@@ -24,7 +23,6 @@ public class AnAI extends AI {
 	public Action action(Turn turn) {
 		MoveAction move = new MoveAction();
 		boolean movedSomeSoldier = false;
-		
 		if (enemy == null) {
 			enemy = turn.getEnemyTeams().get(0).getColor();
 		}
