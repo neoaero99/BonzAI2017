@@ -9,7 +9,10 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Random;
 
+import Castles.CastlesMap;
 import Castles.CastlesRenderer;
+import Castles.CastlesScenario;
+import Castles.Parser;
 import Castles.Objects.*;
 import Castles.util.graph.CastlesMapGraph;
 import Castles.util.graph.Vertex;
@@ -17,7 +20,6 @@ import Castles.util.priorityq.AdaptablePQ;
 import bonzai.Action;
 import bonzai.Position;
 import bonzai.Team;
-import bonzai.ShoutAction;
 
 /**
  * A snapshot in time at the current turn. In addition to accessing current 
@@ -47,7 +49,6 @@ public class Turn {
 	// This decides the context that isValid() will be run for.
 	// Example, If I'm on team 1, I can move team 1's things.  If I'm on team 2, I can't
 	//making this a class so all the pathfinding stuff is in one place
-	Pathfinding pathfinding;
 
 	// Example, If I'm on team 1, I can move team 1's things.  If I'm on team 2, I cannot
 

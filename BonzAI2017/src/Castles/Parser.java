@@ -1,11 +1,13 @@
-package Castles.api;
+package Castles;
 
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Scanner;
+
 import Castles.Objects.*;
+import Castles.api.TeamColor;
 import Castles.util.graph.SegEdge;
 import Castles.util.graph.Vertex;
 import Castles.util.VectorND;

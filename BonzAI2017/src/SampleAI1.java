@@ -8,7 +8,7 @@ import Castles.api.Turn;
 import bonzai.AI;
 import bonzai.Action;
 import bonzai.Agent;
-import bonzai.ShoutAction;
+import Castles.api.ShoutAction;
 import bonzai.Team;
 
 @Agent(name="FindClosest")

@@ -10,10 +10,10 @@ import bonzai.Action;
  * The main action for AI's to take in the castles game for BonzAI 2017
  * 
  * 
- * Usage: Create a MoveAction at the beginning of an AI's Turn </br>
- * 		  Have AI add all the soldier movements it would like </br>
- * 		  to take in its turn.</br>
- * 		  Return the MoveAction at the end of the AI's Turn</br>
+ * Usage: Create a MoveAction at the beginning of an AI's Turn
+ * 		  Have AI add all the soldier movements it would like
+ * 		  to take in its turn.
+ * 		  Return the MoveAction at the end of the AI's Turn
  * 
  * 
  * @author Dane Jensen
