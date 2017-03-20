@@ -186,6 +186,14 @@ public class Soldier{
 		return posID;
 	}
 	
+	public String getDestID() {
+		if (given_path == null | given_path.size() < 2) {
+			return posID;
+		}
+		
+		return given_path.get( given_path.size() - 1 );
+	}
+	
 	public Soldier copy(){
 		Soldier temp = new Soldier(leaderColor, value, posID);
 		

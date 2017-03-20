@@ -517,6 +517,43 @@ public class CastlesMap {
 			}
 		}
 		
+		/** For merging ally soldier groups
+		if (occupants.size() == 2) {
+			Soldier s1 = occupants.get(0);
+			Soldier s2 = occupants.get(1);
+			
+			if (s1.getDestID().equals(s2.getDestID())) {
+				s1.setValue( s1.getValue() + s2.getValue() );
+				removeSoldiers(s2);
+			}
+			
+		} else if (occupants.size() > 2) {
+			HashMap<String, ArrayList<Soldier>> destToGroupMap = new HashMap<String, ArrayList<Soldier>>();
+			
+			for (Soldier s : occupants) {
+				ArrayList<Soldier> groups = destToGroupMap.get(s.getDestID());
+				
+				if (groups == null) {
+					groups = new ArrayList<Soldier>();
+					destToGroupMap.put(s.getDestID(), groups);
+				}
+				
+				groups.add(s);
+			}
+			
+			for (ArrayList<Soldier> groups : destToGroupMap.values()) {
+				if (groups.size() > 1) {
+					Soldier base = groups.get(0);
+					
+					for (int idx = 1; idx < groups.size(); ++idx) {
+						base.setValue( base.getValue() + groups.get(idx).getValue() );
+						removeSoldiers( groups.get(idx) );
+					}
+				}
+			}
+		}
+		/**/
+		
 		/* Return a set containing the initial number of occupying soldier
 		 * groups and the remaining soldier groups */
 		return new int[] { initialOccupants, occupants.size() };

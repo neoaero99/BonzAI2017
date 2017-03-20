@@ -319,6 +319,21 @@ public class Turn {
 	}
 	
 	/**
+	 * Returns the base position for the given team or null if the given team
+	 * is invalid.
+	 * 
+	 * @param t	The team, of which to find the base
+	 * @return	The base of the given team
+	 */
+	public PositionData getBaseFor(Team t) {
+		if (t != null) {
+			return getPosition( String.format("P%d", t.getID()) );
+		}
+		
+		return null;
+	}
+	
+	/**
 	 * Returns a list of positions that are adjacent to the position with the
 	 * given ID. If the position is invalid, an empty set is returned.
 	 * 
@@ -339,7 +354,7 @@ public class Turn {
 	/**
 	 * Returns a set of positions controlled by the team of the given color. If
 	 * the given color is null, then a list of uncontrolled positions will be
-	 * returned.
+	 * returned (this includes rally points).
 	 * 
 	 * @param teamColor	The color of the team controlling positions, of which
 	 * 					will by queried, or null to query for uncontrolled
@@ -820,8 +835,9 @@ public class Turn {
 				if (s != null) {
 					newMap.addSoldiers(s);
 				}
-				TeamColor c =b.getTeamColor();
-				if(c!=null){
+				
+				TeamColor c = b.getTeamColor();
+				if(c != null){
 						int ID =c.ordinal();
 						teamScoreAdditions[ID]+=b.getDefVal();
 				}
