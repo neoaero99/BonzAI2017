@@ -1,61 +1,47 @@
 import java.util.List;
-import java.util.Random;
 
 import Castles.api.MoveAction;
+import Castles.api.PositionData;
+import Castles.api.ShoutAction;
 import Castles.api.SoldierData;
 import Castles.api.Turn;
 import bonzai.AI;
 import bonzai.Action;
 import bonzai.Agent;
-import bonzai.ShoutAction;
 
-/**
- * A simple AI used for testing the game.
- * 
- * @author Joshua Hooker
- */
-@Agent(name = "NAAI")
+@Agent(name="NAAI")
 public class NAAI extends AI {
 	
-	private static final Random generator;
+	private List<String> path;
 	
-	static {
-		generator = new Random( System.currentTimeMillis() );
+	public NAAI() {
+		path = null;
 	}
-
+	
 	@Override
 	public Action action(Turn turn) {
-		double prob = generator.nextDouble();
 		
-		/**
-		
-		List<SoldierData> soldiers = turn.getSoldiersControlledBy(turn.getMyTeam().getColor());
-		
-		System.out.printf("Group #: %d\n", soldiers.size());
-		
-		for (SoldierData s : soldiers) {
-			System.out.printf("%s\n", s);
-		}
-		
-		System.out.println();
-		
-		/**
-		
-		if (prob >= 0.1) {
-			return new ShoutAction("...");
-		}
-		
-		/**/
-		
-		MoveAction ma = new MoveAction();
-		
-		if (turn.getMyTeam().getID() == 0) {
-			ma.addMove(0, 1, "P0", "P1");
+		if (path == null) {
+			PositionData myBase = turn.getBaseFor( turn.getMyTeam() );
+			PositionData enemyBase = turn.getBaseFor( turn.getEnemyTeams().get(0) );
 			
-		} else {
-			ma.addMove(0, 1, "P1", "P0");
+			path = turn.getPath(myBase.ID, enemyBase.ID);
 		}
 		
-		return ma;
+		if (turn.getTurnsRemaining() <= path.size()) {
+			List<SoldierData> soldiers = turn.getSoldiersControlledBy( turn.getMyTeam().getColor() );
+			
+			if (soldiers.size() > 0) {
+				MoveAction move = new MoveAction();
+				SoldierData s = soldiers.get(0);
+				
+				move.addMove(s.sIdx, s.size, s.posID, path.get( path.size() - 1 ));
+				
+				return move;
+			}
+		}
+		
+		return new ShoutAction( Integer.toString( turn.getTurnsRemaining() ) );
 	}
+
 }

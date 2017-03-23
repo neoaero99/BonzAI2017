@@ -11,6 +11,7 @@ import java.util.concurrent.atomic.AtomicReference;
 import Castles.Objects.SoldierState;
 import Castles.api.MoveAction;
 import Castles.api.MoveSoldier;
+import Castles.api.ShoutAction;
 
 public class AIHost {
 	private final Process process;
@@ -188,19 +189,10 @@ public class AIHost {
 						SoldierState state = SoldierState.STANDBY;
 						// parse the soldier state based on its name
 						if (stateName.equals("MOVING")) {
-							state = SoldierState.MOVING;
-							
-						} else if (stateName.equals("CONFLICT")) {
-							state = SoldierState.CONFLICT;
-							
-						} else if (stateName.equals("DEFENDING")) {
-							state = SoldierState.DEFENDING;
-							
-						} else if (stateName.equals("SIEGING")) {
-							state = SoldierState.SIEGING;
+							state = SoldierState.MOVING;	
 						}
 						
-						action.addUpdate(sIdx,  pID,  state);
+						action.addUpdate(sIdx, pID, state);
 					}
 				}
 				

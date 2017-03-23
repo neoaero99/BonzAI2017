@@ -3,6 +3,7 @@ package Castles.util.graph;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.List;
 
 import Castles.Objects.RallyPoint;
 
@@ -35,6 +36,24 @@ public class Vertex extends Node {
 	 */
 	protected void addConnection(SegEdge edge) {
 		incEdges.put(edge.ID, edge);
+	}
+	
+	/**
+	 * Compiles a list of IDs of the waypoints, which connect this node to each
+	 * of its incident edges.
+	 * 
+	 * @return	A list of IDs of positions adjacent to this vertex
+	 */
+	public ArrayList<String> adjPositionIDs() {
+		ArrayList<SegEdge> incEdges = incidentEdges();
+		ArrayList<String> wpIDs = new ArrayList<String>();
+		
+		for (SegEdge e : incEdges) {
+			// Add the ID of each adjacent waypoint
+			wpIDs.add(e.getWayPointConnection(this));
+		}
+		
+		return wpIDs;
 	}
 	
 	/**

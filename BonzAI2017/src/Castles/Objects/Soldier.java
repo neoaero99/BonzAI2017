@@ -6,7 +6,8 @@ import java.util.List;
 
 import javax.swing.JComponent;
 
-import Castles.api.Color;
+import Castles.api.TeamColor;
+import DavidMohrhardt.animator.Animator;
 
 /**
  * Class:	Soldier.java
@@ -47,17 +48,10 @@ import Castles.api.Color;
  * 
  */
 
-public class Soldier extends JComponent {
+public class Soldier{
+
 	
-	// The radius used in collision
-	public final static float radius;
-	
-	// The shared sprite for the soldier
-	private static BufferedImage sprite;
-	
-	private static final long serialVersionUID = 3166707557130028703L;
-	
-	private Color leaderColor;
+	private TeamColor leaderColor;
 	// The combat value this unit has
 	private int value;
 	// The current status of the soldier (always defaults to standby)
@@ -68,9 +62,8 @@ public class Soldier extends JComponent {
 	// The ID of the position where the soldier is on the map
 	private String posID;
 	
-	static {
-		radius = 0f;
-	}
+	private Animator animator;
+	
 	
 	/**
 	 * Method:	Soldier(VectorND base_position)
@@ -84,7 +77,7 @@ public class Soldier extends JComponent {
 	 * 
 	 * @author David Mohrhardt
 	 */
-	public Soldier(Color teamColor, int iniVal, String posID) {
+	public Soldier(TeamColor teamColor, int iniVal, String posID) throws IllegalArgumentException{
 		
 		if (posID == null) {
 			throw new NullPointerException("Soldier position cannot be null!\n");
@@ -96,8 +89,22 @@ public class Soldier extends JComponent {
 		
 		this.posID = posID;
 		given_path = new ArrayList<String>();
+		
+		if (teamColor == TeamColor.RED){
+			animator = new Animator("art/sprite_sheets/redsoldier.png", "art/sprite_sheets/redsoldier.ssc");
+		}
+		else if (teamColor == TeamColor.BLUE){
+			animator = new Animator("art/sprite_sheets/bluesoldier.png", "art/sprite_sheets/bluesoldier.ssc");
+		}
+		else{
+			animator = null;
+			throw new IllegalArgumentException("Bad team");
+		}
 	}
 	
+	public Animator getAnimator(){
+		return animator;
+	}
 	public static void quickSort(List<Soldier> s){
 		if(s.size()<=1){
 			return;
@@ -116,7 +123,7 @@ public class Soldier extends JComponent {
 		quickSort(s.subList(part+1, s.size()));
 	}
 	
-	public Color getLeaderColor() {
+	public TeamColor getLeaderColor() {
 		return leaderColor;
 	}
 
@@ -177,6 +184,14 @@ public class Soldier extends JComponent {
 
 	public String getPositionID() {
 		return posID;
+	}
+	
+	public String getDestID() {
+		if (given_path == null | given_path.size() < 2) {
+			return posID;
+		}
+		
+		return given_path.get( given_path.size() - 1 );
 	}
 	
 	public Soldier copy(){

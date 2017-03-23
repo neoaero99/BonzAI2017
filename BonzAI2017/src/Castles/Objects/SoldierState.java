@@ -12,5 +12,5 @@ package Castles.Objects;
  */
 
 public enum SoldierState {
-	STANDBY, MOVING, CONFLICT, SIEGING, DEFENDING
+	STANDBY, MOVING;
 }

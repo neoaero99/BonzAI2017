@@ -5,42 +5,45 @@ import bonzai.*;
 
 @Agent(name ="Captain No-Beard")
 public class DanAI extends AI {
+
+	Team myTeam;
 	@Override
 	public Action action(Turn turn) {
-		Team myTeam=turn.getMyTeam();
-		List<PositionData> myPositions =turn.getPositionsControlledBy(myTeam.getColor());
-		int max=-1;
-		PositionData data=null;
+			Team myTeam=turn.getMyTeam();
+		if(myTeam==null){
+			return new ShoutAction("No team? BUG!");
+		}
+		TeamColor t=myTeam.getColor();
+		if(t==null){
+			return new ShoutAction("No color? BUG!");
+		}
+		int numSoldiers=0;
+		List<Team> teams=turn.getAllTeams();
+		teams.remove(myTeam);
+		List<PositionData> myPositions =turn.getPositionsControlledBy(t);
+		MoveAction movements= new MoveAction();
 		for(PositionData p:myPositions){
-			int [] sizes=p.occupantSizes;
-			int temp=0;
-			for(int i=0;i<sizes.length;i++){
-				temp+=sizes[i];
+			int max=0;
+			for(int i=0;i<p.occupantData.length;i++){
+				numSoldiers++;
+				max+=p.occupantData[i].size;
 			}
-			if(temp>max){
-				data=p;
+			Team otherTeam=null;
+			int i=(int)Math.random()*teams.size();
+			otherTeam=teams.get(i);
+			if(otherTeam==null){
+				return new ShoutAction("Captain No-Beard wins my default! No other Challengers!");
+			}
+			List<PositionData> otherData=turn.getPositionsControlledBy(null);
+			int x=(int)Math.random()*otherData.size();
+			PositionData go=otherData.get(x);
+			for(int j=0;j<p.occupantData.length;j++){
+				movements.addMove(j, max, p.ID, go.ID);
 			}
 		}
-		if(max<=0){
+		if(numSoldiers<=0){
 			return new ShoutAction("I be Captain No-Beard!");
 		}
-		List<Team> teams=turn.getAllTeams();
-		Team otherTeam=null;
-		while(true){
-			int i=(int)Math.random()*teams.size();
-			if(!teams.get(i).equals(myTeam)){
-				otherTeam=teams.get(i);
-				break;
-			}
-		}
-		if(otherTeam==null){
-			return new ShoutAction("Captain No-Beard wins my default! No other Challengers!");
-		}
-		List<PositionData> otherData=turn.getPositionsControlledBy(otherTeam.getColor());
-		int i=(int)Math.random()*otherData.size();
-		PositionData go=otherData.get(i);
-		List<String> path=turn.getPath(data.ID,go.ID);
-		return new MoveAction();
+		return movements;
 	}
-
 }

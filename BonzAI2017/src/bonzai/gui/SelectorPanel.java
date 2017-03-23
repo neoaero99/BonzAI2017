@@ -87,6 +87,20 @@ public class SelectorPanel extends JPanel implements ActionListener, FileListene
 		for(MutableComboBoxModel<Jar> model : this.jars) {
 			model.addElement(null);
 		}
+		
+		File f = new File("CompetitorAI....");
+		
+		try {
+			Jar jar = game.jar(f);
+			for(MutableComboBoxModel<Jar> model : this.jars) {
+				int x = 1; 
+				for(; x < model.getSize() && model.getElementAt(x).compareTo(jar) < 0; x++);
+				model.insertElementAt(jar, x);
+			}
+		
+		} catch (Exception Ex) {
+			Ex.printStackTrace();
+		}
 
 		for (File file : this.jarWatcher.files()) {
 			try {
@@ -98,6 +112,7 @@ public class SelectorPanel extends JPanel implements ActionListener, FileListene
 				}
 			} 
 			catch (Exception e) {
+				e.printStackTrace();
 				System.out.printf("AI file %s failed to load%n", file);
 			}
 		}
