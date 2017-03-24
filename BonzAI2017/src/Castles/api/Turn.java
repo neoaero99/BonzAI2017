@@ -565,10 +565,17 @@ public class Turn {
 		return turnNumber == 0;
 	}
 	
+	/**
+	 * Determines if the game has finished. This can occur if there are no more
+	 * turns remaining or an AI controls all buildings on the map.
+	 * 
+	 * @return	The end of the game has been reached
+	 */
 	public boolean gameOver() {
 		boolean AIWithNoBuildings = false;
 		
 		for (Team t : map.getTeams()) {
+			// Does an AI control no buildings
 			AIWithNoBuildings = getPositionsControlledBy(t.getColor()).size() == 0;
 		}
 		
@@ -808,25 +815,7 @@ public class Turn {
 		 */
 		ArrayList<RallyPoint> rally = newMap.getAllPositions();
 		for (RallyPoint r: rally) {
-			String originOccupants = r.getOccupants().toString();
 			newMap.mergeSoldiers(r);
-			TeamColor tc = null;
-			
-			for (Soldier s : r.getOccupants()) {
-				if (tc == null) {
-					tc = s.getLeaderColor();
-					
-				} else if (s.getLeaderColor() != tc) {
-					System.out.printf("%s", r.ID);
-					
-					if (r instanceof Building){
-						System.out.printf(" %s", ((Building)r).getTeamColor());
-					}
-					
-					System.out.printf("\n%s\n%s\n", originOccupants, r.getOccupants());
-					throw new RuntimeException("Soldier merge error!");
-				}
-			}
 			
 			/* Determine if the remaining soldiers on a position can capture an
 			 * unclaimed or enemy position. */
