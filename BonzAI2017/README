@@ -18,6 +18,11 @@ If you plan to compile through the command line:
 	*******	     directory and try again
 	3. enjoy
 
+If you want to run the castles jar without compiling your AI, you MUST navigate the the BonzAI2017 sub folder
+inside of the BonzAI2017 parent folder and use the command:
+	java -jar castles.jar
+Otherwise the communication won't work between the AI's and the host.  Thank you for your cooperation.
+
 
 In order for your AI to compile correctly and run, make sure to change the
 @Agent annotation at the top of your ai to reflect your team name, faliure to
