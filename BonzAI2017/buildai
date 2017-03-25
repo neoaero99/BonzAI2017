@@ -10,12 +10,17 @@ do
 	cp $entry $NAME/
 	javac $NAME/*
 	jar cf "../BonzAI2017/ais/$NAME.jar" $NAME/*.class
+	cp "../BonzAI2017/ais/$NAME.jar" "../ais/$NAME.jar"
 	rm -rf $NAME
+	rm -rf */*.class
 done 
 cd ..
 echo "removing old log files"
-rm BonzAI2017/*.out BonzAI2017/*.err
+rm BonzAI2017/*.out 
+rm BonzAI2017/*.err
 
 
 echo  "launching Bonzai2017 game"
-java -jar BonzAI2017/castles.jar
+cd BonzAI2017
+java -jar castles.jar
+cd ..

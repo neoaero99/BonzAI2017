@@ -163,7 +163,7 @@ public class Turn {
 		CastlesMap map = null;
 		
 		try {
-			map = Parser.parseFile("scenarios/testmap.dat");
+			map = Parser.parseFile("scenarios/triangles.dat");
 			
 			Turn t = new Turn(0, 1, map, 5);
 			TeamColor enemy = t.getEnemyTeams().get(0).getColor();
@@ -173,7 +173,7 @@ public class Turn {
 			System.out.println(t.getMyTeam().getColor());
 			System.out.println(enemy);
 			
-			/**
+			/**/
 			if (soldiers.size() > 0) {
 				SoldierData s = soldiers.get(0);
 				List<PositionData> closestBuildings = t.getClosestByColor(s.posID, null);
@@ -182,7 +182,7 @@ public class Turn {
 				List<String> path = t.getPath(s.posID, closestBuildings.get(0).ID);
 				
 				System.out.printf("%s\n", path);
-				/**
+				/**/
 			}
 			
 			/**
@@ -195,7 +195,7 @@ public class Turn {
 			path = map.getPath("!C0-V0:1", "!P0-R0:1");
 			System.out.printf("%s\n", path);
 			
-			/**/
+			/**
 			RallyPoint r = map.getPosition("R0");
 			//((Building)r).setTeamColor(TeamColor.BLUE);
 			
@@ -458,7 +458,7 @@ public class Turn {
 	 */
 	public List<PositionData> getClosestByColor(String refID, TeamColor target) {
 		List<PositionData> positions = new ArrayList<PositionData>();
-		PositionData p = this.getPosition(refID);
+		PositionData p = getPosition(refID);
 		
 		if (p != null) {
 			HashMap<String, Boolean> posVisited = new HashMap<String, Boolean>();

@@ -110,10 +110,22 @@ public class SegEdge extends Node {
 	protected String getWayPointConnection(Vertex node) {
 		
 		if (node == first) {
-			return waypointIDs[0];
+			
+			if (waypointIDs.length == 0) {
+				return second.ID;
+				
+			} else {
+				return waypointIDs[0];
+			}
 			
 		} else if (node == second) {
-			return waypointIDs[waypointIDs.length - 1];
+			
+			if (waypointIDs.length == 0) {
+				return first.ID;
+				
+			} else {
+				return waypointIDs[waypointIDs.length - 1];
+			}
 		}
 		
 		return null;
