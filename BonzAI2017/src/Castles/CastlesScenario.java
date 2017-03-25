@@ -10,7 +10,7 @@ import Castles.api.TeamColor;
 import bonzai.Team;
 
 public class CastlesScenario implements bonzai.Scenario {
-  public static final int NUM_TURNS = 15;
+  public static final int NUM_TURNS = 2000;
 
 	
 	//TODO 2017: This is used in simulation. If the turns are not applied at the same time,
