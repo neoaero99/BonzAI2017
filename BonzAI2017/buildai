@@ -2,12 +2,15 @@ echo "removing old ais"
 rm -rf BonzAI2017/ais/*
 echo "compiling all ais"
 cd src
-for entry in ./*.java
+for entry in *.java
 do
-	echo "compiling $entry"
-	javac $entry $entry.class
-	jar cf "../BonzAI2017/ais/$entry.jar" $entry.class
-	rm -rf $entry
+	NAME="${entry%.*}"
+	echo "compiling $NAME"
+	mkdir $NAME
+	cp $entry $NAME/
+	javac $NAME/*
+	jar cf "../BonzAI2017/ais/$NAME.jar" $NAME/*.class
+	rm -rf $NAME
 done 
 cd ..
 echo "removing old log files"
