@@ -8,7 +8,9 @@ import Castles.api.TeamColor;
 import Castles.api.Turn;
 import bonzai.AI;
 import bonzai.Action;
+import bonzai.Agent;
 
+@Agent(name="FailAI")
 public class SampleAI2 extends AI {
 	
 	private TeamColor enemy;
@@ -19,8 +21,10 @@ public class SampleAI2 extends AI {
 
 	@Override
 	public Action action(Turn turn) {
-		// TODO
-		return null;
+
+		while (true) {
+			
+		}
 	}
 	
 	private List<SoldierData> greatestSize(Turn t) {
