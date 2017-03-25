@@ -126,7 +126,8 @@ public class CastlesMap {
 				// The position is on a vertex
 				return graph.getVertex(ID).adjPositionIDs();
 			}
-		
+			
+			
 		} catch (Exception Ex) {
 			// Invalid ID
 			return new ArrayList<String>();
