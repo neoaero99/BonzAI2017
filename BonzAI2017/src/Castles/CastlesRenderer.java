@@ -15,7 +15,7 @@ import javax.imageio.ImageIO;
 
 import Castles.Game;
 import Castles.Objects.*;
-import Castles.api.CastlesMap;
+import Castles.api.ShoutAction;
 import Castles.api.TeamColor;
 //import Castles.api.Color;
 import Castles.api.Turn;
@@ -25,7 +25,6 @@ import bonzai.Action;
 import bonzai.Position;
 import bonzai.Renderer;
 import bonzai.Team;
-import bonzai.ShoutAction;
 
 /**
  * Handle rendering the actual game objects on the screen. 
@@ -72,7 +71,6 @@ public class CastlesRenderer extends Renderer {
 	private static BufferedImage[] rallyPointImages;
 	private static BufferedImage rallyPointImage,villageImage,castleImage;
 	private static boolean imagesLoaded = false;
-	private static int gridWidth, gridHeight;
 
 	public CastlesRenderer() {
 		soldierUpdateCount = 0;
@@ -116,8 +114,6 @@ public class CastlesRenderer extends Renderer {
 	 * Render a preview of the map, for displaying inside of the launcher.
 	 **/
 	public static void render(Graphics2D g, CastlesMap map) {
-		gridHeight = map.getHeight();
-		gridWidth = map.getWidth();
 		List<Castles.api.TeamColor> colors = new LinkedList<Castles.api.TeamColor>(getColors().keySet());
 		Game game = new Game(0, 2, map, colors);
 		render(g, game.turn(0), game.turn(0), null, 1);
@@ -242,7 +238,7 @@ public class CastlesRenderer extends Renderer {
 			int y2 = r2.getPosition().getY();
 			
 			g.setColor(Color.PINK);
-			g.drawLine(x1, y1 - gridHeight, x2, y2 - gridHeight);
+			g.drawLine(x1, y1 - map.getHeight(), x2, y2 - map.getHeight());
 		}
 		
 		g.setStroke(origin);
@@ -302,10 +298,10 @@ public class CastlesRenderer extends Renderer {
 							halfImgHeight = soldierImgSF * image.getHeight() / 2.0;
 					
 					//g.translate(-halfImgWidth, -halfImgHeight);
-					drawToScale(g, image, px, py, 0, soldierImgSF, 0);
+					drawToScale(g, map, image, px, py, 0, soldierImgSF, 0);
 					//g.translate(halfImgWidth, halfImgHeight);
 					
-					drawText(g, Integer.toString(newSoldier.getValue()), px + halfImgWidth / 2f, py + halfImgHeight / 2f - gridHeight, Color.BLACK, Color.WHITE, 0.5f);
+					drawText(g, Integer.toString(newSoldier.getValue()), px + halfImgWidth / 2f, py + halfImgHeight / 2f - map.getHeight(), Color.BLACK, Color.WHITE, 0.5f);
 				}
 			}
 		}
@@ -342,21 +338,21 @@ public class CastlesRenderer extends Renderer {
 					int teamIdx = b.getTeamColor().ordinal() + 1;
 					
 					g.translate(0.2, 0.75);
-					drawToScale(g,rallyPointImages[teamIdx],p.getX(),p.getY(),0,2f*posImgSF/3f,0);
+					drawToScale(g, map, rallyPointImages[teamIdx],p.getX(),p.getY(),0,2f*posImgSF/3f,0);
 					g.translate(-0.2, -0.75);
 				}
 				
 				// Draw the image for the position based on its building type
 				if (b.type == PType.BASE || b.type == PType.CASTLE) {
-					drawToScale(g,castleImage,p.getX(),p.getY(),0,posImgSF,0);
+					drawToScale(g, map, castleImage,p.getX(),p.getY(),0,posImgSF,0);
 					
 				} else {
-					drawToScale(g,villageImage,p.getX(),p.getY(),0,posImgSF,0);
+					drawToScale(g, map, villageImage,p.getX(),p.getY(),0,posImgSF,0);
 				}
 				
 			} else {
 				// Position is a rally point
-				drawToScale(g,rallyPointImages[0],p.getX(),p.getY(),0,2f*posImgSF/3f,0);
+				drawToScale(g, map, rallyPointImages[0],p.getX(),p.getY(),0,2f*posImgSF/3f,0);
 			}	
 		}
 	}
@@ -372,7 +368,7 @@ public class CastlesRenderer extends Renderer {
 				Position pos = turn.getRanOccupiedPos( t.getColor() );
 				
 				if (pos == null) {
-					pos = new Position(CastlesRenderer.gridWidth / 2, CastlesRenderer.gridHeight / 2);
+					pos = new Position(turn.getMapWidth() / 2, turn.getMapHeight() / 2);
 				}
 				
 				String message = ((ShoutAction)a).getMessage();
@@ -392,7 +388,7 @@ public class CastlesRenderer extends Renderer {
 				bubble.arcwidth = .4f;
 	
 				bubble.x = pos.getX() - offsetX;
-				bubble.y = pos.getY() - gridHeight;
+				bubble.y = pos.getY() - turn.getMapHeight();
 	
 				g.setColor(new Color(245, 245, 245, 200));
 				g.fill(bubble);
@@ -428,9 +424,9 @@ public class CastlesRenderer extends Renderer {
 
 		//Remember that transforms happen in reverse!
 		AffineTransform at = new AffineTransform();
-
+		
 		at.translate(0, -mapHeight);
-		at.scale(scaleWidth * mapWidth,scaleHeight * mapHeight);
+		at.scale(scaleWidth * mapWidth, scaleHeight * mapHeight);
 		g.transform(at);
 
 		g.drawImage(backgroundImage,0,0,null);
@@ -472,23 +468,19 @@ public class CastlesRenderer extends Renderer {
 	 * @param y - y position in grid to draw
 	 * @param rotation - rotation of object
 	 */
-	private static void drawToScale(Graphics2D g, BufferedImage img, int x, int y, float rotation, float scaleFactor, float alpha) {
-		
-		//get the dimentions of the background
-		int bx = backgroundImage.getWidth();
-		int by = backgroundImage.getHeight();
+	private static void drawToScale(Graphics2D g, CastlesMap map, BufferedImage img, int x, int y, float rotation, float scaleFactor, float alpha) {
 
-		//get the dimentions of the image to be rendered
-		int dx = img.getWidth();
-		int dy = img.getHeight();
+		// Scale the dimensions of the image
+		int gx = (int)(scaleFactor * img.getWidth());
+		int gy = (int)(scaleFactor * img.getHeight());
 		
-		//get the dimentions of a grid space
-		int gx = (int)(scaleFactor * dx);
-		int gy = (int)(scaleFactor * dy);
+		AffineTransform origin = g.getTransform();
 		
 		g.translate(-gx / 2.0, -gy / 2.0);
-		g.drawImage(img, x, y - gridHeight, gx, gy, null);
+		g.drawImage(img, x, y - map.getHeight(), gx, gy, null);
 		g.translate(gx / 2.0, gy / 2.0);
+		
+		g.setTransform(origin);
 	}
 
 	// TODO Tweak transformation (possibly add in custom transform functions?)

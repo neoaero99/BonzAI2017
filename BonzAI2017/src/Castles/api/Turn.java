@@ -1,6 +1,7 @@
 package Castles.api;
 
 import java.awt.Graphics2D;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -9,7 +10,10 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Random;
 
+import Castles.CastlesMap;
 import Castles.CastlesRenderer;
+import Castles.CastlesScenario;
+import Castles.Parser;
 import Castles.Objects.*;
 import Castles.util.graph.CastlesMapGraph;
 import Castles.util.graph.Vertex;
@@ -17,7 +21,6 @@ import Castles.util.priorityq.AdaptablePQ;
 import bonzai.Action;
 import bonzai.Position;
 import bonzai.Team;
-import bonzai.ShoutAction;
 
 /**
  * A snapshot in time at the current turn. In addition to accessing current 
@@ -47,7 +50,6 @@ public class Turn {
 	// This decides the context that isValid() will be run for.
 	// Example, If I'm on team 1, I can move team 1's things.  If I'm on team 2, I can't
 	//making this a class so all the pathfinding stuff is in one place
-	Pathfinding pathfinding;
 
 	// Example, If I'm on team 1, I can move team 1's things.  If I'm on team 2, I cannot
 
@@ -167,11 +169,11 @@ public class Turn {
 			TeamColor enemy = t.getEnemyTeams().get(0).getColor();
 			List<SoldierData> soldiers = t.getSoldiersControlledBy(t.getMyTeam().getColor());
 			
-			/**/
+			/**
 			System.out.println(t.getMyTeam().getColor());
 			System.out.println(enemy);
 			
-			/**/
+			/**
 			if (soldiers.size() > 0) {
 				SoldierData s = soldiers.get(0);
 				List<PositionData> closestBuildings = t.getClosestByColor(s.posID, null);
@@ -180,7 +182,7 @@ public class Turn {
 				List<String> path = t.getPath(s.posID, closestBuildings.get(0).ID);
 				
 				System.out.printf("%s\n", path);
-				/**/
+				/**
 			}
 			
 			/**
@@ -193,23 +195,17 @@ public class Turn {
 			path = map.getPath("!C0-V0:1", "!P0-R0:1");
 			System.out.printf("%s\n", path);
 			
-			/**
+			/**/
 			RallyPoint r = map.getPosition("R0");
-			//((Building)r).setTeamColor(Color.RED);
+			//((Building)r).setTeamColor(TeamColor.BLUE);
 			
-			Soldier s1 = new Soldier(TeamColor.RED, 6, r.ID);
-			Soldier s2 = new Soldier(TeamColor.YELLOW, 5, r.ID);
-			Soldier s3 = new Soldier(TeamColor.RED, 3, r.ID);
-			Soldier s4 = new Soldier(TeamColor.YELLOW, 2, r.ID);
-			Soldier s5 = new Soldier(TeamColor.RED, 4, r.ID);
-			Soldier s6 = new Soldier(TeamColor.YELLOW, 9, r.ID);
+			Soldier s1 = new Soldier(TeamColor.RED, 13, r.ID);
+			Soldier s2 = new Soldier(TeamColor.RED, 6, r.ID);
+			Soldier s3 = new Soldier(TeamColor.RED, 8, r.ID);
 			
 			map.addSoldiers(s1);
 			map.addSoldiers(s2);
 			map.addSoldiers(s3);
-			map.addSoldiers(s4);
-			map.addSoldiers(s5);
-			map.addSoldiers(s6);
 			
 			int[] sizeDiff = map.mergeSoldiers(r);
 			
@@ -318,6 +314,21 @@ public class Turn {
 	}
 	
 	/**
+	 * Returns the base position for the given team or null if the given team
+	 * is invalid.
+	 * 
+	 * @param t	The team, of which to find the base
+	 * @return	The base of the given team
+	 */
+	public PositionData getBaseFor(Team t) {
+		if (t != null) {
+			return getPosition( String.format("P%d", t.getID()) );
+		}
+		
+		return null;
+	}
+	
+	/**
 	 * Returns a list of positions that are adjacent to the position with the
 	 * given ID. If the position is invalid, an empty set is returned.
 	 * 
@@ -338,7 +349,7 @@ public class Turn {
 	/**
 	 * Returns a set of positions controlled by the team of the given color. If
 	 * the given color is null, then a list of uncontrolled positions will be
-	 * returned.
+	 * returned (this includes rally points).
 	 * 
 	 * @param teamColor	The color of the team controlling positions, of which
 	 * 					will by queried, or null to query for uncontrolled
@@ -552,6 +563,23 @@ public class Turn {
 	 */
 	public boolean isFirstTurn() {
 		return turnNumber == 0;
+	}
+	
+	/**
+	 * Determines if the game has finished. This can occur if there are no more
+	 * turns remaining or an AI controls all buildings on the map.
+	 * 
+	 * @return	The end of the game has been reached
+	 */
+	public boolean gameOver() {
+		boolean AIWithNoBuildings = false;
+		
+		for (Team t : map.getTeams()) {
+			// Does an AI control no buildings
+			AIWithNoBuildings = getPositionsControlledBy(t.getColor()).size() == 0;
+		}
+		
+		return getTurnsRemaining() <= 1 || AIWithNoBuildings;
 	}
 
 	/**
@@ -819,8 +847,9 @@ public class Turn {
 				if (s != null) {
 					newMap.addSoldiers(s);
 				}
-				TeamColor c =b.getTeamColor();
-				if(c!=null){
+				
+				TeamColor c = b.getTeamColor();
+				if(c != null){
 						int ID =c.ordinal();
 						teamScoreAdditions[ID]+=b.getDefVal();
 				}

@@ -12,7 +12,6 @@ import java.util.Queue;
 import bonzai.AIHost;
 import bonzai.Action;
 import bonzai.Team;
-import Castles.api.CastlesScenario;
 import Castles.api.*;
 
 /**
@@ -48,7 +47,7 @@ public class Simulation extends Thread {
 		
 		//Initialize the game with the required jars and scenario.
 		//Effectively, this makes the game at it's initial point, before anyone has taken an action.
-		this.game = ((Castles.api.CastlesScenario)scenario).instantiate(jars);
+		this.game = ((Castles.CastlesScenario)scenario).instantiate(jars);
 		
 		this.actions = new ArrayList<Action>();
 	}

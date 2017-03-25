@@ -1,4 +1,4 @@
-package Castles.api;
+package Castles;
 
 import java.awt.*;
 import java.awt.image.*;
@@ -6,12 +6,11 @@ import java.io.*;
 import java.util.*;
 import java.util.List;
 
-import Castles.CastlesRenderer;
-import Castles.Game;
+import Castles.api.TeamColor;
 import bonzai.Team;
 
 public class CastlesScenario implements bonzai.Scenario {
-  public static final int NUM_TURNS = 15;
+  public static final int NUM_TURNS = 50;
 
 	
 	//TODO 2017: This is used in simulation. If the turns are not applied at the same time,

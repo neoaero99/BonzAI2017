@@ -11,6 +11,7 @@ import java.util.concurrent.atomic.AtomicReference;
 import Castles.Objects.SoldierState;
 import Castles.api.MoveAction;
 import Castles.api.MoveSoldier;
+import Castles.api.ShoutAction;
 
 public class AIHost {
 	private final Process process;

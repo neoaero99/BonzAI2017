@@ -17,6 +17,7 @@ import java.util.Scanner;
 import java.util.Set;
 
 import bonzai.Jar;
+import Castles.CastlesScenario;
 import Castles.Simulation;
 import Castles.api.*;
 import Castles.util.*;
