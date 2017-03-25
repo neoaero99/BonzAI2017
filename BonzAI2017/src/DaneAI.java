@@ -147,7 +147,7 @@ public class DaneAI extends AI {
 					JohnLucPicard = s;
 				}
 			}
-			move.addMove(JohnLucPicard.sIdx, p.soldiersCommited, p.to.ID, p.from.ID);
+			move.addMove(JohnLucPicard.sIdx, p.soldiersCommited, p.from.ID, p.to.ID);
 		}
 		
 		return move;
@@ -164,7 +164,7 @@ public class DaneAI extends AI {
 			//from each owned buildings
 			for(PositionData unowned : uStructs){
 				if(getSoldierCount(owned) > getSoldierCount(unowned) + 1){
-					DualLinkList<String> temp = (DualLinkList<String>) turn.getPath(owned.ID, unowned.ID);
+					ArrayList<String> temp = (ArrayList<String>) turn.getPath(owned.ID, unowned.ID);
 					pm.add(new Path(temp, temp.size(),unowned,owned,getSoldierCount(unowned) +1));
 				}
 			}
@@ -172,7 +172,7 @@ public class DaneAI extends AI {
 			//finds the list of turns I can use for un-owned buildings
 			//from each owned building
 			for(PositionData eowned : eStructs){
-				DualLinkList<String> temp = (DualLinkList<String>) turn.getPath(owned.ID, eowned.ID);
+				ArrayList<String> temp = (ArrayList<String>) turn.getPath(owned.ID, eowned.ID);
 				int count = getSoldierCount(eowned);
 				count += getTroopGain(eowned) * temp.size();
 				if(getSoldierCount(owned) > count + 1){
@@ -209,8 +209,8 @@ public class DaneAI extends AI {
 		
 		//testing if the file is recompiling
 		
-		if(Josh == null) return 0;
-		count = Josh.size;
+		if(Josh == null) return p.defVal;
+		count = Josh.size + p.defVal;
 		for(Path path: currentMovements){
 			if(p.ID.equals(path.from)){
 				count -= path.soldiersCommited;
@@ -221,11 +221,11 @@ public class DaneAI extends AI {
 	
 	private class Path implements Comparable<Path>{
 		@SuppressWarnings("unused")
-		DualLinkList<String> p = new DualLinkList<>();
+		ArrayList<String> p = new ArrayList<>();
 		int length;
 		PositionData to,from;
 		int soldiersCommited;
-		public Path(DualLinkList<String> temp, int length, PositionData unowned, PositionData owned, int comitted){
+		public Path(ArrayList<String> temp, int length, PositionData unowned, PositionData owned, int comitted){
 			this.p = temp;
 			this.length = length;
 			this.to = unowned;
