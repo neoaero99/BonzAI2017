@@ -91,6 +91,7 @@ public class Parser {
 					
 				case PARSE_PATH:
 					// Connect the two vertices and add the edge
+					//System.out.println(row);
 					Vertex v1 = getVertex(vertices, row[0]);
 					Vertex v2 = getVertex(vertices, row[1]);
 					SegEdge edge = new SegEdge(Integer.parseInt(row[2]), v1, v2);

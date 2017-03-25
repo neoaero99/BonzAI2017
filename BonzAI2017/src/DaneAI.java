@@ -205,6 +205,11 @@ public class DaneAI extends AI {
 				break;
 			}
 		}
+		
+		
+		//testing if the file is recompiling
+		
+		if(Josh == null) return 0;
 		count = Josh.size;
 		for(Path path: currentMovements){
 			if(p.ID.equals(path.from)){

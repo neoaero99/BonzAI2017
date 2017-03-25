@@ -1,0 +1,48 @@
+# BONZAI CONFIDENTIAL
+# This map was auto generated
+
+name: Confirmed
+size: 20, 20
+theme: desert
+playercount: 2
+
+players:
+    <4, 11, P0>
+    <14, 11, P1>
+
+castles:
+    <1, 17, C0>
+    <17, 17, C1>
+    <9, 2, C2>
+
+villages:
+    <7, 9, V0>
+    <7, 13, V1>
+    <11, 13, V2>
+    <11, 9, V3>
+
+rally:
+    <9, 9, R0>
+    <8, 11, R1>
+    <10, 11, R2>
+    <9, 13, R3>
+
+paths:
+    <C0, P0, 1>
+    <C1, P0, 1>
+    <C1, P1, 1>
+    <P1, C2, 1>
+    <C0, C2, 1>
+    <P0, V0, 1>
+    <P0, V1, 1>
+    <V1, R3, 1>
+    <R3, V2, 1>
+    <P1, V2, 1>
+    <P1, V3, 1>
+    <V3, R0, 1>
+    <R0, V0, 1>
+    <R0, R1, 1>
+    <R0, R2, 1>
+    <R1, R3, 1>
+    <R2, R3, 1>
+

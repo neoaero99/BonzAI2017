@@ -86,7 +86,13 @@ public class Building extends RallyPoint {
 	 * @return	A new soldier, if it was created, or null
 	 */
 	public Soldier reinforce() {
-				
+		int total=0;
+		for(Soldier S: onPoint){
+			total+=S.getValue();
+		}
+		if(type==PType.BASE&&total>100){
+			return null;
+		}
 		if (myTeamColor != null) {
 			/* Add the reinforcements to an already existing soldier group or add a
 			 * new soldier group. */
