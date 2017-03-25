@@ -1,0 +1,18 @@
+echo "removing old ais"
+rm -rf BonzAI2017/ais/*
+echo "compiling all ais"
+cd src
+for entry in ./*.java
+do
+	echo "compiling $entry"
+	javac $entry $entry.class
+	jar cf "../BonzAI2017/ais/$entry.jar" $entry.class
+	rm -rf $entry
+done 
+cd ..
+echo "removing old log files"
+rm BonzAI2017/*.out BonzAI2017/*.err
+
+
+echo  "launching Bonzai2017 game"
+java -jar BonzAI2017/castles.jar

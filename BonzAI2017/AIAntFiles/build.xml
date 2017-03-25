@@ -7,7 +7,7 @@
 	
 	<!-- AI Target(s) -->
 	<target name = "ais.build" >
-		<delete dir = "../Bonzai2017/ais/*" />
+		<delete dir = "../Bonzai2017/ais/**" />
 		<jar basedir="../bin" destfile="../Bonzai2017/ais/DaneAI.jar" includes="DaneAI.class" />
 	</target>
 
