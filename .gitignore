@@ -9,6 +9,7 @@ local.properties
 .settings/
 .loadpath
 .recommenders
+*.class
 
 BonzAI2017/bonzai2017/
 
