@@ -446,7 +446,7 @@ public class CastlesMap {
 			}
 			
 			// Multiple teams must be present to initiate a merge
-			if (teamCount > 2) {
+			if (teamCount >= 2) {
 				// Find the greatest and second greatest team sizes
 				for (Team t : teams) {
 					int total = teamTotals[t.getColor().ordinal()];
@@ -515,6 +515,33 @@ public class CastlesMap {
 					}
 				}
 			}
+			
+			/* Merge ally soldier groups that are on the same path */
+			if (occupants.size() > 2) {
+				HashMap<String, ArrayList<Soldier>> destToGroupMap = new HashMap<String, ArrayList<Soldier>>();
+				// Associate soldiers with their destination position
+				for (Soldier s : occupants) {
+					ArrayList<Soldier> groups = destToGroupMap.get(s.getDestID());
+					
+					if (groups == null) {
+						groups = new ArrayList<Soldier>();
+						destToGroupMap.put(s.getDestID(), groups);
+					}
+					
+					groups.add(s);
+				}
+				// Merge all soldiers, whose destination positions are equal
+				for (ArrayList<Soldier> groups : destToGroupMap.values()) {
+					if (groups.size() > 1) {
+						Soldier base = groups.get(0);
+						
+						for (int idx = 1; idx < groups.size(); ++idx) {
+							base.setValue( base.getValue() + groups.get(idx).getValue() );
+							removeSoldiers( groups.get(idx) );
+						}
+					}
+				}
+			}
 		}
 		
 		/* Return a set containing the initial number of occupying soldier
@@ -568,6 +595,13 @@ public class CastlesMap {
 					ret |= 0x1;
 					s1.setValue(s1DiffS2);
 				}
+			}
+			
+		} else {
+			// Merge soldiers, if destination positions are equal
+			if (s1.getDestID().equals(s2.getDestID())) {
+				s1.setValue( s1.getValue() + s2.getValue() );
+				removeSoldiers(s2);
 			}
 		}
 		

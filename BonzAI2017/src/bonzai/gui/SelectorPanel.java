@@ -112,6 +112,7 @@ public class SelectorPanel extends JPanel implements ActionListener, FileListene
 				}
 			} 
 			catch (Exception e) {
+				e.printStackTrace();
 				System.out.printf("AI file %s failed to load%n", file);
 			}
 		}
