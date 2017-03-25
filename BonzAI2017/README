@@ -1,0 +1,24 @@
+This is the BonzAI2017 Competition game.
+
+There are 2 ways to compile your AI to test it, the first is
+to use the eclipes and file located in AIAntFiles/build.xml
+or the shell script buildai
+
+If you plan to compile through eclipse:
+	1. Changes view to ant
+	2. click on the ant button with the plus on it and select AIAntFiles/build.xml
+	3. when you are ready to complie, click on build_ai and click on the play button to compile
+	   and test your AI.
+
+If you plan to compile through the command line:
+	1. Navigate to the directory containing the src folder
+	2. use the command ./buildai
+	*******Note: if the script is ended prematurely, you may be in a different
+	*******	     folder than when you started, just switch back to the parent 
+	*******	     directory and try again
+	3. enjoy
+
+
+In order for your AI to compile correctly and run, make sure to change the
+@Agent annotation at the top of your ai to reflect your team name, faliure to
+do so will risk disquallificaiton.
