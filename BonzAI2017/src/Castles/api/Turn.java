@@ -173,7 +173,7 @@ public class Turn {
 			System.out.println(t.getMyTeam().getColor());
 			System.out.println(enemy);
 			
-			/**/
+			/**
 			if (soldiers.size() > 0) {
 				SoldierData s = soldiers.get(0);
 				List<PositionData> closestBuildings = t.getClosestByColor(s.posID, null);
@@ -182,7 +182,7 @@ public class Turn {
 				List<String> path = t.getPath(s.posID, closestBuildings.get(0).ID);
 				
 				System.out.printf("%s\n", path);
-				/**/
+				/**
 			}
 			
 			/**
@@ -572,14 +572,16 @@ public class Turn {
 	 * @return	The end of the game has been reached
 	 */
 	public boolean gameOver() {
-		boolean AIWithNoBuildings = false;
-		
 		for (Team t : map.getTeams()) {
 			// Does an AI control no buildings
-			AIWithNoBuildings = getPositionsControlledBy(t.getColor()).size() == 0;
+			List<PositionData> buildings = getPositionsControlledBy(t.getColor());
+			
+			if (buildings.size() == 0) {
+				return true;
+			}
 		}
 		
-		return getTurnsRemaining() <= 1 || AIWithNoBuildings;
+		return getTurnsRemaining() <= 1;
 	}
 
 	/**
