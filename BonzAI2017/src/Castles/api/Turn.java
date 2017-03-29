@@ -1,6 +1,7 @@
 package Castles.api;
 
 import java.awt.Graphics2D;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -162,17 +163,17 @@ public class Turn {
 		CastlesMap map = null;
 		
 		try {
-			map = Parser.parseFile("scenarios/testmap.dat");
+			map = Parser.parseFile("scenarios/triangles.dat");
 			
 			Turn t = new Turn(0, 1, map, 5);
 			TeamColor enemy = t.getEnemyTeams().get(0).getColor();
 			List<SoldierData> soldiers = t.getSoldiersControlledBy(t.getMyTeam().getColor());
 			
-			/**/
+			/**
 			System.out.println(t.getMyTeam().getColor());
 			System.out.println(enemy);
 			
-			/**/
+			/**
 			if (soldiers.size() > 0) {
 				SoldierData s = soldiers.get(0);
 				List<PositionData> closestBuildings = t.getClosestByColor(s.posID, null);
@@ -181,7 +182,7 @@ public class Turn {
 				List<String> path = t.getPath(s.posID, closestBuildings.get(0).ID);
 				
 				System.out.printf("%s\n", path);
-				/**/
+				/**
 			}
 			
 			/**
@@ -196,21 +197,15 @@ public class Turn {
 			
 			/**
 			RallyPoint r = map.getPosition("R0");
-			//((Building)r).setTeamColor(Color.RED);
+			//((Building)r).setTeamColor(TeamColor.BLUE);
 			
-			Soldier s1 = new Soldier(TeamColor.RED, 6, r.ID);
-			Soldier s2 = new Soldier(TeamColor.YELLOW, 5, r.ID);
-			Soldier s3 = new Soldier(TeamColor.RED, 3, r.ID);
-			Soldier s4 = new Soldier(TeamColor.YELLOW, 2, r.ID);
-			Soldier s5 = new Soldier(TeamColor.RED, 4, r.ID);
-			Soldier s6 = new Soldier(TeamColor.YELLOW, 9, r.ID);
+			Soldier s1 = new Soldier(TeamColor.RED, 13, r.ID);
+			Soldier s2 = new Soldier(TeamColor.RED, 6, r.ID);
+			Soldier s3 = new Soldier(TeamColor.RED, 8, r.ID);
 			
 			map.addSoldiers(s1);
 			map.addSoldiers(s2);
 			map.addSoldiers(s3);
-			map.addSoldiers(s4);
-			map.addSoldiers(s5);
-			map.addSoldiers(s6);
 			
 			int[] sizeDiff = map.mergeSoldiers(r);
 			
@@ -463,7 +458,7 @@ public class Turn {
 	 */
 	public List<PositionData> getClosestByColor(String refID, TeamColor target) {
 		List<PositionData> positions = new ArrayList<PositionData>();
-		PositionData p = this.getPosition(refID);
+		PositionData p = getPosition(refID);
 		
 		if (p != null) {
 			HashMap<String, Boolean> posVisited = new HashMap<String, Boolean>();
@@ -568,6 +563,25 @@ public class Turn {
 	 */
 	public boolean isFirstTurn() {
 		return turnNumber == 0;
+	}
+	
+	/**
+	 * Determines if the game has finished. This can occur if there are no more
+	 * turns remaining or an AI controls all buildings on the map.
+	 * 
+	 * @return	The end of the game has been reached
+	 */
+	public boolean gameOver() {
+		for (Team t : map.getTeams()) {
+			// Does an AI control no buildings
+			List<PositionData> buildings = getPositionsControlledBy(t.getColor());
+			
+			if (buildings.size() == 0) {
+				return true;
+			}
+		}
+		
+		return getTurnsRemaining() <= 1;
 	}
 
 	/**

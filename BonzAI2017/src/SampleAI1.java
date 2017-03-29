@@ -73,7 +73,7 @@ public class SampleAI1 extends AI {
 					
 					/* Determine if the soldier group is large enough to
 					 * capture the building */
-					if (dest.defVal <= s.size) {
+					if (dest.defVal < s.size) {
 						movedSomeSoldier = true;
 						/* Order the soldier group to march towards the target
 						 * enemy building */

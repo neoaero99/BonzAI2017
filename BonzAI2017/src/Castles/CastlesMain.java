@@ -246,7 +246,7 @@ public class CastlesMain extends JPanel implements GameWrapper, Runnable, KeyLis
 			renderScore(g2d, turn, getWidth(), getHeight());
 
 			//Paint game over screen
-			if (turn.getTurnsRemaining() <= 1) {
+			if (turn.gameOver()) {
 				//We're at the end of the game!
 				renderGameOver(g2d, turn, getWidth(), getHeight(), gameOverFrame);
 				gameOverFrame++;

@@ -1,31 +1,31 @@
-name: Final Destination, Fox Only, No Items
-size: 25, 25
-theme: supernova
+name: Atlantis
+size: 79, 79
+theme: water
 playercount: 2
 
 players:
-    <20, 4, P0>
-    <4, 20, P1>
+    <69, 6, P0>
+    <15, 63, P1>
 
 castles:
-    <12, 12, C0>
+    <39, 39, C0>
 
 villages:
     <0, 0, V0>
-    <24, 24, V1>
-    <8, 12, V2>
-    <16, 12, V3>
-    <12, 8, V4>
-    <12, 16, V5>
+    <75, 75, V1>
+    <27, 39, V2>
+    <51, 39, V3>
+    <39, 27, V4>
+    <39, 51, V5>
     
 
 rally:
-    <4, 4, R0>
-    <4, 12, R1>
-    <12, 4, R2>
-    <20, 12, R3>
-    <12, 20, R4>
-    <20, 20, R5>
+    <15, 15, R0>
+    <15, 39, R1>
+    <39, 15, R2>
+    <63, 39, R3>
+    <39, 63, R4>
+    <63, 63, R5>
 
 paths:
     <P0, R2, 2>
@@ -50,3 +50,7 @@ paths:
     <V2, C0, 1>
     <V3, C0, 1>
     <V4, C0, 1>
+    
+    
+    
+    
