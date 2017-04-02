@@ -3,7 +3,6 @@ package Castles.api;
 import java.util.ArrayList;
 import java.util.List;
 
-import Castles.Objects.SoldierState;
 import bonzai.Action;
 
 /**

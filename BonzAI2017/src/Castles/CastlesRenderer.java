@@ -15,6 +15,7 @@ import javax.imageio.ImageIO;
 
 import Castles.Game;
 import Castles.Objects.*;
+import Castles.api.PType;
 import Castles.api.ShoutAction;
 import Castles.api.TeamColor;
 //import Castles.api.Color;
