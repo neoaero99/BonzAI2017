@@ -6,6 +6,7 @@ import java.util.List;
 
 import javax.swing.JComponent;
 
+import Castles.api.SoldierState;
 import Castles.api.TeamColor;
 import DavidMohrhardt.animator.Animator;
 

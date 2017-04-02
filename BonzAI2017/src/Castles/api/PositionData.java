@@ -15,6 +15,18 @@ import Castles.Objects.Soldier;
  * @author Joshua Hooker
  */
 public class PositionData {
+	/**
+	 * The defense value for the building type
+	 */
+	public static final int BASE_DV = 10,
+							CASTLE_DV = 5,
+							VILLAGE_DV = 3;
+	/**
+	 * The soldier spawn rate for the building type
+	 */
+	public static final int	BASE_SR = 4,
+							CASTLE_SR = 3,
+							VILLAGE_SR = 2;	
 	
 	/**
 	 * The unique ID associated with this position.
@@ -87,8 +99,6 @@ public class PositionData {
 	 * Returns the team color of the soldiers occupying this position. It is
 	 * entirely possible that a soldier group belonging to one AI is
 	 * occupying a building controlled by another AI.
-	 * 
-	 * @return	The team color of occupying soldiers
 	 */
 	public TeamColor getOccupantLeader() {
 		if (occupantData.length > 0) {
@@ -98,11 +108,22 @@ public class PositionData {
 		return null;
 	}
 	
-	public boolean isControled(){
+	/**
+	 * Determines if this position has been claimed by an AI.
+	 * 
+	 * @return	whether the position is claimed	
+	 */
+	public boolean isControled() {
 		return (leader == null) ? false : true;
 	}
 	
-	public boolean isControledBy(Castles.api.TeamColor team){
+	/**
+	 * Determines if the AI with the given team color controls this position.
+	 * 
+	 * @param team	an AI's team color
+	 * @return		if the AI with the given color controls this position
+	 */
+	public boolean isControledBy(TeamColor team){
 		return (leader == team) ? true : false;
 	}
 	
