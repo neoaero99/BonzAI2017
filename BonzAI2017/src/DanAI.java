@@ -34,7 +34,10 @@ public class DanAI extends AI {
 			if(otherTeam==null){
 				return new ShoutAction("Captain No-Beard wins my default! No other Challengers!");
 			}
-			List<PositionData> otherData=turn.getPositionsControlledBy(null);
+			List<PositionData> otherData=turn.getClosestByColor(p.ID, null);
+			if(otherData.size()==0){
+				 otherData=turn.getClosestByColor(p.ID, teams.get(0).getColor());
+			}
 			int x=(int)Math.random()*otherData.size();
 			PositionData go=otherData.get(x);
 			for(int j=0;j<p.occupantData.length;j++){
