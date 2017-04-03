@@ -69,7 +69,15 @@
 		<build jar = "castles.jar" source = "./" main = "bonzai.automator.Automator">
 		</build>
 	</target>
-
+	
+	<!-- Build Bracket Generator -->
+	<target name = "bracket" depends = "build">
+			<build jar = "brackets.jar" source = "./" main = "DaneJensenBrackets.Bracket">
+				<external>
+					<fileset dir = "${lib}" includes="**/*.jar"/>
+				</external>
+			</build>
+	</target>
 	<!-- Run Spawner -->
 	<target name = "spawner">
 		<java classname = "bonzai.automator.Spawner" fork = "true">
