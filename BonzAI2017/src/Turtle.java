@@ -10,11 +10,11 @@ import bonzai.Action;
 import bonzai.Agent;
 
 @Agent(name="NAAI")
-public class NAAI extends AI {
+public class Turtle extends AI {
 	
 	private List<String> path;
 	
-	public NAAI() {
+	public Turtle() {
 		path = null;
 	}
 	

@@ -5,7 +5,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import Castles.Objects.Soldier;
-import Castles.Objects.SoldierState;
 
 /**
  * Stores the data associated with a soldier, that an AI needs to know

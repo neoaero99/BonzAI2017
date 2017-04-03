@@ -1,4 +1,4 @@
-package Castles.Objects;
+package Castles.api;
 
 /**
  * Defines the types of positions that exist at a node on the map.
