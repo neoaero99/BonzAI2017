@@ -94,6 +94,7 @@ public class Parser {
 					//System.out.println(row);
 					Vertex v1 = getVertex(vertices, row[0]);
 					Vertex v2 = getVertex(vertices, row[1]);
+					//System.out.println(row[0]+ " "+ row[1]);
 					SegEdge edge = new SegEdge(Integer.parseInt(row[2]), v1, v2);
 					
 					edges.add(edge);
