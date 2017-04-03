@@ -63,10 +63,10 @@ public class Turn {
 	/**
 	 * Turn constructor.
 	 * 
-	 * @param teamNumber - the team number that this current Turn object
-	 *					   was made for
-	 * @param turnNumber - the current turn number
-	 * @param map - the map object to clone to start the turn off
+	 * @param teamNumber	the team number that this current Turn object
+	 *					  	was made for
+	 * @param turnNumber	the current turn number
+	 * @param map			the map object to clone to start the turn off
 	 */
 	public Turn(int teamNumber, int turnNumber, CastlesMap map) {
 		this.currentTeam = teamNumber;
@@ -126,11 +126,11 @@ public class Turn {
 	 * Alternate turn constructor, used to specify a number of turns
 	 * that the match should last for
 	 * 
-	 * @param teamNumber - the team number that this current Turn object
-	 *					   was made for
-	 * @param turnNumber - the current turn number
-	 * @param map - the map object to clone to start the turn off
-	 * @param MAX_TURNS - the total number of turns in the match
+	 * @param teamNumber	the team number that this current Turn object
+	 *						was made for
+	 * @param turnNumber	the current turn number
+	 * @param map			the map object to clone to start the turn off
+	 * @param MAX_TURNS		the total number of turns in the match
 	 */
 	public Turn(int teamNumber, int turnNumber, CastlesMap map, int MAX_TURNS) {
 		this(teamNumber, turnNumber, map);
@@ -140,7 +140,7 @@ public class Turn {
 	/**
 	 * Copy constructor for Turn
 	 * 
-	 * @param turn - the Turn object to copy
+	 * @param turn			the Turn object to copy
 	 * @param teamNumber
 	 * @param map
 	 */
@@ -587,8 +587,8 @@ public class Turn {
 	/**
 	 * Returns the score for the specified Team
 	 * 
-	 * @param t - the Team object to get the score for
-	 * @return - the Team's score
+	 * @param t	the Team object to get the score for
+	 * @return	the Team's score
 	 */
 	public int getScore(Team t) { 
 		return t.getScore();
@@ -597,7 +597,7 @@ public class Turn {
 	/**
 	 * Returns the number of remaining turns in the match
 	 * 
-	 * @return - the number of remaining turns
+	 * @return	the number of remaining turns
 	 */
 	public int getTurnsRemaining() {
 		return MAX_TURNS - turnNumber;
@@ -614,10 +614,10 @@ public class Turn {
 	 * If this method returns false, calling getIsValidError() will return the
 	 * reason for failure.
 	 * 
-	 * @param action - the Action object to check for validity
+	 * @param action	the Action object to check for validity
 	 * 
-	 * @return - true if the Action is valid for the current gamestate,
-	 * 			 false otherwise
+	 * @return			true if the Action is valid for the current gamestate,
+	 * 					false otherwise
 	 */
 	public boolean isValid(Team team, Action action) {
 		//TODO 2017: This is important for us and competitors.
@@ -720,9 +720,9 @@ public class Turn {
 	 * Applies an action to the current turn. This should 
 	 * not be called by an AI as it is almost useless.
 	 * 
-	 * @param actions - the list of actions to apply
-	 * @return - the new Turn object created after applying 
-	 * the actions
+	 * @param actions	the list of actions to apply
+	 * @return			the new Turn object created after applying 
+	 * 					the actions
 	 */
 	public Turn apply(List<Action> actions) {
 		
@@ -863,7 +863,9 @@ public class Turn {
 	}
 	
 	/**
-	 * TODO
+	 * Returns a random xy position corresponding to a building, which is
+	 * controlled by the AI with the given team color. If the AI controls
+	 * no positions, null is returned.
 	 * 
 	 * @param target	The color of the target team
 	 * @return			The position of some building on the map
@@ -889,7 +891,7 @@ public class Turn {
 	}
 	
 	/**
-	 * TODO
+	 * Returns the action taken by the AI with the given team color.
 	 * 
 	 * @param tc	The color of team, of which to find the action
 	 * @return		The action taken by the AI of the given color

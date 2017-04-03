@@ -1,18 +1,19 @@
 package Castles.Objects;
 
+import Castles.api.PType;
+import Castles.api.SoldierState;
 import Castles.api.TeamColor;
-import Castles.Objects.PType;
 
 public class Building extends RallyPoint {
 	
 	/**
-	 * The defense value for this building
+	 * The defense value for the building type
 	 */
 	public static final int BASE_DV = 10,
 							CASTLE_DV = 5,
 							VILLAGE_DV = 3;
 	/**
-	 * The soldier spawn rate for this building
+	 * The soldier spawn rate for the building type
 	 */
 	public static final int	BASE_SR = 4,
 							CASTLE_SR = 3,

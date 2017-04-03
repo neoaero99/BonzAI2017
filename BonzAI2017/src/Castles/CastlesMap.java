@@ -11,7 +11,7 @@ import java.util.Set;
 import Castles.Objects.Building;
 import Castles.Objects.RallyPoint;
 import Castles.Objects.Soldier;
-import Castles.Objects.SoldierState;
+import Castles.api.SoldierState;
 import Castles.api.TeamColor;
 import Castles.util.graph.IDPair;
 import Castles.util.graph.Node;

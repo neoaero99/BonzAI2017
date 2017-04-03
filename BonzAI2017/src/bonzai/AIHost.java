@@ -8,10 +8,10 @@ import java.util.List;
 import java.util.Scanner;
 import java.util.concurrent.atomic.AtomicReference;
 
-import Castles.Objects.SoldierState;
 import Castles.api.MoveAction;
 import Castles.api.MoveSoldier;
 import Castles.api.ShoutAction;
+import Castles.api.SoldierState;
 
 public class AIHost {
 	private final Process process;
