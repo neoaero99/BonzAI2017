@@ -323,25 +323,26 @@ public class CastlesMain extends JPanel implements GameWrapper, Runnable, KeyLis
 			if (frame > 180) { frame = 180; }
 
 			//Sort the teams in descending order
-			List<Team> teams = new ArrayList<>(turn.getAllTeams());
+			List<Team> oriTeams = turn.getAllTeams();
+			List<Team> teams = new ArrayList<>(oriTeams);
 			Collections.sort(teams, new Comparator<Team>() {
 				public int compare(Team arg0, Team arg1) {
 					return arg1.getScore() - arg0.getScore();
 				}
 			});
 			
-			
 			//This stuff is required by the existing framework
 			//A bit "hard-codey", but it works for now 
 			HashMap<Team, Integer> rank = new HashMap<>();
+			float highestScore;
+			
 			rank.put(teams.get(0), 1);
 			for (int i = 1, r = 1; i < teams.size(); i++) {
 				if (teams.get(i - 1).getScore() != teams.get(i).getScore()) r++;
 				rank.put(teams.get(i), r);
 			}
 			
-			float highestScore = teams.get(0).getScore();
-			
+			highestScore = teams.get(0).getScore();
 
 			//All scores are given in percentages of the best team's score
 			float percent = frame / 180.0f;
@@ -391,6 +392,8 @@ public class CastlesMain extends JPanel implements GameWrapper, Runnable, KeyLis
 			//Give em 2 seconds to let it sink in
 			//TODO MITCH This needs to be dynamic!  Not 300!  Otherwise winners will be reported too early when the automator runs
 			if (gameOverFrame == 300) {
+				System.out.printf("SCORES %d(%d) : %d(%d)\n", oriTeams.get(0).getScore(), turn.getTeamLossCount(0),
+															  oriTeams.get(1).getScore(), turn.getTeamLossCount(1));
 				System.out.println("RESULT " + getTeamID(teams, 0) + " " + getTeamID(teams, 1) + " " + getTeamID(teams, 2));
 			}
 		}
