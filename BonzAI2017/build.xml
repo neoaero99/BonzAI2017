@@ -19,6 +19,8 @@
 		<delete>
 			<fileset dir = "${package}" includes="*.err"/>
 		 	<fileset dir = "${package}" includes="*.out"/>
+			<fileset dir = "${package}" includes="*.jar"/>
+			<fileset dir = "${package}" includes="*.txt"/>
 		</delete>
 	</target>
 	

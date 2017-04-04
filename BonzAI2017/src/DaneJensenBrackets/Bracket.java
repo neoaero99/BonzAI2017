@@ -341,6 +341,12 @@ public class Bracket {
 				writer.write(rb[i][1]);
 				writer.newLine();
 			}
+			writer.write("Not Placed");
+			writer.newLine();
+			for(int i =ais.size()-disc; i < ais.size(); i++){
+				writer.write(ais.get(i).name());
+				writer.newLine();
+			}
 			writer.close();
 		} catch(Exception e) {
 			System.err.println("Error: " + e.getMessage());
