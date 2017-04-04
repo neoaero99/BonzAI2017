@@ -9,7 +9,7 @@ import bonzai.AI;
 import bonzai.Action;
 import bonzai.Agent;
 
-@Agent(name="NAAI")
+@Agent(name="Turtle")
 public class Turtle extends AI {
 	
 	private List<String> path;

@@ -593,6 +593,16 @@ public class Turn {
 	public int getScore(Team t) { 
 		return t.getScore();
 	}
+	
+	/**
+	 * Returns the soldier loss count for the team with the given ID.
+	 * 
+	 * @param teamID	The ID of some team
+	 * @return			The number of soldiers that they have lost
+	 */
+	public int getTeamLossCount(int teamID) {
+		return map.getTeamLossCount(teamID);
+	}
 
 	/**
 	 * Returns the number of remaining turns in the match

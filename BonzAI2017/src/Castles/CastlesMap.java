@@ -35,6 +35,7 @@ public class CastlesMap {
 	private boolean[] players;
 	
 	private ArrayList<Team> teams;
+	private ArrayList<Integer> teamLossCount;
 	private ArrayList<Soldier>[] soldiers;
 	
 	@SuppressWarnings("unchecked")
@@ -54,6 +55,11 @@ public class CastlesMap {
 		
 		players = new boolean[] { true,true,true,true,true,true };
 		teams = t;
+		teamLossCount = new ArrayList<Integer>();
+		
+		for (Team tm : teams) {
+			teamLossCount.add(0);
+		}
 		
 		soldiers = (ArrayList<Soldier>[])new ArrayList[6];
 		for(int i=0;i<6;i++) {
@@ -81,6 +87,7 @@ public class CastlesMap {
 		//copy the list of teams
 		players = previousTurn.players;
 		teams = previousTurn.teams;
+		teamLossCount = previousTurn.teamLossCount;
 		
 		soldiers = (ArrayList<Soldier>[])new ArrayList[6];
 		for(int i=0;i<6;i++){
@@ -104,6 +111,41 @@ public class CastlesMap {
 				addSoldiers( s.copy() );
 			}
 		}
+	}
+	
+	/**
+	 * Update the number of soldiers, who have fallen, which belonged to the
+	 * team with the given color. The loss value must be a positive integer.
+	 * 
+	 * @param TID	The color of team, whose soldier loss count will be updated
+	 * 				by loss
+	 * @param loss	A positive integer corresponding to the number of soldiers
+	 * 				lost
+	 */
+	private void updateTeamLossCount(TeamColor color, int loss) {
+		if (color != null && loss > 0) {
+			
+			for (Team t : teams) {
+				if (t.getColor() == color) {
+					teamLossCount.set(t.getID(), teamLossCount.get(t.getID()) +
+							loss);
+				}
+			}
+		}
+	}
+	
+	/**
+	 * Returns the soldier loss count for the team with the given ID.
+	 * 
+	 * @param teamID	The ID of some team
+	 * @return			The number of soldiers that they have lost
+	 */
+	public int getTeamLossCount(int teamID) {
+		if (teamID >= 0 && teamID < teamLossCount.size()) {
+			return teamLossCount.get(teamID);
+		}
+		
+		return Integer.MAX_VALUE;
 	}
 	
 	/**
@@ -279,20 +321,29 @@ public class CastlesMap {
 	}
 	
 	/**
-	 * Removes a soldier from the map
+	 * Removes a soldier from the map and the team's pool of soldiers. The
+	 * countAsLost flag distinguishes between soldiers lost due to battle
+	 * and those lost due to merging.
 	 * 
-	 * @param s	The soldier group to remove from the map
+	 * @param s				The soldier group to remove from the map
+	 * @param countAsLost	Whether the removed soldier should be counted as a
+	 * 						loss for the team
 	 */
-	private void removeSoldiers(Soldier s) {
+	private void removeSoldiers(Soldier s, boolean countAsLost) {
 		
 		/* PLEASR DAN, USE THIS METHOD! I BEG OF YOU!
 		 *      - JOSHUA */
 		
 		if (s != null) {
 			// Remove from the team soldiers list
-			soldiers[s.getLeaderColor().ordinal()].remove(s);
+			boolean removed = soldiers[s.getLeaderColor().ordinal()].remove(s);
 			// Remove from the current position 
 			getPosition(s.getPositionID()).removeOccupant(s);
+			
+			if (countAsLost && removed) {
+				// Update soldier loss count
+				updateTeamLossCount(s.getLeaderColor(), s.getValue());
+			}
 		}
 	}
 	
@@ -500,17 +551,19 @@ public class CastlesMap {
 								counter -= s.getValue();
 								
 								if (counter < 0) {
+									int iniS = s.getValue();
 									s.setValue(-counter);
+									updateTeamLossCount(s.getLeaderColor(), iniS - s.getValue());
 									
 								} else {
-									removeSoldiers(s);
+									removeSoldiers(s, true);
 								}
 							}
 							
 						} else {
 							// Remove all the soldiers of the teams, which lost
 							for (Soldier s : soldierList) {
-								removeSoldiers(s);
+								removeSoldiers(s, true);
 							}
 						}
 					}
@@ -538,7 +591,7 @@ public class CastlesMap {
 						
 						for (int idx = 1; idx < groups.size(); ++idx) {
 							base.setValue( base.getValue() + groups.get(idx).getValue() );
-							removeSoldiers( groups.get(idx) );
+							removeSoldiers( groups.get(idx), false );
 						}
 					}
 				}
@@ -564,6 +617,7 @@ public class CastlesMap {
 		byte ret = 0;
 		// Multiple teams must be present for a merge
 		if (s1.getLeaderColor() != s2.getLeaderColor()) {
+			int iniS1 = s1.getValue(), iniS2 = s2.getValue();
 			int s1DiffS2 = s1.getValue() - s2.getValue();
 			
 			if (r instanceof Building) {
@@ -581,20 +635,22 @@ public class CastlesMap {
 			 * the sizes of the soldier groups occupying the position. */
 			
 			if (s1DiffS2 <= 0) {
-				removeSoldiers(s1);
+				removeSoldiers(s1, true);
 				
 				if (s1DiffS2 < 0) {
 					ret |= 0x2;
 					s2.setValue(-s1DiffS2);
+					updateTeamLossCount(s2.getLeaderColor(), iniS2 - s2.getValue());
 				}
 			}
 			
 			if (s1DiffS2 >= 0) {
-				removeSoldiers(s2);
+				removeSoldiers(s2, true);
 				
 				if (s1DiffS2 > 0) {
 					ret |= 0x1;
 					s1.setValue(s1DiffS2);
+					updateTeamLossCount(s1.getLeaderColor(), iniS1 - s1.getValue());
 				}
 			}
 			
@@ -602,7 +658,7 @@ public class CastlesMap {
 			// Merge soldiers, if destination positions are equal
 			if (s1.getDestID().equals(s2.getDestID())) {
 				s1.setValue( s1.getValue() + s2.getValue() );
-				removeSoldiers(s2);
+				removeSoldiers(s2, false);
 			}
 		}
 		
