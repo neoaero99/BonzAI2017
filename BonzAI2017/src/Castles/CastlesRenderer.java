@@ -332,7 +332,7 @@ public class CastlesRenderer extends Renderer {
 			*/
 			
 			if (r instanceof Building) {
-				Building b = (Building)r;
+				Building b = (Castles.Objects.Building)r;
 				
 				// Draw team color under buildings controlled by an AI
 				if (b.getTeamColor() != null) {

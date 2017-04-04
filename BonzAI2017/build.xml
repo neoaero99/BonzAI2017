@@ -66,12 +66,6 @@
 		</build>
 	</target>
 	
-	<!-- Build Automator -->
-	<target name = "automator" depends = "deploy">
-		<build jar = "castles.jar" source = "./" main = "bonzai.automator.Automator">
-		</build>
-	</target>
-	
 	<!-- Build Bracket Generator -->
 	<target name = "bracket" depends = "build">
 			<build jar = "brackets.jar" source = "./" main = "DaneJensenBrackets.Bracket">
@@ -79,21 +73,11 @@
 					<fileset dir = "${lib}" includes="**/*.jar"/>
 				</external>
 			</build>
-	</target>
-	<!-- Run Spawner -->
-	<target name = "spawner">
-		<java classname = "bonzai.automator.Spawner" fork = "true">
-			<classpath>
-				<pathelement location="bin"/>
-				<pathelement path="lib/lib/*"/>
-			</classpath>			
-		</java>
-	</target>
-	
-	<!-- Build Ladder -->
-	<target name = "ladder" depends = "deploy">
-		<build jar = "ladder.jar" source = "./" main = "bonzai.automator.Ladder">
-		</build>
+			<build jar = "competition.jar" source = "./" main = "DaneJensenBrackets.BracketDisplay">
+				<external>
+					<fileset dir = "${lib}" includes="**/*.jar"/>
+				</external>
+			</build>
 	</target>
 	
 	<target name = "deploy" depends = "build">

@@ -23,8 +23,7 @@ import javax.swing.JPanel;
 import Castles.api.*;
 import Castles.util.AIJar;
 import bonzai.GameWrapper;
-import bonzai.Jar;
-import bonzai.Team;
+import bonzai.*;
 import bonzai.gui.AffineMouseAdapter;
 import bonzai.gui.BonzAIFrame;
 import bonzai.Action;
@@ -58,13 +57,14 @@ public class CastlesMain extends JPanel implements GameWrapper, Runnable, KeyLis
 		addMouseWheelListener(affine);
 
 		this.simulation = null;
+		enableAutoStart();
 		//this.renderer = null;
 	}
 
 	@Override
-	// TODO 2017: Set the version number here!!!!
+	// TODO 2018: Set the version number here!!!!
 	public String version() {
-		return "0.0";
+		return "1.0";
 	}
 
 	/**
@@ -482,6 +482,9 @@ public class CastlesMain extends JPanel implements GameWrapper, Runnable, KeyLis
 		Container parent = this;
 		while (true) {
 			parent = parent.getParent();
+			if(parent==null){
+				return;
+			}
 			if (parent instanceof JFrame) {
 				f = (JFrame)parent;
 				break;
@@ -492,10 +495,23 @@ public class CastlesMain extends JPanel implements GameWrapper, Runnable, KeyLis
 		f.setExtendedState(f.getExtendedState()|JFrame.MAXIMIZED_BOTH );
 	}
 
-	public static void main(String[] args) throws Exception{
+	public static void main(String[] args) throws Exception {
+		System.out.println(Arrays.toString(args));
 		CastlesMain castles = new CastlesMain();
 		new Thread(castles).start();
 		BonzAIFrame.create("Castles!!!!", castles);
+		Thread.sleep(1000);
+		if (args.length == 8 && args[0] == "-run") {
+			System.out.println("Called");
+			String scenario = args[1];
+			ArrayList<bonzai.Jar> ais = new ArrayList<>();
+			for (int i = 2; i < args.length; i++) {
+				ais.add(new AIJar(new File(args[i])));
+			}
+			castles.run(castles.scenario(new File(scenario)), ais);
+			System.exit(0);
+		}
+
 	}
 
 	@Override

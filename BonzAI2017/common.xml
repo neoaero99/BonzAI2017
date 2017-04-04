@@ -30,7 +30,7 @@
 				deprecation = "on"
 				debug       = "true"
 				debuglevel  = "lines,vars,source"
-				listfiles   = "no"
+				listfiles   = "yes"
 			>
 				<!-- show all warnings -->
 				<compilerarg value = "-Xlint"/>

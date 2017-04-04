@@ -5,10 +5,16 @@ import java.awt.*;
 public class Match extends Component{
 	private bonzai.Jar[] teams = new bonzai.Jar[2];
 	private int winningTeam = -1;
+	private int[] scores = {0,0};
+	//font style, font type and font size
+	public static final Font matchFont = new Font("Times New Roman", Font.PLAIN, 12);
 	
 	public Match(bonzai.Jar team1, bonzai.Jar team2){
 		teams[0] = team1;
 		teams[1] = team2;
+		if(teams[0] == null || teams[1] == null){
+			throw new IllegalArgumentException("A team is null");
+		}
 	}
 	
 	/**
@@ -50,6 +56,12 @@ public class Match extends Component{
 		g.setColor(Color.BLACK);
 		g.drawLine(x, y + bY, x + xsize, y + bY);
 		g.drawLine(x, y + 3 * bY, x + xsize, y + 3*bY);
+		//the input for strings is strange because it takes the bottom left corner
+		//or where the string is supposed to be
+		g.setFont(matchFont);
+		g.drawString(teams[0].name() + "    " + scores[0],x + xsize/10 , bY*3 + y);
+		g.drawString(teams[1].name() + "    " + scores[0],x + xsize/10 , bY*5 + y);
+		g.drawString("Start Match", x + xsize * 3 /10, bY);
 		
 	}
 	
@@ -62,7 +74,7 @@ public class Match extends Component{
 		
 		try{
 			//java -jar castles.jar -run [scenarios] <ai/null> <ai/null> <ai/null> <ai/null> <ai/null> <ai/null>
-			String[] args = new String[11];
+			String[] args = new String[11]; 
 			
 			
 		}catch(Exception e){

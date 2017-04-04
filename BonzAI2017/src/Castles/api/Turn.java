@@ -25,7 +25,7 @@ import bonzai.Team;
 /**
  * A snapshot in time at the current turn. In addition to accessing current 
  * state, stale references to entities can be used to get fresh references to
- * those entities at this turn.
+ * those entities at this turn. 
  **/
 public class Turn {
 	
@@ -912,16 +912,20 @@ public class Turn {
 	
 	/**
 	 * Renders all the elements of the map, including the background for this
-	 * turn.
+	 * turn.  
 	 * 
 	 * @param g	The graphics object used for rendering
 	 */
 	public void renderMap(Graphics2D g) {
-		if (g != null) {
-			CastlesRenderer.renderBackground(g, map);
-			CastlesRenderer.renderPaths(g, map);
-			CastlesRenderer.renderBuildings(g, map);
-			CastlesRenderer.renderSoldiers(g, map);
+		try{
+			if (g != null) {
+				CastlesRenderer.renderBackground(g, map);
+				CastlesRenderer.renderPaths(g, map);
+				CastlesRenderer.renderBuildings(g, map);
+				CastlesRenderer.renderSoldiers(g, map);
+			}
+		}catch(Exception e){
+			e.printStackTrace(System.err);
 		}
 	}
 	
