@@ -158,7 +158,7 @@ public class Ladder {
 
 			//Catch the output from the process and try to parse out the winner. 
 			while (true) {
-				try {
+				try { 
 					String l = resultScanner.nextLine();
 					String[] line = l.split(" ");
 					if (line[0].equals("RESULT")) {
