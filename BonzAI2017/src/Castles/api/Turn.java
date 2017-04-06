@@ -164,10 +164,26 @@ public class Turn {
 		
 		try {
 			map = Parser.parseFile("scenarios/triangles.dat");
+			map.addSoldiers(new Soldier(TeamColor.RED, 6, "R0"));
+			map.addSoldiers(new Soldier(TeamColor.RED, 3, "R0"));
+			map.addSoldiers(new Soldier(TeamColor.RED, 8, "R0"));
+			map.addSoldiers(new Soldier(TeamColor.RED, 9, "R0"));
 			
-			Turn t = new Turn(0, 1, map, 5);
-			TeamColor enemy = t.getEnemyTeams().get(0).getColor();
-			List<SoldierData> soldiers = t.getSoldiersControlledBy(t.getMyTeam().getColor());
+			map.addSoldiers(new Soldier(TeamColor.RED, 12, "R1"));
+			map.addSoldiers(new Soldier(TeamColor.RED, 5, "R1"));
+			map.addSoldiers(new Soldier(TeamColor.RED, 2, "R1"));
+			map.addSoldiers(new Soldier(TeamColor.RED, 11, "R1"));
+			
+			Turn turn = new Turn(0, 1, map, 5);
+			Team team = turn.getMyTeam();
+			TeamColor enemy = turn.getEnemyTeams().get(0).getColor();
+			List<SoldierData> soldiers = turn.getSoldiersControlledBy(team.getColor());
+			
+			MoveAction m = new MoveAction();
+			
+			// Test basic boundaries
+			
+			turn.AIActionsMap.put(team.getColor(), m);
 			
 			/**
 			System.out.println(t.getMyTeam().getColor());
@@ -755,15 +771,20 @@ public class Turn {
 		 */
 		for (Action action : actions) {
 			//TODO Actions are Handled here
-			if (isValid(teams.get(teamID), action)) {
+			Team t = teams.get(teamID);
+			
+			if (isValid(t, action)) {
 				
 				if (action instanceof ShoutAction) {
-					AIActionsMap.put(teams.get(teamID).getColor(), action);
+					AIActionsMap.put(t.getColor(), action);
 					
 				} else if (action instanceof MoveAction) {
 					MoveAction move = (MoveAction)action;
+					int sdSize = getSoldiersControlledBy(t.getColor()).size();
 					
-					for (int idx = 0; idx < move.numOfActions(); ++idx) {
+					/* Only at most a number of commands equal to the number of
+					 * soldier groups for an AI */
+					for (int idx = 0; idx < sdSize && idx < move.numOfActions(); ++idx) {
 						Object obj = move.get(idx);
 						
 						if (obj instanceof MoveSoldier) {
@@ -901,13 +922,20 @@ public class Turn {
 	}
 	
 	/**
-	 * Returns the action taken by the AI with the given team color.
+	 * Returns the message shouted by the AI with the given color, or null if
+	 * the AI did not choose a shout action this turn.
 	 * 
-	 * @param tc	The color of team, of which to find the action
-	 * @return		The action taken by the AI of the given color
+	 * @param tc	The color of team, of which to get the message
+	 * @return		The message shouted by this AI this turn
 	 */
-	public Action getActionFor(TeamColor tc) {
-		return AIActionsMap.get(tc);
+	public String getShoutFor(TeamColor tc) {
+		Action a = AIActionsMap.get(tc);
+		
+		if (a instanceof ShoutAction) {
+			return ((ShoutAction)a).getMessage();
+		}
+		
+		return null;
 	}
 	
 	/**

@@ -363,38 +363,40 @@ public class CastlesRenderer extends Renderer {
 		float fontScale = fontSize / 2.f;
 		
 		for (Team t : turn.getAllTeams()) {
-			Action a = turn.getActionFor(t.getColor());
+			String msg = turn.getShoutFor(t.getColor());
 			
-			if (a instanceof ShoutAction) {
+			if (msg != null) {
+				// Pos can be null!
 				Position pos = turn.getRanOccupiedPos( t.getColor() );
 				
-				if (pos == null) {
-					pos = new Position(turn.getMapWidth() / 2, turn.getMapHeight() / 2);
-				}
-				
-				String message = ((ShoutAction)a).getMessage();
-	
 				g.setFont(new Font("Arial", Font.PLAIN, fontSize));
 	
 				RoundRectangle2D.Float bubble = new RoundRectangle2D.Float();
 	
-				int length = message.length();
+				int length = msg.length();
 				length += (length < 9 ? 9 - length : 0);
 	
-				bubble.width = (g.getFontMetrics().stringWidth(message) + length) / 20.f;
+				bubble.width = (g.getFontMetrics().stringWidth(msg) + length) / 20.f;
 				float offsetX = bubble.width / 2 / fontScale;
 	
 				bubble.height = g.getFontMetrics().getHeight() * 3 / 40.f;
 				bubble.archeight = .4f;
 				bubble.arcwidth = .4f;
-	
-				bubble.x = pos.getX() - offsetX;
-				bubble.y = pos.getY() - turn.getMapHeight();
-	
+				
+				if (pos == null) {
+					bubble.x = (turn.getMapWidth() / 2f) - offsetX;
+					bubble.y = (turn.getMapHeight() / 2f) - turn.getMapHeight();
+		
+				} else {
+					bubble.x = pos.getX() - offsetX;
+					bubble.y = pos.getY() - turn.getMapHeight();
+		
+				}
+				
 				g.setColor(new Color(245, 245, 245, 200));
 				g.fill(bubble);
 
-				drawText(g, message, bubble.getCenterX(), bubble.getCenterY() , Color.BLACK, new Color(0, 0, 0, 0),1.0f);
+				drawText(g, msg, bubble.getCenterX(), bubble.getCenterY() , Color.BLACK, new Color(0, 0, 0, 0),1.0f);
 			}
 		}
 	}
