@@ -13,7 +13,7 @@ import java.io.*;
  * the BonzAI team decided to try a more fair bracket system
  * due to some participants being angry that their AI's only
  * got to run once while other went 20 times, then lost.
- * 
+ *  
  * @author Dane Jensen
  * 
  */
@@ -82,7 +82,7 @@ public class Bracket {
 		//Seed the ais
 		//5 seeding matches per ai, which means that each round
 		//will run ais.size()/2 matches between 2 teams
-		bonzai.Jar[][][] seedMatches = new bonzai.Jar[5][(ais.size()/2)][2];
+		bonzai.Jar[][][] seedMatches = new bonzai.Jar[numSeedMatches][(ais.size()/2)][2];
 		//the scores of each ai, indexed by the ai
 		TreeMap<bonzai.Jar,Integer> scores = new TreeMap<bonzai.Jar,Integer>();
 		for(int i = 0; i < ais.size();i++) scores.put(ais.get(i), 0);//make sure each ai
@@ -103,7 +103,7 @@ public class Bracket {
 					}
 				}
 				chosen[chosen1]++; //mark the chosen ais as chosen
-				while(chosen[chosen2] >= i+1 && ais.get(chosen2) != ais.get(chosen1)){
+				while(chosen[chosen2] >= i+1 || ais.get(chosen2) == ais.get(chosen1)){
 					chosen2++;
 					if(chosen2 >= ais.size()){
 						chosen2 = 0;
@@ -247,35 +247,35 @@ public class Bracket {
 		 * 15th seed v 18th seed
 		 * 16th seed v 17th seed
 		 */
-		int n = 2;
+		int n = 1;
 		while(n < ais.size()/2){
 			n*=2;
 		}
 		System.out.println();
 		System.out.println();
 		System.out.println(n);
-		int disc = (ais.size() - n)*2;
+		int disc = (ais.size() - 2*n)*2;
 		
-		String[][] lb = new String[n/4][2];
-		String[][] rb = new String[n/4][2];
-		int[] pos = new int[n];
+		String[][] lb = new String[n/2][2];
+		String[][] rb = new String[n/2][2];
+		int[] pos = new int[2 * n];
 		int[] indexs = new int[4];
 		//with the example of 41 teams
-		indexs[0] = 0;//top left				0
-		indexs[1] = n/2;//top right				16
-		indexs[2] = (n/2)-1;//bottom left		15
-		indexs[3] = (n)-1;//bottom right		31
+		indexs[0] = 0;			//top left			0
+		indexs[1] = n;			//bottom left		16
+		indexs[2] = (2 * n)-1;	//top right			15
+		indexs[3] = (1 * n)-1;	//bottom right		31
 		int j = 0;
 		int sign = 1;
 		
 		System.out.println("Generating Brackets");
 		//ensures that 1 and 2 are on opposite sides of the bracket
 		//and that the 2 sides of the brackets are roughly as difficult
-		for(int i = 0; i < n; i++){
+		for(int i = 0; i < (n*2); i++){
 			pos[indexs[j]] = i;
-			if(j <= 2){
+			if(j < 2){//0 or 1
 				indexs[j]+=2;
-			}else{
+			}else{//2 or 3
 				indexs[j]-=2;
 			}
 			j+=sign;
@@ -288,30 +288,37 @@ public class Bracket {
 				j = 0;
 			}
 		}
+		System.out.println(Arrays.toString(pos));
 		
 		//matches are in sets of 2, so pos[0] v pos[1], pos[2] v pos[3]
 		//now set up the brackets (L + i will be substituted for names
 		//in the event that a pos is a seed facing elemination
-		for(int i = 0; i < n/2; i+=2){
-			if(pos[i] > disc){
-				lb[i/2][0] = "L" + (pos[i] - disc);
+		int qual = ais.size() - disc;
+		int l = 1;
+		for(int i = 0; i < n; i+=2){
+			
+			if(pos[i] >= qual){
+				lb[i][0] = "L" + l++;
 			}else{
-				lb[i/2][0] = ais.get(pos[i]).name();
+				lb[i][0] = ais.get((int)avgScores[pos[i]][1]).name();
 			}
-			if(pos[i+1] > disc){
-				lb[i/2][1] = "L" + (pos[i] - disc);
+			
+			if(pos[i+1] >= qual){
+				lb[i][1] = "L" + l++;
 			}else{
-				lb[i/2][1] = ais.get(pos[i+1]).name();
+				lb[i][1] = ais.get((int)avgScores[pos[i+1]][1]).name();
 			}
-			if(pos[i + n/2] > disc){
-				rb[i/2][0] = "L" + (pos[i] - disc);
+			
+			if(pos[i + n] >= qual){
+				rb[i][0] = "L" + l++;
 			}else{
-				rb[i/2][0] = ais.get(pos[i + n/2]).name();
+				rb[i][0] = ais.get((int)avgScores[pos[i + n]][1]).name();
 			}
-			if(pos[i + 1 + n/2] > disc){
-				rb[i/2][1] = "L" + (pos[i] - disc);
+			
+			if(pos[i + 1 + n] >= qual){
+				rb[i][1] = "L" + l++;
 			}else{
-				rb[i/2][1] = ais.get(pos[i + n/2 + 1]).name();
+				rb[i][1] = ais.get((int)avgScores[pos[i + n + 1]][1]).name();
 			}
 		}
 		System.out.println("Brackets Generated");
@@ -341,8 +348,15 @@ public class Bracket {
 				writer.write(rb[i][1]);
 				writer.newLine();
 			}
+			writer.write("Not Placed");
+			writer.newLine();
+			for(int i =ais.size()-disc; i < ais.size(); i++){
+				writer.write(ais.get(i).name());
+				writer.newLine();
+			}
 			writer.close();
 		} catch(Exception e) {
+			e.printStackTrace(System.err);
 			System.err.println("Error: " + e.getMessage());
 		}
 		System.out.println("Brackets Outputed");
