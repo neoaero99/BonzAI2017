@@ -175,13 +175,36 @@ public class Turn {
 			map.addSoldiers(new Soldier(TeamColor.RED, 11, "R1"));
 			
 			Turn turn = new Turn(0, 1, map, 5);
+			
 			Team team = turn.getMyTeam();
 			TeamColor enemy = turn.getEnemyTeams().get(0).getColor();
 			List<SoldierData> soldiers = turn.getSoldiersControlledBy(team.getColor());
 			
+			System.out.println(soldiers);
 			MoveAction m = new MoveAction();
 			
-			// Test basic boundaries
+			System.out.println(team.getColor());
+			
+			/* Test move commands *
+			m.addMove(0, 1, "R0", "P1");
+			m.addMove(-5, 1, "R0", "P1");
+			m.addMove(5, 1, "R0", "P1");
+			m.addMove(0, -5, "R0", "P1");
+			m.addMove(0, 7, "R0", "P1");
+			m.addMove(0, 1, null, "P1");
+			m.addMove(3, 1, "P0", "P1");
+			m.addMove(0, 1, "R0", null);
+			/**/
+			
+			/* Test update commands */
+			m.addUpdate(0, "P0", SoldierState.MOVING);
+			m.addUpdate(0, "P0", SoldierState.STANDBY);
+			m.addUpdate(-5, "P0", SoldierState.MOVING);
+			m.addUpdate(0, "P0", null);
+			m.addUpdate(2, "P0", null);
+			/**/
+			
+			System.out.println( turn.verifyMoveAction(team, m) );
 			
 			turn.AIActionsMap.put(team.getColor(), m);
 			
@@ -628,118 +651,162 @@ public class Turn {
 	public int getTurnsRemaining() {
 		return MAX_TURNS - turnNumber;
 	}
-
+	
 	/**
-	 * Test if a given Action is a valid one if it were applied on this Turn object.
-	 * This method returns true if the Action is a valid Action, false otherwise.
-	 * There are no guarantees that the Action will be performed, even if it is
-	 * valid, as another team may be performing an Action that interferes
-	 * with the given Action. (For example, if two teams try to rotate the same
-	 * Repeater on the same turn.) 
+	 * Checks all commands in the move action and determines if any of the
+	 * command are invalid. The returned map maps the index of an invalid
+	 * action with a message describing the error; valid commands will not
+	 * appear in the map. In addition, general errors with the given parameters
+	 * for the method are associated with the key -1 in the map.
 	 * 
-	 * If this method returns false, calling getIsValidError() will return the
-	 * reason for failure.
-	 * 
-	 * @param action	the Action object to check for validity
-	 * 
-	 * @return			true if the Action is valid for the current gamestate,
-	 * 					false otherwise
+	 * @param team	The team of the AI, to which the action belongs
+	 * @param ms	The move action to verify
 	 */
-	public boolean isValid(Team team, Action action) {
-		//TODO 2017: This is important for us and competitors.
+	public HashMap<Integer, String> verifyMoveAction(Team team, MoveAction ma) {
+		HashMap<Integer, String> errorMessages = new HashMap<Integer, String>();
 		
+		// General errors have key -1
 		if (team == null) {
-			errorMessage = "Team argument cannot be null.";
+			errorMessages.put(-1, "Null team");
 			
-		} else if (action == null) {
-			errorMessage = "Action argument cann be null";
+		} else if (ma == null) {
+			errorMessages.put(-1, "Null action");
 			
-		} else if (action instanceof ShoutAction) {
-			errorMessage = "";
-			return true;
-			
-		} else if (action instanceof MoveAction) {
-			MoveAction move = (MoveAction)action;
-			
-			for (int idx = 0; idx < move.numOfActions(); ++idx) {
-				Object obj = move.get(idx);
+		} else if (ma.numOfActions() == 0) {
+			errorMessages.put(-1, "Empty action set");
+		
+		} else {
+			/* Command specific errors have a key corresponding to the index of the
+			 * command in the action */
+			for (int idx = 0; idx < ma.numOfActions(); ++idx) {
 				
-				if (obj instanceof MoveSoldier) {
-					// Check a soldier path update action
-					MoveSoldier ms = (MoveSoldier)obj;
-					RallyPoint r = map.getPosition(ms.endID);
+				Object cmd = ma.get(idx);
+				String error = null;
+				
+				if (cmd instanceof MoveSoldier) {
+					error = verifyMSCMD(team, (MoveSoldier)cmd);
 					
-					if (r != null) {
-						r = map.getPosition(ms.startID);
-						
-						if (r != null) {
-							Soldier s = r.getOccupant(ms.soldierIdx);
-							
-							if (s != null && s.getLeaderColor()==team.getColor()) {
-								/* Clamp the split amount for the move action
-								 * within the valid range for the target
-								 * soldier group */
-								ms.splitAmt = Math.max(1, Math.min(ms.splitAmt,
-										s.getValue()));
-									
-								errorMessage = "";
-								continue;
-								
-							} else {
-								errorMessage = String.format("No soldier on position %s", ms.startID);
-							}
-							
-						} else {
-							errorMessage = String.format("No position %s", ms.endID);
-						}
+				} else if (cmd instanceof UpdateSoldier) {
+					error = verifyUSCMD(team, (UpdateSoldier)cmd);
+					
+				} else {
+					// Should never happen
+					error = "Invalid command type: " + cmd.getClass();
+				}
+				
+				if (error != null) {
+					// Error exists with the command
+					errorMessages.put(idx, error);
+				}
+			}
+		}
+		
+		return errorMessages;
+	}
+	
+	/**
+	 * Checks all the parameters of the given move command assuming the given
+	 * team controls the soldier specified by the command. If the command is
+	 * valid, null is returned. Otherwise a string describing the error is
+	 * returned.
+	 * 
+	 * @param team	The team of the AI, who is giving the command
+	 * @param cmd	The move command to verify
+	 * @return		An error message or null if the command is valid
+	 */
+	private String verifyMSCMD(Team team, MoveSoldier cmd) {
+		// Check a soldier path update action
+		RallyPoint r = map.getPosition(cmd.endID);
+		
+		if (r != null) {
+			r = map.getPosition(cmd.startID);
+			
+			if (r != null) {
+				Soldier s = r.getOccupant(cmd.soldierIdx);
+				
+				if (s != null && s.getLeaderColor() == team.getColor()) {
+					/* Clamp the split amount for the move action
+					 * within the valid range for the target
+					 * soldier group */
+					cmd.splitAmt = Math.max(1, Math.min(cmd.splitAmt,
+							s.getValue()));
+					
+					return null;
+					
+				} else {
+					if (s == null) {
+						return String.format("No soldier %d on position %s",
+								cmd.soldierIdx, cmd.startID);
 						
 					} else {
-						errorMessage = String.format("No position %s", ms.startID);
+						return String.format("Soldier %d on %s does not belong to team %s",
+								cmd.soldierIdx, cmd.startID, team.getColor());
 					}
+				}
+				
+			} else {
+				return "No position: " + cmd.startID;
+			}
+			
+		} else {
+			return "No position: " + cmd.endID;
+		}
+	}
+	
+	/**
+	 * Checks all the parameters of the given update command assuming the given
+	 * team controls the soldier specified by the command. If the command is
+	 * valid, null is returned. Otherwise a string describing the error is
+	 * returned.
+	 * 
+	 * @param team	The team of the AI, who is giving the command
+	 * @param cmd	The update command to verify
+	 * @return		An error message or null if the command is valid
+	 */
+	private String verifyUSCMD(Team team, UpdateSoldier cmd) {
+		// Check a soldier state update action;
+		RallyPoint r = map.getPosition(cmd.posID);
+		
+		if (r != null) {
+			Soldier s = r.getOccupant(cmd.soldierIdx);
+			
+			if (s != null) {
+				
+				if (s.getLeaderColor() == team.getColor()) {
 					
-				} else if (obj instanceof UpdateSoldier) {
-					// Check a soldier state update action
-					UpdateSoldier us = (UpdateSoldier)obj;
-					RallyPoint r = map.getPosition(us.posID);
-					
-					if (r != null) {
-						Soldier s = r.getOccupant(us.soldierIdx);
+					if (cmd.newState == SoldierState.STANDBY || cmd.newState == SoldierState.MOVING) {
+						return null;
 						
-						if (s != null) {
-							
-							if (s.getLeaderColor() == team.getColor() && (us.newState == SoldierState.STANDBY
-								|| us.newState == SoldierState.MOVING)) {
-								
-								errorMessage = "";
-								continue;
-								
-							} else {
-								errorMessage = String.format("Invalid state %s", us.newState);
-							}
-							
-						} else {
-							errorMessage = String.format("No soldiers at position %s", r.ID);
-						}
-							
 					} else {
-						errorMessage = String.format("No position %s", us.posID);
+						return String.format("Invalid state: %s", cmd.newState);
 					}
 					
 				} else {
-					// Invalid action
-					errorMessage = "Invalid soldier action";
+					return String.format("Soldier %d on %s does not belong to team %s",
+							cmd.soldierIdx, cmd.posID, team.getColor());
 				}
 				
-				return false;
+			} else {
+				return String.format("No soldier %d at position, %s", cmd.soldierIdx, r.ID);
 			}
-			
-			return true;
-			
+				
 		} else {
-			errorMessage = "Invalid action given.";
+			return String.format("No position: %s", cmd.posID);
 		}
-		
-		return false;
+	}
+
+	/**
+	 * 2017: Unused
+	 * 
+	 * See verifyMoveAction()
+	 * 
+	 * @param team
+	 * @param action
+	 * @return
+	 */
+	public boolean isValid(Team team, Action action) {
+		//TODO 2017: This is important for us and competitors.
+		return action instanceof ShoutAction;
 	}
 
 	/**
@@ -773,23 +840,26 @@ public class Turn {
 			//TODO Actions are Handled here
 			Team t = teams.get(teamID);
 			
-			if (isValid(t, action)) {
+			if (action instanceof ShoutAction) {
+				AIActionsMap.put(t.getColor(), action);
 				
-				if (action instanceof ShoutAction) {
-					AIActionsMap.put(t.getColor(), action);
+			} else if (action instanceof MoveAction) {
+				MoveAction move = (MoveAction)action;
+				int sdSize = getSoldiersControlledBy(t.getColor()).size();
+				// Determine if at least one command was successful
+				boolean cmdPassed = false;
+				
+				/* Only at most a number of commands equal to the number of
+				 * soldier groups for an AI */
+				for (int idx = 0; idx < sdSize && idx < move.numOfActions(); ++idx) {
+					Object obj = move.get(idx);
 					
-				} else if (action instanceof MoveAction) {
-					MoveAction move = (MoveAction)action;
-					int sdSize = getSoldiersControlledBy(t.getColor()).size();
-					
-					/* Only at most a number of commands equal to the number of
-					 * soldier groups for an AI */
-					for (int idx = 0; idx < sdSize && idx < move.numOfActions(); ++idx) {
-						Object obj = move.get(idx);
+					if (obj instanceof MoveSoldier) {
+						MoveSoldier ms = (MoveSoldier)obj;
 						
-						if (obj instanceof MoveSoldier) {
+						if (verifyMSCMD(t, ms) == null) {
+							cmdPassed = true;
 							// Update the path of a soldier
-							MoveSoldier ms = (MoveSoldier)obj;
 							ArrayList<String> path = new ArrayList<String>( getPath(ms.startID, ms.endID) );
 							RallyPoint src = newMap.getPosition(ms.startID);
 							Soldier target = src.getOccupant(ms.soldierIdx);
@@ -804,22 +874,27 @@ public class Turn {
 								 * the given path */
 								newMap.splitSoliders(target, ms.splitAmt, path);
 							}
-							
-						} else {
+						}
+						
+					} else {
+						UpdateSoldier us = (UpdateSoldier)obj;
+						
+						if (verifyUSCMD(t, us) == null) {
+							cmdPassed = true;
 							// Update a soldier's state
-							UpdateSoldier us = (UpdateSoldier)obj;
 							RallyPoint r = newMap.getPosition(us.posID);
 							Soldier s = r.getOccupant(us.soldierIdx);
 							s.setState(us.newState);
 						}
 					}
-					
-					AIActionsMap.put(teams.get(teamID).getColor(), action);
 				}
 				
-			} else {
-				failedTeams.add(teams.get(teamID));
-				// Test scoring
+				if (!cmdPassed) {
+					// No commands were successful
+					failedTeams.add(teams.get(teamID));
+				}
+				
+				AIActionsMap.put(teams.get(teamID).getColor(), action);
 			}
 
 			teamID++;
