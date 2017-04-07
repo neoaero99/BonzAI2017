@@ -1,10 +1,5 @@
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
 import java.util.Random;
 
-import Castles.api.PositionData;
-import Castles.api.SoldierData;
 import Castles.api.TeamColor;
 import Castles.api.Turn;
 import bonzai.AI;

@@ -29,6 +29,6 @@ public class CompetitorAI extends AI {
 			}
 		}
 		
-		return ( m.numOfActions() > 0 ) ? m : new ShoutAction("No soldiers moved!");
+		return ( m.numOfActions() > 0 ) ? m : new ShoutAction("No soldiers changed!");
 	}
 }
