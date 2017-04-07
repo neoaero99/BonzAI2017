@@ -1,3 +1,6 @@
+del bin\CompetitorAI.class
+del bonzai2017\ais\CompetitorAI.jar
+
 rmdir tmp /s /q
 
 mkdir tmp
