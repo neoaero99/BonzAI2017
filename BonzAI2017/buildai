@@ -1,26 +1,19 @@
-echo "removing old ais"
-rm -rf BonzAI2017/ais/*
-echo "compiling all ais"
-cd src
-for entry in *.java
-do
-	NAME="${entry%.*}"
-	echo "compiling $NAME"
-	mkdir $NAME
-	cp $entry $NAME/
-	javac $NAME/*
-	jar cf "../BonzAI2017/ais/$NAME.jar" $NAME/*.class
-	cp "../BonzAI2017/ais/$NAME.jar" "../ais/$NAME.jar"
-	rm -rf $NAME
-	rm -rf */*.class
-done 
+echo "Removing old CompetitorAI"
+rm -f bin/CompetitorAI.class bonzai2017/ais/CompetitorAI.jar
+rm -fr tmp
+
+echo "Compiling new CompetitorAI"
+mkdir tmp
+cp src/CompetitorAI.java tmp/
+cd tmp
+javac -cp .:../bin/ CompetitorAI.java
+jar cf CompetitorAI.jar CompetitorAI.class
+cp CompetitorAI.jar ../bonzai2017/ais/
+
 cd ..
-echo "removing old log files"
-rm BonzAI2017/*.out 
-rm BonzAI2017/*.err
+rm -fr tmp
 
-
-echo  "launching Bonzai2017 game"
-cd BonzAI2017
+echo "Running castles.jar"
+cd bonzai2017
 java -jar castles.jar
 cd ..
