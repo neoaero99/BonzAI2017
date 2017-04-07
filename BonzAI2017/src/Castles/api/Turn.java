@@ -336,13 +336,39 @@ public class Turn {
 	/**
 	 * @return	A list of all positions on the map
 	 */
-	public Collection<PositionData> getAllPositions() {
-		return positions.values();
+	public List<PositionData> getAllPositions() {
+		return new ArrayList<PositionData>( positions.values() );
 	}
 	
 	/**
 	 * Returns the position with the given ID value, if one exists. If no
 	 * position exits with the given ID, null is returned.
+	 * </br>
+	 * A vertex position's ID is a single character followed by a number.
+	 * </br>
+	 * Rally points have IDs R0, R1, R2, ...
+	 * </br>
+	 * Villages have IDs V0, V1, V2, ...
+	 * </br>
+	 * Castles have IDs C0, C1, C2, ...
+	 * </br>
+	 * The two bases in a scenario have the IDs P0 and P1
+	 * </br>
+	 * </br>
+	 * Edge waypoint IDs are a bit more complicated.
+	 * </br>
+	 * Edge waypoint ID = !first-last:<x>
+	 * </br>
+	 * first is the ID of a vertex connected to the edge, to which the
+	 * position belongs
+	 * </br>
+	 * second is the ID of the other vertex connected to the edge, to
+	 * which the position belongs
+	 * </br>
+	 * x is the index of the position with respect to other waypoints
+	 * on the edge. If an edge has 3 waypoints, then those waypoints
+	 * would have x values 0, 1, and 2.
+	 * </br>
 	 * 
 	 * @param ID	The unique identifier of a position in the map
 	 * @return		The position associated with the given ID, if it exists in
