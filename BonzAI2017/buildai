@@ -1,5 +1,9 @@
 echo "Removing old CompetitorAI"
+<<<<<<< HEAD
 rm -f bin/CompetitorAI.class bonzAI2017/ais/CompetitorAI.jar
+=======
+rm -f bin/CompetitorAI.class bonzai2017/ais/CompetitorAI.jar
+>>>>>>> master
 rm -fr tmp
 
 echo "Compiling new CompetitorAI"
@@ -8,13 +12,21 @@ cp src/CompetitorAI.java tmp/
 cd tmp
 javac -cp .:../bin/ CompetitorAI.java
 jar cf CompetitorAI.jar CompetitorAI.class
+<<<<<<< HEAD
 cp CompetitorAI.jar ../bonzAI2017/ais/
+=======
+cp CompetitorAI.jar ../bonzai2017/ais/
+>>>>>>> master
 
 cd ..
 rm -fr tmp
 
 echo "Running castles.jar"
+<<<<<<< HEAD
 cd bonzAI2017
 rm -f ais/CompetitorAI.jar
+=======
+cd bonzai2017
+>>>>>>> master
 java -jar castles.jar
 cd ..

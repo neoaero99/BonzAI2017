@@ -60,6 +60,11 @@ public class CastlesRenderer extends Renderer {
 	
 	static File villageFile = new File("art/sprites/village.png");
 	static File castleFile = new File("art/sprites/castle.png");
+	
+	static File[] baseFiles = new File[] {
+		new File("art/sprites/red_base.png"),
+		new File("art/sprites/blue_base.png")
+	};
 
 //	
 //***************************************************************************************************
@@ -69,7 +74,7 @@ public class CastlesRenderer extends Renderer {
 	private static Map<TeamColor, BufferedImage> selectorImages = new HashMap<>();
 //	private static Map<Castles.api.Color, BufferedImage> castleImages = new HashMap<>();
 //	private static BufferedImage[] targetImages = new BufferedImage[targetFiles.length];
-	private static BufferedImage[] rallyPointImages;
+	private static BufferedImage[] rallyPointImages, baseImages;
 	private static BufferedImage rallyPointImage,villageImage,castleImage;
 	private static boolean imagesLoaded = false;
 
@@ -100,6 +105,12 @@ public class CastlesRenderer extends Renderer {
 				
 				for (int idx = 0; idx < rallyPointFiles.length; ++idx) {
 					rallyPointImages[idx] = ImageIO.read(rallyPointFiles[idx]);
+				}
+				
+				baseImages = new BufferedImage[baseFiles.length];
+				
+				for (int idx = 0; idx < baseImages.length; ++idx) {
+					baseImages[idx] = ImageIO.read(baseFiles[idx]);
 				}
 
 			} catch (Exception e) {
@@ -344,7 +355,16 @@ public class CastlesRenderer extends Renderer {
 				}
 				
 				// Draw the image for the position based on its building type
-				if (b.type == PType.BASE || b.type == PType.CASTLE) {
+				if (b.type == PType.BASE) {
+					
+					if (b.getTeamColor() == TeamColor.BLUE) {
+						drawToScale(g, map, baseImages[1], p.getX(), p.getY(), 0, posImgSF, 0);
+						
+					} else {
+						drawToScale(g, map, baseImages[0], p.getX(), p.getY(), 0, posImgSF, 0);
+					}
+					
+				} else if (b.type == PType.CASTLE) {
 					drawToScale(g, map, castleImage,p.getX(),p.getY(),0,posImgSF,0);
 					
 				} else {
