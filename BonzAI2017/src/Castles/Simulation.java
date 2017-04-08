@@ -62,6 +62,17 @@ public class Simulation extends Thread {
 		return out;
 	}
 	
+	public int[] getScores(int turn){
+		if(turn >= game.turns() || turn < 0) return null;
+		int[] out = new int[6];
+		//we only use 2 teams this year, so the last 4 slots should
+		//be 0
+		for(int i = 0; i < 4; i++) out[i+2] = 0;
+		out[0] = game.turn(turn).getAllTeams().get(0).getScore();
+		out[1] = game.turn(turn).getAllTeams().get(1).getScore();
+		return out;
+	}
+	
 	/**
 	 * Get the winning team
 	 */

@@ -1,3 +1,4 @@
+#!/bin/bash
 echo "Removing old CompetitorAI"
 rm -f bin/CompetitorAI.class bonzai2017/ais/CompetitorAI.jar
 rm -fr tmp
@@ -8,7 +9,7 @@ cp src/CompetitorAI.java tmp/
 cd tmp
 
 javac -cp .:../classes/ CompetitorAI.java
-jar cf CompetitorAI.jar CompetitorAI.class
+jar cf CompetitorAI.jar *.class
 cp CompetitorAI.jar ../bonzai2017/ais/
 
 cd ..
