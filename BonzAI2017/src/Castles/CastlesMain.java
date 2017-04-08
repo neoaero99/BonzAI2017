@@ -66,7 +66,7 @@ public class CastlesMain extends JPanel implements GameWrapper, Runnable, KeyLis
 	@Override
 	// TODO 2018: Set the version number here!!!!
 	public String version() {
-		return "1.0";
+		return "1.1";
 	}
 
 	/**
