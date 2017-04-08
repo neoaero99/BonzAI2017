@@ -1,20 +1,13 @@
 echo "Removing old CompetitorAI"
-<<<<<<< HEAD
 rm -f bin/CompetitorAI.class bonzai2017/ais/CompetitorAI.jar
-=======
-rm -f bin/CompetitorAI.class bonzAI2017/ais/CompetitorAI.jar
->>>>>>> 0f73a852de5144ada6991dfb8b7e54b9823bc817
 rm -fr tmp
 
 echo "Compiling new CompetitorAI"
 mkdir tmp
 cp src/CompetitorAI.java tmp/
 cd tmp
-<<<<<<< HEAD
+
 javac -cp .:../classes/ CompetitorAI.java
-=======
-javac -cp .:../bin/ CompetitorAI.java
->>>>>>> 0f73a852de5144ada6991dfb8b7e54b9823bc817
 jar cf CompetitorAI.jar CompetitorAI.class
 cp CompetitorAI.jar ../bonzai2017/ais/
 
