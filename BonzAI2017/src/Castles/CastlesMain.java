@@ -12,7 +12,9 @@ import java.awt.event.KeyListener;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
+import java.io.BufferedWriter;
 import java.io.File;
+import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.*;
@@ -392,9 +394,33 @@ public class CastlesMain extends JPanel implements GameWrapper, Runnable, KeyLis
 			//Give em 2 seconds to let it sink in
 			//TODO MITCH This needs to be dynamic!  Not 300!  Otherwise winners will be reported too early when the automator runs
 			if (gameOverFrame == 300) {
-				System.out.printf("SCORES %d(%d) : %d(%d)\n", oriTeams.get(0).getScore(), turn.getTeamLossCount(0),
-															  oriTeams.get(1).getScore(), turn.getTeamLossCount(1));
+				Team t1 = oriTeams.get(0);
+				Team t2 = oriTeams.get(1);
+				
+				String output = String.format("SCORES\n%s %d(%d)\n%s %d(%d)\n",
+						t1.getColor(), t1.getScore(), turn.getTeamLossCount(0),
+						t2.getColor(), t2.getScore(), turn.getTeamLossCount(1));
+				
+				System.out.println(output);
 				System.out.println("RESULT " + getTeamID(teams, 0) + " " + getTeamID(teams, 1) + " " + getTeamID(teams, 2));
+				
+				try {
+					// Output score results to a file
+					String filename = String.format("%s_%s.out", t1.getName(), t2.getName());
+					File results = new File(filename);
+					
+					if (!results.exists()) {
+						results.createNewFile();
+					}
+					
+					BufferedWriter out = new BufferedWriter(new PrintWriter(results));
+					
+					out.write(output);
+					out.close();
+					
+				} catch (Exception Ex) {
+					Ex.printStackTrace();
+				}
 			}
 		}
 	}

@@ -1,7 +1,6 @@
 package Castles.api;
 
 import java.util.ArrayList;
-import java.util.List;
 
 import bonzai.Action;
 
@@ -10,7 +9,7 @@ import bonzai.Action;
  * 
  * 
  * Usage: Create a MoveAction at the beginning of an AI's Turn
- * 		  Have AI add all the soldier movements it would like
+ * 		  Have AI add all the soldier commands it would like
  * 		  to take in its turn.
  * 		  Return the MoveAction at the end of the AI's Turn
  * 
@@ -35,6 +34,9 @@ public class MoveAction implements Action {
 	 * partition of the specified size to move to the specified end point, while
 	 * leaving the rest of the soldiers on their origin path.
 	 * 
+	 * However, only enough commands equal to the number of soldier groups
+	 * controlled by an AI will be applied each turn.
+	 * 
 	 * @param sIdx	The index of target soldier group
 	 * @param spAmt	The number of soldier from that soldier group affected by
 	 * 				the command
@@ -49,6 +51,9 @@ public class MoveAction implements Action {
 	 * Adds an update command to this move action. An update command will
 	 * change the state of the soldier group specified by the position and
 	 * soldier index to the specified state.
+	 * 
+	 * However, only enough commands equal to the number of soldier groups
+	 * controlled by an AI will be applied each turn.
 	 * 
 	 * @param sIdx		The index of the soldier group to update
 	 * @param posID		The ID of the position occupied by the target soldier

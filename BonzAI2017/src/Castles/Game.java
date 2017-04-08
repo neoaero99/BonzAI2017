@@ -65,7 +65,9 @@ public class Game {
 	}
 
 	/**
-	 *
+	 * 2017: Unused
+	 * 
+	 * See verifyMoveAction()
 	 **/
 	public boolean isValid(Team t, Action action) {
 		return turn().isValid(t, action);
