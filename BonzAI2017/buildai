@@ -1,3 +1,5 @@
+#!bin/bash
+
 echo "removing old ais"
 rm -rf BonzAI2017/ais/*
 echo "compiling all ais"
