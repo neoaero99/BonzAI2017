@@ -7,7 +7,7 @@ mkdir tmp
 copy src\CompetitorAI.java tmp\
 cd tmp
 
-javac -cp ".;../bin/" CompetitorAI.java
+javac -cp ".;../classes/" CompetitorAI.java
 jar cf CompetitorAI.jar CompetitorAI*.class
 
 copy CompetitorAI.jar ..\bonzai2017\ais\
