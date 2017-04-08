@@ -1,20 +1,18 @@
 #!/bin/bash
 echo "Removing old CompetitorAI"
 rm -f bin/CompetitorAI.class bonzai2017/ais/CompetitorAI.jar
-rm -fr tmp
 
 echo "Compiling new CompetitorAI"
-mkdir tmp
-cp src/CompetitorAI.java tmp/
-cd tmp
+mkdir src/tmp
+cp src/CompetitorAI.java src/tmp/
+cd src
 
-javac -cp .:../classes/ CompetitorAI.java
-jar cf CompetitorAI.jar *.class
-cp CompetitorAI.jar ../bonzai2017/ais/
+javac tmp/*.java
+jar cf tmp/CompetitorAI.jar tmp/*.class
+cp tmp/CompetitorAI.jar ../bonzai2017/ais/
 
-cd ..
 rm -fr tmp
-
+cd ..
 echo "Running castles.jar"
 cd bonzai2017
 java -jar castles.jar

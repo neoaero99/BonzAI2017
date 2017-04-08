@@ -217,27 +217,21 @@ public class BracketDisplay extends Component implements MouseListener,Runnable{
 		int matchxsize = 120;
 		int matchysize = 40;
 		int yOffFrame = -1;
+		
 		if((frame*yOffFrame+y)<0){
 			frame = 0;
 		}
-		//n = 32;
 		if(n * (matchysize + ypadding) >= y){
 			y = n * (matchysize + ypadding);
 		}else{
 			yOffFrame = 0;
 		}
-		/*
-		logn = 5;
-		for(int j = 0; j <= logn; j++){
-			int i = (int)Math.pow(2,j);
-			int numB = i*2;
-			int xs = x - (xpadding*(j)) - xoffset - matchxsize*(j+1);
-				
-				for(;i>0;i--){
-					int ys = (y/numB) * (2*i-1) + (-matchysize/2 + yOffFrame * frame);
-					Match.drawEmptyMatch(g,xs, ys, matchxsize, matchysize);
-				}
-		}*/
+		
+		if(matchxsize * logn >= Toolkit.getDefaultToolkit().getScreenSize().width - 500){
+			x = matchxsize * logn + 500;
+		}else{
+			x = Toolkit.getDefaultToolkit().getScreenSize().width;
+		}
 		
 		//print brackets
 		int m = 1;
