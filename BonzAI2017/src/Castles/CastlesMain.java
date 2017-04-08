@@ -22,6 +22,8 @@ import java.util.List;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 
+import Castles.Objects.Building;
+import Castles.Objects.RallyPoint;
 import Castles.api.*;
 import Castles.util.AIJar;
 import bonzai.GameWrapper;
@@ -393,6 +395,7 @@ public class CastlesMain extends JPanel implements GameWrapper, Runnable, KeyLis
 
 			//Give em 2 seconds to let it sink in
 			//TODO MITCH This needs to be dynamic!  Not 300!  Otherwise winners will be reported too early when the automator runs
+			List<PositionData> rally = turn.getAllPositions();
 			if (gameOverFrame == 300) {
 				Team t1 = oriTeams.get(0);
 				Team t2 = oriTeams.get(1);
@@ -479,15 +482,15 @@ public class CastlesMain extends JPanel implements GameWrapper, Runnable, KeyLis
 				nameOffset += width;
 
 				//Draw scores
-				if (totalScore > 0) {
-					width = (t.getScore() / totalScore) * barWidth;
-					g.setColor((Color) CastlesRenderer.getColors().get(t.getColor()));
-					//Draw rectangle
-					g.fill(new Rectangle2D.Double(offset, 20, width, 10));
-					g.setColor(Color.WHITE);
-					g.draw(new Rectangle2D.Double(offset, 20, width, 10));
-					offset+=width;
-				}
+//				if (totalScore > 0) {
+//					width = (t.getScore() / totalScore) * barWidth;
+//					g.setColor((Color) CastlesRenderer.getColors().get(t.getColor()));
+//					//Draw rectangle
+//					g.fill(new Rectangle2D.Double(offset, 20, width, 10));
+//					g.setColor(Color.WHITE);
+//					g.draw(new Rectangle2D.Double(offset, 20, width, 10));
+//					offset+=width;
+//				}
 			}
 			catch (NullPointerException e){
 

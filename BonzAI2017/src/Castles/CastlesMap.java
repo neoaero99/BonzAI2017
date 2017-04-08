@@ -406,7 +406,7 @@ public class CastlesMap {
 	 * @return the second soldier
 	 */
 	public Soldier splitSoliders(Soldier s, int num,ArrayList<String> path){
-		if (s.getValue() == 0||path==null) {
+		if (s.getValue() == 0||path==null||path.isEmpty()) {
 			// This should never be true!
 			return null;
 		}
